@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http\Controllers\Usuario;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+class AjustesController extends Controller
+{
+    public function showView()
+    {
+        return view('pages.usuario.ajustes');
+    }
+    public function create()
+    {
+    }
+
+    public function read()
+    {
+    }
+
+    public function update()
+    {
+    }
+
+    public function delete()
+    {
+    }
+}

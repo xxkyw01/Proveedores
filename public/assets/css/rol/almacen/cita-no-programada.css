@@ -1,0 +1,555 @@
+.wizard-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 18%;
+  z-index: 2;
+}
+
+.step-item .circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #000;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+.step-item.active .circle {
+  background: #ee7826;
+  color: #fff;
+}
+
+.step-item.completed .circle {
+  background: #28a745;
+  color: #fff;
+}
+
+.step-item .label {
+  margin-top: 6px;
+  font-size: 14px;
+  text-align: center;
+  font-weight: 500;
+  color: #333;
+}
+
+.line {
+  height: 4px;
+  background: #ccc;
+  flex: 1;
+  margin: 0 4px;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+.step-item.completed + .line {
+  background: #28a745;
+}
+
+body {
+  background: #f8f9fa;
+  font-family: "Arial", sans-serif;
+}
+
+.text-orange {
+  color: #ee7826;
+}
+
+.text-blue {
+  color: #009cd6;
+}
+
+.container {
+  max-width: 650px;
+  background: white;
+  border: 2px solid #ee7826;
+  border-radius: 12px;
+  padding: 25px;
+  margin-top: 90px;
+  margin-bottom: 50px;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.8);
+}
+
+.titulo-paso {
+  background-color: #fff1e5;
+  /* naranja pastel */
+  color: #ee7826;
+  font-weight: bold;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 18px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-left: 6px solid #ee7826;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.timeline .step {
+  width: 50px;
+  height: 50px;
+  background: #ee7826;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.timeline .step.active {
+  background: #009cd6;
+}
+
+.timeline .line {
+  flex: 1;
+  height: 5px;
+  background: #009cd6;
+  border-radius: 5px;
+}
+
+.custom-input,
+.custom-select {
+  border: 2px solid #ee7826;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.btn-primary {
+  background-color: #ee7826;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  color: white;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #d16520;
+}
+
+.btn-success {
+  background-color: #009cd6;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  color: white;
+  transition: 0.3s;
+}
+
+.btn-success:hover {
+  background-color: #0080b3;
+}
+
+.confirmation-box {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 2px solid #009cd6;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.progress-container {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background-color: #d16520;
+  transition: width 0.4s ease-in-out;
+}
+
+.custom-multiselect {
+  position: relative;
+  width: 100%;
+}
+
+.selected-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  border: 2px solid #ee7826;
+  padding: 8px;
+  border-radius: 8px;
+  background-color: #fff;
+  min-height: 40px;
+  align-items: center;
+}
+
+.selected-tag {
+  background-color: #f8d7af;
+  color: #914d21;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.selected-tag .remove-tag {
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.selected-tag .remove-tag:hover {
+  color: red;
+}
+
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Cambiar color del día seleccionado */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: #ee7826 !important;
+  border-color: #ee7826 !important;
+  color: rgb(0, 0, 0);
+}
+
+/* Hover sobre días */
+.flatpickr-day:hover {
+  background: #009cd6 !important;
+}
+
+/* Fondo y bordes del calendario */
+.flatpickr-calendar {
+  border: 2px solid #ee7826;
+  border-radius: 12px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header del mes */
+.flatpickr-months .flatpickr-month {
+  background-color: #ee7826;
+  color: rgb(2, 2, 2);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+#botonesVehiculos .btn {
+  border: 2px solid #ee7826;
+  color: #ee7826;
+  border-radius: 8px;
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+#botonesVehiculos .btn.active {
+  background-color: #ee7826;
+  color: white;
+}
+
+.orden-container {
+  border: 2px solid #ccc;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
+  font-size: 15px;
+}
+
+.titulo-doc {
+  font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ee7826;
+  padding-bottom: 8px;
+  color: #444;
+}
+
+.info-bloque p {
+  margin: 4px 0;
+  font-weight: 500;
+}
+
+.subtitulo {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #009cd6;
+  font-weight: bold;
+}
+
+.tabla-vehiculos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.tabla-vehiculos th,
+.tabla-vehiculos td {
+  border: 1px solid #ddd;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.tabla-vehiculos th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+.orden-doc {
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.orden-doc table {
+  border: 1px solid #ccc;
+}
+
+.orden-doc th,
+.orden-doc td {
+  border: 1px solid #ccc;
+}
+
+.orden-doc h4 {
+  color: #ee7826;
+}
+
+.orden-doc td,
+.orden-doc th {
+  vertical-align: middle !important;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .orden-doc,
+  .orden-doc * {
+    visibility: visible;
+  }
+
+  .orden-doc {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+
+.is-invalid {
+  border: 2px solid #e74c3c !important;
+  box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+}
+
+.vehiculo-block {
+  position: relative;
+  padding: 20px;
+  border: 2px solid #ee7826;
+  border-radius: 12px;
+  background-color: #fffdf9;
+  margin-bottom: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Efecto de parpadeo para el contenedor del vehículo */
+@keyframes highlightFade {
+  0% {
+    box-shadow: 0 0 0px 4px rgba(255, 165, 0, 0.6);
+  }
+
+  100% {
+    box-shadow: none;
+  }
+}
+
+.vehiculo-highlight {
+  animation: highlightFade 1.5s ease-in-out;
+}
+
+@keyframes slideInBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vehiculo-slide-in {
+  animation: slideInBottom 0.6s ease-out;
+}
+
+@keyframes highlightFade {
+  0% {
+    box-shadow: 0 0 0px 4px rgba(255, 165, 0, 0.6);
+  }
+
+  100% {
+    box-shadow: none;
+  }
+}
+
+.vehiculo-highlight {
+  animation: highlightFade 1.5s ease-in-out;
+}
+
+/*diseño paso 5 : Resumen de Cita de Entrega */
+.titulo-seccion {
+  color: #ee7826;
+  padding: 10px 15px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 8px 8px 0 0;
+  font-size: 19px;
+  margin-top: 20px;
+}
+
+.resumen-nuevo {
+  background: #fefefe;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.resumen-section {
+  background: #fafafa;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 5px solid #ee7826;
+}
+
+.resumen-section div {
+  font-size: 15px;
+}
+
+.tabla-custom th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .resumen-section div {
+    font-size: 14px;
+  }
+
+  .tabla-custom th,
+  .tabla-custom td {
+    font-size: 13px;
+    padding: 6px;
+  }
+}
+
+/* Tabla general */
+.tabla-resumen {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ee7826;
+  margin-bottom: 20px;
+}
+
+/* Encabezado de la tabla la de color  pastel */
+.tabla-resumen thead th {
+  background-color: #fff1e5;
+  color: #ee7826;
+  font-weight: bold;
+  text-align: center;
+  padding: 12px;
+}
+
+/* Celdas */
+.tabla-resumen td {
+  border: 1px solid #f2c8a3;
+  padding: 10px;
+  text-align: center;
+  background-color: #fffdfc;
+}
+
+/* Alternar fondo */
+.tabla-resumen tbody tr:nth-child(even) {
+  background-color: #fff7f1;
+}
+
+#btnAgregarVehiculo {
+  display: none;
+}
+
+/*cursor*/
+.step-item {
+  cursor: not-allowed;
+}
+
+.step-item.completed,
+.step-item.active {
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .wizard-steps {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 0 5px;
+  }
+
+  .step-item {
+    width: 100%;
+    flex: 1;
+    align-items: center;
+    margin-bottom: 0;
+  }
+
+  .step-item .circle {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .step-item .label {
+    display: none; /* Ocultar los textos debajo de los círculos */
+  }
+
+  .line {
+    display: none; /* Ocultar la línea entre pasos */
+  }
+}

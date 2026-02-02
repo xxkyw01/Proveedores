@@ -1,0 +1,283 @@
+/* =========================================================
+   GRPO / RECIBO MERCANCÍA - ESTILOS
+   - Ordenado por secciones
+   - Variables para colores
+   - Sin reglas duplicadas
+   ========================================================= */
+
+/* -----------------------------
+   1) Variables / Tema
+------------------------------ */
+:root {
+  --brand: #ee7826; /* naranja principal */
+  --brand-soft: #ffe2ba; /* fondo naranja suave */
+  --text: #000000;
+  --muted: #555;
+  --border: #ddd;
+  --border-soft: #eee;
+  --shadow-focus: 0 0 0 3px rgba(238, 120, 38, 0.18);
+  --thead-bg: #fff7ed;
+  --thead-text: #7a3a06;
+}
+
+/* -----------------------------
+   2) Tarjetas de Órdenes (lado izquierdo)
+------------------------------ */
+.orden-card {
+  display: block;
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--brand);
+  padding: 12px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: inherit;
+  text-decoration: none;
+}
+
+.orden-card:hover {
+  transform: translateX(-15px);
+  border-color: var(--brand);
+}
+
+.orden-card.active {
+  background: var(--brand-soft);
+  transform: translateX(-10px);
+}
+
+/* Textos dentro de la tarjeta */
+.orden-card .titulo {
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.orden-card .prov {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+  display: block;
+}
+
+/* -----------------------------
+  3) Contenedores (paneles)
+------------------------------ */
+.detallesContainer,
+.detallesCompras {
+  background-color: #fff;
+  border: 1px solid var(--brand);
+  padding: 12px;
+  border-radius: 12px;
+
+  /* Ocultar scrollbar en la mayoría de navegadores */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+
+.detallesContainer::-webkit-scrollbar,
+.detallesCompras::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+/* Encabezado de detalles */
+.detalle-header {
+  border-bottom: 2px solid var(--brand);
+  padding: 12px;
+  margin-bottom: 12px;
+  justify-content: center;
+}
+
+/* -----------------------------
+  4) Tabla de artículos (base)
+------------------------------ */
+/* Que el ancho sea el del contenedor, no el del texto */
+#tablaArticulos {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+/* Permitir que el texto rompa líneas */
+#tablaArticulos td,
+#tablaArticulos th {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Columna Artículo (índice 2): que se vea linda y controlada */
+#tablaArticulos td:nth-child(3) {
+  line-height: 1.15;
+}
+
+/* Inputs no se desborden */
+#tablaArticulos input.inp-recibir{
+  max-width: 80px;
+  width: 100%;
+}
+
+.dt-hidden { 
+  visibility: hidden; 
+}
+
+/* Checkbox de selección */
+.chk-art {
+  transform: scale(1.15);
+  accent-color: var(--brand);
+}
+
+/* Input de recepción (cantidad) */
+.inp-recibir {
+  width: 100%;
+  max-width: 110px;
+  text-align: right;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  outline: none;
+}
+
+.inp-recibir:focus {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-focus);
+}
+
+/* -----------------------------
+  5) Comentarios + Botones
+------------------------------ */
+.comentario-area {
+  margin-top: 12px;
+}
+
+.botones-action {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-confirm {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 1;
+}
+
+/* -----------------------------
+   6) Layout móvil (paneles)
+   - Oculta panel derecho en móvil
+------------------------------ */
+@media (max-width: 768px) {
+  .right-panel {
+    display: none;
+  }
+  .left-panel {
+    max-height: calc(100vh - 20px);
+  }
+}
+
+/* =========================================================
+   DATATABLES - ESTILO (buscar/paginación)
+   Nota: no depende de bootstrap
+   ========================================================= */
+
+/* -----------------------------
+   7) Buscador
+------------------------------ */
+.dataTables_wrapper .dataTables_filter input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-focus);
+}
+
+/* -----------------------------
+   8) Paginación
+------------------------------ */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+  padding: 6px 10px !important;
+  margin: 0 2px !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--brand-soft) !important;
+  border-color: var(--brand) !important;
+  color: var(--text) !important;
+}
+
+
+
+/* Fuerza tabla en móvil con scroll horizontal */
+@media (max-width: 768px) {
+  #tablaArticulos {
+    width: 100% !important;
+  }
+
+  /* contenedor de DataTables con scrollX */
+  div.dataTables_wrapper {
+    width: 100%;
+  }
+
+  div.dataTables_scrollBody {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table.dataTable th,
+  table.dataTable td {
+    white-space: nowrap;
+  }
+
+  /* inputs no se encojan horrible */
+  .inp-recibir {
+    min-width: 80px;
+  }
+}
+
+
+/* contenedor de tabla (lo crea DataTables con scrollY) */
+.dataTables_wrapper .dataTables_scrollBody{
+  max-height: 45vh;           /* ajusta: 40vh, 50vh, etc */
+  overflow-y: auto !important;
+}
+
+/* que la tabla use todo el ancho disponible */
+#tablaArticulos{
+  width: 100% !important;
+}
+
+
+/* Chrome, Edge, Safari */
+.dataTables_scrollBody::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+/* Firefox */
+.dataTables_scrollBody {
+  scrollbar-width: none; /* hide scrollbar */
+}
+
+/* IE / Edge viejo */
+.dataTables_scrollBody {
+  -ms-overflow-style: none;
+}

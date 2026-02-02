@@ -1,0 +1,26 @@
+@font-face {
+    font-family: "Candlescript";
+    src: url("../fonts/Candlescript.otf");
+}
+
+@font-face {
+    font-family: "Darleston";
+    src: url("../fonts/Darleston.otf");
+}
+
+@font-face {
+    font-family: "Madina";
+    src: url("../fonts/Madina.otf");
+}
+
+.Candlescript {
+    font-family: 'Candlescript', sans-serif;
+}
+
+.Darleston {
+    font-family: 'Darleston', sans-serif;
+}
+
+.Madina {
+    font-family: 'Madina', sans-serif;
+}

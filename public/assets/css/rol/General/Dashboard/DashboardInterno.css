@@ -1,0 +1,113 @@
+:root {
+  --brand: #ff6b00; /* naranja */
+  --ink: #1e293b; /* slate-800 */
+  --muted: #6b7280; /* gray-500 */
+  --card: #ffffff;
+  --bg: #f8fafc;
+}
+
+body {
+  background: var(--bg);
+}
+
+.kpi-filters {
+  max-width: 980px;
+  border: 2px solid #ee7826;
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px 20px; /* más espacio interno */
+  margin-top: 12px; /* separación con el título (≈ medio cm) */
+}
+
+.kpi-title {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.2px;
+}
+.kpi-value {
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 1.6rem;
+}
+
+/* Botones tipo “pill” */
+.btn-pill {
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+.btn-pill.active {
+  border-color: var(--brand);
+  color: #fff;
+  background: var(--brand);
+}
+
+/* Cards para gráficas */
+.hc-card {
+  border-radius: 16px;
+  background: var(--card);
+  border: 0;
+  box-shadow: 0 6px 18px rgba(2, 8, 23, 0.06);
+}
+.section-title {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 1rem;
+}
+.subtle {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+/* Estados */
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260px;
+  color: #94a3b8;
+  border: 1px dashed #e2e8f0;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+/* Tabla */
+.table thead th {
+  font-weight: 700;
+}
+
+
+/* Forzar borde naranja aunque exista .border-0 de Bootstrap */
+.card.border-0 { 
+  border: 2px solid var(--brand) !important;
+}
+
+/* Sombra más marcada abajo/derecha */
+.card,
+.hc-card,
+.kpi-card {
+  background: var(--card);
+  border: 2px solid var(--brand);              /* naranja */
+  border-radius: 16px;
+  box-shadow: 6px 8px 14px rgba(0,0,0,.10),    /* abajo/derecha */
+              0 2px 4px rgba(0,0,0,.04);
+}
+
+/* Un pelín más de aire dentro de las cards con charts */
+.card.p-3, .hc-card { padding: 1rem 1rem; }
+
+
+.page-wrapper {
+  padding-left: 2rem;   /* ~32px */
+  padding-right: 2rem;  /* ~32px */
+}
+
+@media (min-width: 1400px) {
+  .page-wrapper {
+    padding-left: 4rem;  /* ~64px en pantallas grandes */
+    padding-right: 4rem;
+  }
+}

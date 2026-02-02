@@ -1,0 +1,767 @@
+/* ======== GENERALES ======== */
+
+body {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: var(--bs-body-font-family);
+  /* use responsive font sizing */
+  font-size: clamp(14px, 1.2vw, var(--bs-body-font-size));
+  font-weight: var(--bs-body-font-weight);
+  line-height: var(--bs-body-line-height);
+  color: var(--bs-body-color);
+  text-align: var(--bs-body-text-align);
+  background-color: var(--bs-body-bg);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+/* root helpers for breakpoints */
+:root {
+  --bp-mobile: 430px;
+  --bp-tablet-min: 768px;
+  --bp-tablet-max: 991px;
+  --bp-desktop: 992px;
+}
+
+/* Smooth touch scrolling on mobile */
+.agenda-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Estado visual cuando excede */
+.cell-excede {
+  outline: 2px solid #e53935;
+  background: #fff1f1;
+}
+
+/* ===== TIMELINE & ITEMS ====== */
+.timeline-item {
+  transition: all 0.5s ease;
+  opacity: 1;
+}
+
+/* animación de nuevos items */
+.timeline-item.new-item {
+  animation: highlight 2s ease;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: rgba(238, 120, 38, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* estructura columna */
+.columna-dia {
+  position: relative;
+}
+
+/* NAVBAR días */
+.navbar-dias {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+/* componentes */
+.orden-compra {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.icono-info {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.25rem;
+}
+.icono-info .material-icons {
+  font-size: 18px;
+  vertical-align: middle;
+}
+.icono-coment {
+  color: #28a745;
+}
+.icono-evid {
+  color: #ee7826;
+}
+
+.btn-primary {
+  background-color: #ee7826;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  color: white;
+  transition: 0.3s;
+}
+
+/* AGENDA contenedor flexible y responsivo */
+.agenda-container {
+  height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* scroll interno */
+.agenda-scroll {
+  overflow-y: auto;
+  padding: 10px;
+  height: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.agenda-scroll::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* CABECERA fechas sticky (ajuste responsive del top) */
+.date-header {
+  position: sticky;
+  top: 65px;
+  z-index: 999;
+  background: #ebebeb;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 10px;
+  font-weight: bold;
+  margin: auto;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ee7826;
+}
+
+/* texto cabecera */
+.date-day {
+  text-transform: uppercase;
+  color: #000;
+  transition: all 0.3s ease-in-out;
+}
+.date-number {
+  font-weight: bold;
+  color: #d6641d;
+  transition: all 0.3s ease-in-out;
+}
+.swal-estado {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ee7826;
+}
+
+/* SKELETON placeholders */
+.skeleton-card {
+  opacity: 0.9;
+}
+.skeleton-bg {
+  position: relative;
+  overflow: hidden;
+  background-color: #e3e3e3;
+}
+.skeleton-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: skeleton-loading 1.4s infinite;
+}
+@keyframes skeleton-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton-line {
+  height: 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.skeleton-line.w-30 {
+  width: 30%;
+}
+.skeleton-line.w-40 {
+  width: 40%;
+}
+.skeleton-line.w-50 {
+  width: 50%;
+}
+.skeleton-line.w-60 {
+  width: 60%;
+}
+.skeleton-line.w-80 {
+  width: 80%;
+}
+.skeleton-badge {
+  height: 18px;
+  width: 80px;
+  border-radius: 10px;
+  margin-right: 6px;
+}
+.skeleton-pill {
+  height: 24px;
+  width: 90px;
+  border-radius: 12px;
+}
+
+/* TIMELINE layout */
+.timeline {
+  max-width: 900px;
+  margin: 10px auto;
+  min-height: 100%;
+  padding-left: 8px;
+  padding-right: 8px;
+  box-sizing: border-box;
+  display: block;
+}
+
+/* item */
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 5px;
+  flex-wrap: nowrap;
+}
+
+/* marcador vertical */
+.timeline-marker {
+  width: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  flex: 0 0 60px;
+}
+
+.circulo {
+  width: 30px;
+  height: 30px;
+  background-color: #ee7826;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.linea {
+  position: absolute;
+  top: 18px;
+  width: 8px;
+  background-color: #ee7826;
+  z-index: 2;
+  left: 25px;
+  /* bottom: -10px; */
+  bottom: -790%; /* ajustado para que la línea sea más larga y cubra más espacio */
+}
+
+/* TARJETA */
+.timeline-card {
+  background: white;
+  /*box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);*/
+  box-shadow: 10px 3px 4px 6px rgba(0, 0, 0, 0.08);
+  border-left: 8px solid #ee7826;
+  border-radius: 12px;
+  /* padding: 10px; */
+  padding: 12px 16px !important; /* antes 20px */
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-card p {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.timeline-card h5 {
+  margin-bottom: 10px;
+  transition: all 0.3s ease-in-out;
+}
+.timeline-card .material-icons {
+  margin-right: 8px;
+  color: #ee7826;
+  transition: all 0.3s ease-in-out;
+}
+
+/* ESTADOS */
+.status-badge {
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+.status-confirmada {
+  background-color: #ee7826;
+  color: white;
+}
+.status-pendiente {
+  background-color: #ffea2d;
+  color: #000;
+}
+.status-asistio {
+  background-color: #1d973e;
+  color: white;
+}
+.status-noasistio {
+  background-color: #000;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+}
+.status-tardia {
+  background-color: #d43183;
+  color: white;
+}
+.status-proceso {
+  background-color: #696969;
+  color: white;
+}
+.status-cancelada-sp,
+.status-cancelada {
+  background-color: #dc3545;
+  color: white;
+}
+.status-timeout {
+  background-color: #2ea2cd;
+  color: white;
+}
+
+/* EVENTOS */
+.evento-badge {
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+.evento-programada {
+  background-color: #611d89;
+  color: white;
+}
+.evento-no-programada {
+  background-color: #880a3e;
+  color: white;
+}
+
+.evento-paqueteria-express {
+  background-color: #ffc919;
+  color: rgb(20, 20, 20);
+}
+.evento-apartada {
+  background-color: #333030;
+  color: white;
+}
+
+/* BOTÓN DETALLES */
+.btn-detalles {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background-color: #ee7826;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: 0.3s;
+  padding: 8px 12px;
+}
+.btn-detalles:hover {
+  background-color: #d6641d;
+}
+.btn-detalles .material-icons {
+  margin-left: 6px;
+}
+
+/* SELECTOR SUCURSAL */
+.selector-sucursal {
+  border: 2px solid #ee7826;
+  box-shadow: 0 9px 40px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* FORMS */
+.form-select {
+  background: #ffffff;
+  border: none;
+}
+
+/* ORDEN DE COMPRA */
+.badge-orden {
+  background-color: #3d3d3d;
+  color: white;
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 2px 4px 6px 0;
+  transition: all 0.3s ease-in-out;
+}
+
+/* STICKY RIGHT COLUMN */
+.table-sticky-right th.sticky-right,
+.table-sticky-right td.sticky-right {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  z-index: 2;
+  box-shadow: -4px 0 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Bloque de mover agensa*/
+
+/* Contenedor de flecha - select - flecha */
+.nav-agenda-row {
+  flex-wrap: nowrap; /* no permitir que salten de línea */
+  width: 100%;
+  max-width: 420px; /* ajusta según tu diseño */
+  margin: 0 auto; /* centrar */
+}
+
+/* Para que el contenedor del select pueda hacerse más pequeño sin romper */
+.nav-agenda-row .selector-sucursal {
+  min-width: 0;
+}
+
+/* Form (el del select) ocupa todo el espacio disponible */
+.nav-agenda-row form.flex-fill {
+  flex: 1 1 auto;
+}
+
+/* Botones de navegación: tamaño fijo, no se deforman */
+.btn-nav-agenda {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+/* Estilo del “cartelito” de sucursal */
+.selector-sucursal {
+  background-color: #fff;
+  border-radius: 999px;
+}
+
+/* Ajustes finos para pantallas chicas */
+@media (max-width: 576px) {
+  .btn-nav-agenda {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nav-agenda-row {
+    max-width: 360px; /* un poco más angosto en cel */
+  }
+
+  .selector-sucursal {
+    padding: 4px 8px;
+  }
+
+  .selector-sucursal .form-select {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* INPUTS cantidad */
+.inp-recibir {
+  width: 110px;
+}
+.inp-recibir::-webkit-outer-spin-button,
+.inp-recibir::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.inp-recibir[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ===== RESPONSI v2 ====== */
+
+/* MÓVIL: optimizaciones y simplificación */
+@media (max-width: 430px) {
+  :root {
+    --touch-padding: 10px;
+  }
+
+  .date-header {
+    top: 55px;
+    padding: 12px;
+    border-radius: 8px;
+  }
+  .timeline {
+    max-width: 100%;
+    margin: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .timeline-item {
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .timeline-marker {
+    width: 40px;
+    flex: 0 0 40px;
+  }
+  .circulo {
+    width: 22px;
+    height: 22px;
+  }
+  .linea {
+    left: 20px;
+    width: 6px;
+  }
+  .timeline-card {
+    /* padding: 12px; */
+    padding: 12px 16px !important; /* antes 20px */
+    font-size: 0.85rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+  .timeline-card h5 {
+    font-size: 1rem;
+  }
+  .timeline-card p {
+    font-size: 0.85rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .timeline-card .material-icons {
+    font-size: 1rem;
+    margin-right: 6px;
+  }
+  .btn-detalles {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+    justify-content: center;
+  }
+
+  .badge-orden,
+  .status-badge,
+  .evento-badge {
+    font-size: 0.7rem !important;
+    padding: 3px 6px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .date-day {
+    font-size: 0.9rem;
+  }
+  .date-number {
+    font-size: 1rem;
+  }
+  .linea {
+    height: 8vh;
+  }
+  .selector-sucursal {
+    width: 100%;
+  }
+  .columna-dia {
+    display: none !important;
+  }
+  #col-hoy {
+    display: block !important;
+  }
+  .agenda-container {
+    height: calc(100vh - 100px);
+  }
+}
+
+/* TABLET */
+@media (min-width: 768px) and (max-width: 991px) {
+  .date-header {
+    top: 60px;
+    padding: 16px;
+  }
+  .timeline {
+    max-width: 720px;
+    margin-top: 8px;
+  }
+  .timeline-marker {
+    width: 48px;
+    flex: 0 0 48px;
+  }
+  .circulo {
+    width: 26px;
+    height: 26px;
+  }
+  .linea {
+    left: 22px;
+    width: 7px;
+  }
+  .timeline-card {
+    padding: 12px 16px !important; /* antes 20px */
+    /* padding: 10px; */
+    font-size: 0.85rem !important;
+  }
+  .btn-detalles {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    padding: 6px 10px;
+  }
+  .badge-orden,
+  .status-badge {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+  .linea {
+    height: calc(20vh - 12px);
+  }
+}
+
+/* ESCRITORIO */
+@media (min-width: 992px) {
+  .timeline {
+    max-width: 900px;
+  }
+  .timeline-marker {
+    width: 60px;
+    flex: 0 0 60px;
+  }
+  .circulo {
+    width: 30px;
+    height: 30px;
+  }
+  .linea {
+    left: 25px;
+    width: 8px;
+    height: calc(40vh - 25px);
+  }
+  .timeline-card {
+    font-size: 1rem;
+    padding: 12px 16px !important; /* antes 20px */
+    /* padding: 20px; */
+  }
+  .timeline-card h5 {
+    font-size: 1.4rem;
+  }
+  .btn-detalles {
+    font-size: 1rem;
+    padding: 8px 12px;
+    position: absolute;
+  }
+  .badge-orden,
+  .status-badge {
+    font-size: 0.95rem;
+    padding: 6px 12px;
+  }
+  .date-day {
+    font-size: 2rem;
+  }
+  .date-number {
+    font-size: 2rem;
+  }
+}
+
+/* utility to ensure large content doesn't overflow horizontally */
+body,
+.timeline,
+.timeline-card {
+  word-break: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Estado visual cuando excede */
+.cell-excede {
+  outline: 2px solid #e53935;
+  background: #fff1f1;
+}
+
+.timeline-card-body {
+  padding-bottom: 8px !important;
+}
+
+.timeline-card-body .d-flex {
+  gap: 4px !important;
+}
+
+.timeline-card-footer {
+    padding: 6px 12px !important;
+}
+
+
+
+/* ====== MODAL DETALLES OC – RESPONSIVE ====== */
+
+/* contenedor con scroll horizontal */
+.oc-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* que la tabla tenga un ancho mínimo para no romper palabras */
+.oc-table {
+    min-width: 520px;   /* ajusta si lo quieres más chico/grande */
+}
+
+/* encabezados: no los dejes partir letra por letra */
+#modalDetalles table[data-oc] th {
+    white-space: nowrap;
+}
+
+/* versión móvil */
+@media (max-width: 576px) {
+
+    /* el modal que prácticamente ocupe el ancho del cel */
+    #modalDetalles .modal-dialog {
+        margin: 0.5rem;
+        max-width: 100%;
+    }
+
+    #modalDetalles .modal-content {
+        border-radius: 0.75rem;
+    }
+
+    /* header del acordeón más compacto */
+    #modalDetalles .accordion-button {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    /* input group de "No.Ref.del acreedor" más chiquito */
+    #modalDetalles .input-group-text {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    #modalDetalles .inp-numatcard {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* celdas de tabla más compactas */
+    #modalDetalles table[data-oc] th,
+    #modalDetalles table[data-oc] td {
+        padding: 4px 6px;
+        font-size: 0.75rem;
+    }
+
+    /* input de recepción que no se salga */
+    #modalDetalles .inp-recibir {
+        max-width: 80px;
+        font-size: 0.8rem;
+        padding: 0.15rem 0.25rem;
+    }
+}

@@ -1,0 +1,57 @@
+.badge-confirmado {
+  background-color: #ee7826;
+  color: white;
+}
+
+.btn-close-orange {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  opacity: 0.8;
+  color: #ee7826;
+}
+
+.btn-close-orange:hover {
+  opacity: 1;
+  color: #d95d0b;
+}
+
+/* Página activa (ej: "1") - Naranja con texto blanco */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #ee7826 !important; /* Fondo naranja */
+    color: white !important; /* Texto blanco */
+    border: none !important;
+}
+
+/* Todos los demás botones (inactivos, "Anterior/Siguiente") - Solo texto naranja */
+.dataTables_wrapper .dataTables_paginate .paginate_button:not(.current) {
+    color: #ee7826 !important; /* Texto naranja */
+    background: transparent !important; /* Sin fondo */
+    border: none !important;
+}
+
+/* Hover (opcional: si quieres que al pasar el cursor se vea un fondo suave) */
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: rgba(238, 120, 38, 0.1) !important; /* Naranja muy transparente */
+}
+
+@media only screen and (max-width: 768px) {
+  .table-responsive {
+    overflow-x: hidden;
+  }
+
+  .modal-dialog {
+    max-width: 95% !important;
+    margin: 1rem auto;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+
+  .modal-header .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+}

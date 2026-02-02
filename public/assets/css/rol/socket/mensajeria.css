@@ -1,0 +1,87 @@
+html,body {
+  height: 100%;
+  margin: 0;
+  background-color: #fff;
+  color: #000;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.container {
+  height: 90vh;
+}
+
+.chat-item:hover {
+  background-color: #f2f2f2;
+  cursor: pointer;
+}
+
+.mensaje-propio {
+  background-color: #ee7826;
+  color: white;
+  border-radius: 15px 15px 0 15px;
+}
+
+.mensaje-ajeno {
+  background-color: #e0e0e0;
+  color: #000;
+  border-radius: 15px 15px 15px 0;
+}
+
+.mensaje-burbuja {
+  margin: 5px 0;
+  padding: 10px 15px;
+  max-width: 60%;
+  word-wrap: break-word;
+}
+
+.modal {
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+}
+.intro img {
+  width: 100px;
+  opacity: 0.3;
+}
+.intro h5 {
+  margin-top: 1rem;
+  color: #333;
+}
+.intro p {
+  color: #888;
+}
+
+.form-control.bg-secondary {
+  background-color: #f5f5f5 !important;
+  color: black !important;
+  border: none;
+}
+
+.bg-orange {
+    background-color: #ffa318 !important;
+}
+
+.btn-orange {
+    background-color: #ffa318;
+    color: white;
+    border: none;
+}
+
+.btn-orange:hover {
+    background-color: #ff8c00;
+}
+
+.contacto {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

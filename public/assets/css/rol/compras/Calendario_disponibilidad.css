@@ -1,0 +1,90 @@
+.text-orange {
+  color: #fd7e14;
+}
+
+.btn-primary {
+  background-color: #ee7826;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  color: white;
+  transition: 0.3s;
+}
+
+.btn-orange {
+  background-color: #fd7e14;
+  color: white;
+  border: none;
+}
+
+.btn-orange:hover {
+  background-color: #e9690e;
+}
+
+.card {
+  border-radius: 12px;
+  border: 2px solid #fd7e14;
+  background-color: #fff8f1;
+}
+
+.custom-select {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: 1px solid #fd7e14;
+  border-radius: 8px;
+  background-color: #fff8f1;
+}
+
+.encabezado-naranja th {
+  background-color: #ee7826 !important;
+  color: white !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+  background: #fd7e14 !important;
+  border-color: #fd7e14 !important;
+  color: white !important;
+}
+
+.table-sm td, .table-sm th {
+  padding: 0.4rem 0.3rem;
+}
+
+
+/* Hace que la tabla se vea bien en móvil sin romper diseño */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.85rem; /* Letra más chica */
+  }
+
+  .table td, .table th {
+    padding: 0.5rem 0.4rem; /* Menos padding */
+    white-space: nowrap;    /* Evita saltos de línea en texto */
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 120px;       /* Ajusta según gusto */
+  }
+
+  .table td span,
+  .table th span {
+    font-size: 0.75rem;
+  }
+}
+
