@@ -13,18 +13,12 @@
             href="{{ url('auditoria/dashboard') }}">
             <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
         </a>
-
-        <!-- Agenda Proveedores -->
         <a class="nav-link {{ request()->is('almacen/AgendaProveedor') ? 'active' : '' }}"
             href="{{ url('almacen/AgendaProveedor') }}">
             <i class="fas fa-calendar-day nav-icon"></i><span class="nav-text">Agenda
                 Proveedores</span>
         </a>
-        <!---MENSAJE
-        <a class="nav-link {{ request()->is('mejora/mensajeria') ? 'active' : '' }}" href="{{ url('mejora/mensajeria') }}">
-            <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-        </a>
-        -->
+
     </nav>
 
     <a class="nav-link text-danger" href="{{ route('logout') }}"

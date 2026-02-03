@@ -14,16 +14,6 @@
             <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
         </a>
 
-        <!---MENSAJE
-        <a class="nav-link {{ request()->is('compras/mensajeria') ? 'active' : '' }}" href="{{ url('compras/mensajeria') }}">
-            <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-            -->
-        <!-- dasboard -->
-        <a class="nav-link {{ request()->is('almacen/KPIDashboard') ? 'active' : '' }}"
-            href="{{ url('almacen/KPIDashboard') }}">
-            <i class="fas fa-chart-pie nav-icon"></i><span class="nav-text"> Dashboard </span>
-        </a>
-
         <a class="nav-link {{ request()->is('proveedor/citas') ? 'active' : '' }}" href="{{ url('proveedor/citas') }}">
             <i class="fas fa-calendar-plus nav-icon"></i><span class="nav-text">Solicitar
                 Cita</span>
@@ -31,7 +21,7 @@
 
         <a class="nav-link {{ request()->is('proveedor/historial') ? 'active' : '' }}"
             href="{{ url('proveedor/historial') }}">
-            <i class="fas fa-book nav-icon"></i><span class="nav-text">Consultar Citas</span>
+            <i class="fas fa-book nav-icon"></i><span class="nav-text">Historial</span>
         </a>
 
         <a class="nav-link {{ request()->is('almacen/AgendaProveedor') ? 'active' : '' }}"
@@ -49,9 +39,7 @@
             <i class="fas fa-truck-fast  nav-icon"></i><span class="nav-text">Cita Express</span>
         </a>
 
-
     </nav>
-
 
     <a class="nav-link text-danger" href="{{ route('logout') }}"
         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -62,14 +50,11 @@
     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
         @csrf
     </form>
-
 </div>
 
 <div class="main-content" id="main-content">
     @yield('content')
 </div>
-
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

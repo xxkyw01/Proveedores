@@ -95,7 +95,14 @@
         </div>
     </div>
 
+
     <script>
+        const SERIES_BY_SUC = {
+            "1": 156,
+            "4": 157
+        };
+        window.SERIES_BY_SUC = SERIES_BY_SUC;
+
         const SESSION_USER = @json([
             'id' => session('Usuario.IdUsuario') ?? (session('Usuario.id') ?? null),
             'username' => session('Usuario.Usuario') ?? (session('Usuario.user') ?? (session('Usuario.nombre') ?? 'N/A')),
@@ -114,10 +121,6 @@
         const ROL_ID = {{ (int) $rolId }};
         const ES_ADMIN = [5].includes(ROL_ID);
         const ES_ALMACEN = [2].includes(ROL_ID);
-
-      
-
-        const SERIES_BY_SUC = @json(config('sap_series.grpo_series_by_sucursal'));
 
         function ymdLocal(d) {
             d = new Date(d);
@@ -428,12 +431,12 @@
 
             const html = `
             ${ES_ADMIN || ES_ALMACEN ? `
-                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-                <button type="button" class="btn btn-outline-orange btn-sm" onclick="abrirModalAgregarOC()">
-                + Agregar OC
-                </button>
-                <small class="text-muted" style="align-self:center;">Adjunta otra OC a esta cita</small>
-                </div>` 
+                                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                                <button type="button" class="btn btn-outline-orange btn-sm" onclick="abrirModalAgregarOC()">
+                                + Agregar OC
+                                </button>
+                                <small class="text-muted" style="align-self:center;">Adjunta otra OC a esta cita</small>
+                                </div>` 
             : ''}
 
             <div class="detalle-header">
@@ -464,8 +467,8 @@
 
             <div class="botones-action">
                 ${ES_ADMIN ? `
-                    <button class="btn-cancel" type="button" onclick="previsualizarGRPO()">Previsualizar</button>
-                    ` : ''                
+                                    <button class="btn-cancel" type="button" onclick="previsualizarGRPO()">Previsualizar</button>
+                                    ` : ''                
                 }
             <button class="btn-confirm" type="button" onclick="confirmarSeleccion()">Confirmar</button>
             <button class="btn-cancel" type="button" data-bs-dismiss="modal" onclick="cerrarDetalles()">Cerrar</button>
@@ -532,7 +535,7 @@
         function findRowByScannedCode(code) {
             const wanted = normCode(code);
 
-            const rows = getSelectedRowsFromTable(); 
+            const rows = getSelectedRowsFromTable();
             for (const tr of rows) {
                 const inp = tr.querySelector('input.inp-recibir');
                 if (!inp) continue;
@@ -552,7 +555,7 @@
             if (!chk || !inp) return;
             if (!chk.checked) {
                 chk.checked = true;
-                onChkToggle(chk); 
+                onChkToggle(chk);
             }
 
             const pendiente = Number(inp.dataset.pendiente || 0);
@@ -667,7 +670,12 @@
 
             const filas = getSelectedRowsFromTable();
             const sucursalId = Number(document.getElementById('sucursal_id')?.value || 0);
+
             const serieGRPO = Number(SERIES_BY_SUC[String(sucursalId)] || 157); // default ZC
+
+            /* const serieGRPO = Number(SERIES_BY_SUC[String(sucursalId)] || 0);
+            if (!serieGRPO) throw new Error(`Sucursal sin serie GRPO configurada: ${sucursalId}`); */
+
             const seleccion = [];
             filas.forEach(tr => {
                 const chk = tr.querySelector('input.chk-art');
@@ -699,6 +707,8 @@
                 const itemCode = String(inp.dataset.itemcode || '');
                 const whs = String(inp.dataset.whs || '');
                 const ocL = String(inp.dataset.oc || docNumL || '');
+                const serie = Number(SERIES_BY_SUC[String(sucursalId)] || 157); // default ZC
+                if (!serie) throw new Error(`Sucursal sin serie GRPO configurada: ${sucursalId}`);
 
                 if (!docEntryL || !docNumL || !cardCodeL) {
                     throw new Error('Hay líneas sin DocEntry/DocNum/CardCode (no mapeadas a SAP).');
@@ -714,7 +724,8 @@
                         cardCode: cardCodeL,
                         numAtCard: numeroReferencia,
                         sucursal_id: sucursalId,
-                        Series: serieGRPO,
+                        //Series: serieGRPO,
+                        Series: serie,
                         user_comment: `${comment} [OC ${docNumL}]`,
                         oc_num: String(ocL),
                         captured_by: username,
@@ -1370,13 +1381,11 @@
                     inp.value = pendiente ? String(Math.floor(pendiente)) : '1';
                     try {
                         onChkToggle(chk);
-                    } catch (e) {
-                    }
+                    } catch (e) {}
                 } else {
                     try {
                         onChkToggle(chk);
-                    } catch (e) {
-                    }
+                    } catch (e) {}
                 }
             });
         }
@@ -1390,8 +1399,7 @@
                     c.checked = false;
                     try {
                         onChkToggle(c);
-                    } catch (e) {
-                    }
+                    } catch (e) {}
                 } else {
                     const tr = c.closest('tr');
                     const inp = tr?.querySelector('input.inp-recibir');
@@ -1559,6 +1567,8 @@
                 const itemCode = String(inp.dataset.itemcode || '');
                 const whs = String(inp.dataset.whs || '');
                 const ocL = String(inp.dataset.oc || docNumL || '');
+                const serie = Number(SERIES_BY_SUC[String(sucursalId)] || 157); // default ZC
+                if (!serie) throw new Error(`Sucursal sin serie GRPO configurada: ${sucursalId}`);
 
                 if (!docEntryL || !docNumL || !cardCodeL) {
                     return Swal.fire('Error', 'Hay líneas sin DocEntry/DocNum/CardCode (no mapeadas a SAP).', 'error');
@@ -1574,7 +1584,7 @@
                         cardCode: cardCodeL,
                         numAtCard: numeroReferencia,
                         sucursal_id: sucursalId,
-                        Series: Number(SERIES_BY_SUC[String(sucursalId)] || 0),
+                        Series: serie,
                         user_comment: `${comment} [OC ${docNumL}]`,
                         oc_num: String(ocL),
                         captured_by: username,
@@ -1884,8 +1894,8 @@
                 </table>
 
                 ${comentarios ? `
-                        <div class="notes"><b>Comentarios:</b><br/>${esc(comentarios)}</div>
-                        ` : ''}
+                                        <div class="notes"><b>Comentarios:</b><br/>${esc(comentarios)}</div>
+                                        ` : ''}
 
                         <div class="sign">
                         <div class="line">Entrega (Proveedor)</div>

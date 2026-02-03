@@ -15,17 +15,7 @@
                 <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
             </a>
 
-            <!---MENSAJE
-        <a class="nav-link {{ request()->is('admin/mensajeria') ? 'active' : '' }}"
-            href="{{ url('admin/mensajeria') }}">
-            <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-        </a>
-        -->
-
-
             <div class="accordion" id="accordionSidebar">
-
-                    <!-- Mejora -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingMejora">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -36,7 +26,6 @@
                     <div id="collapseMejora" class="accordion-collapse collapse" aria-labelledby="headingMejora"
                         data-bs-parent="#accordionSidebar">
                         <div class="accordion-body">
-                            <!-- dasboard -->
                             <a class="nav-link {{ request()->is('almacen/KPIDashboard') ? 'active' : '' }}"
                                 href="{{ url('almacen/KPIDashboard') }}">
                                 <i class="fas fa-chart-pie nav-icon"></i><span class="nav-text"> Dashboard </span>
@@ -45,8 +34,6 @@
                     </div>
                 </div>
                 
-
-                <!-- PROVEEDOR -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingProveedor">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -58,14 +45,10 @@
                     <div id="collapseProveedor" class="accordion-collapse collapse" aria-labelledby="headingProveedor"
                         data-bs-parent="#accordionSidebar">
                         <div class="accordion-body">
-                            <a class="nav-link {{ request()->is('proveedor/citas') ? 'active' : '' }}"
-                                href="{{ url('proveedor/citas') }}">
-                                <i class="fas fa-calendar-plus nav-icon"></i><span class="nav-text">Solicitar
-                                    Cita</span>
-                            </a>
+            
                             <a class="nav-link {{ request()->is('proveedor/historial') ? 'active' : '' }}"
                                 href="{{ url('proveedor/historial') }}">
-                                <i class="fas fa-book nav-icon"></i><span class="nav-text">Consultar Citas</span>
+                                <i class="fas fa-book nav-icon"></i><span class="nav-text">Historial de Proveedores</span>
                             </a>
                         </div>
                     </div>
@@ -86,16 +69,6 @@
                                 href="{{ url('almacen/AgendaProveedor') }}">
                                 <i class="fas fa-calendar-day nav-icon"></i><span class="nav-text">Agenda
                                     Proveedores</span>
-                            </a>
-                            <a class="nav-link {{ request()->is('almacen/tablero') ? 'active' : '' }}"
-                                href="{{ url('almacen/tablero') }}">
-                                <i class="fas fa-clock nav-icon"></i><span class="nav-text">Disponibilidad de
-                                    Andenes</span>
-                            </a>
-                            <a class="nav-link {{ request()->is('almacen/confirmarCita') ? 'active' : '' }}"
-                                href="{{ url('almacen/confirmarCita') }}">
-                                <i class="fas fa-calendar-check nav-icon"></i><span class="nav-text">Confirmar
-                                    Cita</span>
                             </a>
                         </div>
                     </div>

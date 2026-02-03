@@ -2,9 +2,9 @@
   'app' => 
   array (
     'name' => 'Proveedores',
-    'env' => 'production',
-    'debug' => false,
-    'url' => 'https://proveedores.laconcha.com.mx',
+    'env' => 'local',
+    'debug' => true,
+    'url' => 'http://localhost',
     'asset_url' => NULL,
     'timezone' => 'America/Mexico_City',
     'locale' => 'en',
@@ -207,7 +207,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\framework/cache/data',
+        'path' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -290,7 +290,7 @@
       array (
         'driver' => 'sqlite',
         'url' => NULL,
-        'database' => 'C:\\xampp\\htdocs\\Proveedores\\database\\database.sqlite',
+        'database' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\database\\database.sqlite',
         'prefix' => '',
         'foreign_key_constraints' => true,
       ),
@@ -363,7 +363,6 @@
       'sqlsrv_proveedores' => 
       array (
         'driver' => 'sqlsrv',
-        'url' => NULL,
         'host' => '192.168.2.214',
         'port' => '1433',
         'database' => 'IntranetProveedores',
@@ -372,7 +371,8 @@
         'charset' => 'utf8',
         'prefix' => '',
         'prefix_indexes' => true,
-        'trust_server_certificate' => 'false',
+        'encrypt' => 'yes',
+        'trust_server_certificate' => true,
       ),
     ),
     'migrations' => 'migrations',
@@ -468,14 +468,14 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\app',
+        'root' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\app',
         'throw' => false,
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\app/public',
-        'url' => 'https://proveedores.laconcha.com.mx/storage',
+        'root' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\app/public',
+        'url' => 'http://localhost/storage',
         'visibility' => 'public',
         'throw' => false,
       ),
@@ -494,7 +494,7 @@
     ),
     'links' => 
     array (
-      'C:\\xampp\\htdocs\\Proveedores\\public\\storage' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\app/public',
+      'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\public\\storage' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\app/public',
     ),
   ),
   'hashing' => 
@@ -533,14 +533,14 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\logs/laravel.log',
-        'level' => false,
+        'path' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\logs/laravel.log',
+        'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\logs/laravel.log',
-        'level' => false,
+        'path' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\logs/laravel.log',
+        'level' => 'debug',
         'days' => 14,
       ),
       'slack' => 
@@ -549,12 +549,12 @@
         'url' => NULL,
         'username' => 'Laravel Log',
         'emoji' => ':boom:',
-        'level' => false,
+        'level' => 'debug',
       ),
       'papertrail' => 
       array (
         'driver' => 'monolog',
-        'level' => false,
+        'level' => 'debug',
         'handler' => 'Monolog\\Handler\\SyslogUdpHandler',
         'handler_with' => 
         array (
@@ -566,7 +566,7 @@
       'stderr' => 
       array (
         'driver' => 'monolog',
-        'level' => false,
+        'level' => 'debug',
         'handler' => 'Monolog\\Handler\\StreamHandler',
         'formatter' => NULL,
         'with' => 
@@ -577,13 +577,13 @@
       'syslog' => 
       array (
         'driver' => 'syslog',
-        'level' => false,
+        'level' => 'debug',
         'facility' => 8,
       ),
       'errorlog' => 
       array (
         'driver' => 'errorlog',
-        'level' => false,
+        'level' => 'debug',
       ),
       'null' => 
       array (
@@ -592,7 +592,7 @@
       ),
       'emergency' => 
       array (
-        'path' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\logs/laravel.log',
+        'path' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\logs/laravel.log',
       ),
     ),
   ),
@@ -604,11 +604,11 @@
       'smtp' => 
       array (
         'transport' => 'smtp',
-        'host' => 'correo.laconcha.com.mx',
-        'port' => '465',
-        'encryption' => 'ssl',
-        'username' => 'no-reply@laconcha.com.mx',
-        'password' => 'm9iTgYYu5',
+        'host' => 'sandbox.smtp.mailtrap.io',
+        'port' => '2525',
+        'encryption' => NULL,
+        'username' => 'efd04e51bad491',
+        'password' => '8b75aee7a71aab',
         'timeout' => NULL,
         'local_domain' => NULL,
       ),
@@ -658,7 +658,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\Proveedores\\resources\\views/vendor/mail',
+        0 => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -725,7 +725,7 @@
       2 => '127.0.0.1',
       3 => '127.0.0.1:8000',
       4 => '::1',
-      5 => 'proveedores.laconcha.com.mx',
+      5 => 'localhost',
     ),
     'guard' => 
     array (
@@ -737,6 +737,19 @@
     array (
       'verify_csrf_token' => 'App\\Http\\Middleware\\VerifyCsrfToken',
       'encrypt_cookies' => 'App\\Http\\Middleware\\EncryptCookies',
+    ),
+  ),
+  'sap_series' => 
+  array (
+    'po_series_by_sucursal' => 
+    array (
+      1 => 'ZO',
+      4 => 'ZC',
+    ),
+    'grpo_series_by_sucursal' => 
+    array (
+      1 => 156,
+      4 => 157,
     ),
   ),
   'sapb1sl' => 
@@ -781,7 +794,7 @@
     'lifetime' => '525600',
     'expire_on_close' => true,
     'encrypt' => false,
-    'files' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\framework/sessions',
+    'files' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -792,8 +805,8 @@
     ),
     'cookie' => 'proveedores_session',
     'path' => '/',
-    'domain' => 'proveedores.laconcha.com.mx',
-    'secure' => true,
+    'domain' => NULL,
+    'secure' => NULL,
     'http_only' => true,
     'same_site' => 'lax',
   ),
@@ -801,9 +814,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\xampp\\htdocs\\Proveedores\\resources\\views',
+      0 => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\resources\\views',
     ),
-    'compiled' => 'C:\\xampp\\htdocs\\Proveedores\\storage\\framework\\views',
+    'compiled' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores\\storage\\framework\\views',
   ),
   'flare' => 
   array (
@@ -889,7 +902,7 @@
     array (
     ),
     'enable_runnable_solutions' => NULL,
-    'remote_sites_path' => 'C:\\xampp\\htdocs\\Proveedores',
+    'remote_sites_path' => 'C:\\Users\\ygonzalez\\Synology\\Home\\Escritorio\\Proveedores',
     'local_sites_path' => '',
     'housekeeping_endpoint_prefix' => '_ignition',
     'settings_file_path' => '',

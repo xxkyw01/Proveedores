@@ -1,8 +1,7 @@
 <div class="container-fluid con-sidebar">
     <div class="row justify-content-center">
-     <!-- Dashboard KPI -->
-        <div class="col-lg-4 col-md-6 col-6 mb-3">
 
+        <div class="col-lg-4 col-md-6 col-6 mb-3">
             <div class="wrimagecard wrimagecard-topimage">
                 <a href="{{ url('almacen/KPIDashboard') }}">
                     <div class="wrimagecard-topimage_header bg-tr-orange text-center">
@@ -15,7 +14,6 @@
             </div>
         </div>
         
-    <!-- Agenda Proveedor -->
     <div class="col-lg-4 col-md-6 col-6 mb-3">
         <div class="wrimagecard wrimagecard-topimage">
             <a href="{{ url('almacen/AgendaProveedor') }}">
@@ -29,35 +27,6 @@
         </div>
     </div>
 
-    <!-- Disponibilidad -->
-    <div class="col-lg-4 col-md-6 col-6 mb-3">
-        <div class="wrimagecard wrimagecard-topimage">
-            <a href="{{ url('almacen/tablero') }}">
-                <div class="wrimagecard-topimage_header bg-tr-orange text-center">
-                    <i class="fas fa-clock font-large-2 text-orange"></i>
-                </div>
-                <div class="wrimagecard-topimage_title">
-                    <p class="fs-1 fw-bold m-0">Disponibilidad de Andenes</p>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- Confirmar Cita  -->
-    <div class="col-lg-4 col-md-6 col-6 mb-3">
-        <div class="wrimagecard wrimagecard-topimage">
-            <a href="{{ url('almacen/confirmarCita') }}">
-                <div class="wrimagecard-topimage_header bg-tr-orange text-center">
-                    <i class="fas fa-calendar-check font-large-2 text-orange"></i>
-                </div>
-                <div class="wrimagecard-topimage_title">
-                    <p class="fs-1 fw-bold m-0">Confirmar Cita</p>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- Disponibilidad -->
     <div class="col-lg-4 col-md-6 col-6 mb-3">
         <div class="wrimagecard wrimagecard-topimage">
             <a href="{{ route('reporte.maniobras') }}">
@@ -71,21 +40,6 @@
         </div>
     </div>
 
-    <!-- Agendar -->
-    <div class="col-lg-4 col-md-6 col-6 mb-3">
-        <div class="wrimagecard wrimagecard-topimage">
-            <a href="{{ url('/proveedor/citas') }}">
-                <div class="wrimagecard-topimage_header bg-tr-orange text-center">
-                    <i class="fas fa-calendar-plus font-large-2 text-orange"></i>
-                </div>
-                <div class="wrimagecard-topimage_title">
-                    <p class="fs-1 fw-bold m-0">Solicitar Cita</p>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <!-- Gestionar cita -->
     <div class="col-lg-4 col-md-6 col-6 mb-3">
         <div class="wrimagecard wrimagecard-topimage">
             <a href="{{ url('/proveedor/historial') }}">
@@ -99,7 +53,6 @@
         </div>
     </div>
 
-    <!-- Calendario Proveedores -->
     <div class="col-lg-4 col-md-6 col-6 mb-3">
         <div class="wrimagecard wrimagecard-topimage">
             <a href="{{ url('/compras/calendario') }}">
@@ -112,7 +65,5 @@
             </a>
         </div>
     </div>
-
-
-    </div> {{-- Cierra row --}}
-</div> {{-- Cierra container-fluid --}}
+    </div>
+</div> 

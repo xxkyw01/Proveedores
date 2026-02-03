@@ -187,8 +187,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('monitor.dashboard');
         }
 
-        //return back()->withErrors(['errorMsg' => 'Credenciales incorrectas o usuario inactivo']);
-
         return redirect()
             ->back()
             ->withErrors(['errorMsg' => 'Usuario o contraseña incorrectos'])
@@ -200,10 +198,8 @@ class ProveedorAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
-        $request->session()->invalidate();      // mata la sesión
-        $request->session()->regenerateToken(); // genera nuevo CSRF
-
+        $request->session()->invalidate();      
+        $request->session()->regenerateToken(); 
         return redirect()->route('proveedor.login')
             ->with('logoutMsg', '¡Sesión cerrada exitosamente!');
     }

@@ -12,41 +12,10 @@
             <a class="nav-link {{ request()->is('dev/dashboard') ? 'active' : '' }}" href="{{ url('dev/dashboard') }}">
                 <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
             </a>
-            <!---MENSAJE
-            <a class="nav-link {{ request()->is('dev/mensajeria') ? 'active' : '' }}" href="{{ url('dev/mensajeria') }}">
-                <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-            </a>
-            -->
 
             <div class="accordion" id="accordionSidebar">
 
-                <!-- DEV -->
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="headingDesarrolador">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapseDesarrollador" aria-expanded="false"
-                            aria-controls="collapseProveedor">
-                            Desarrollador
-                        </button>
-                    </h2>
-
-                    
-                    <div id="collapseDesarrollador" class="accordion-collapse collapse"
-                        aria-labelledby="headingDesarrollador" data-bs-parent="#accordionSidebar">
-                        <div class="accordion-body">
-                            <a class="nav-link {{ request()->is('dev/crear-usuario') ? 'active' : '' }}"
-                                href="{{ url('dev/crear-usuario') }}">
-                                <i class="fas fa-user-plus nav-icon"></i><span class="nav-text"> Crear Usuario</span>
-                            </a>
-                            <a class="nav-link {{ request()->is('dev/usuarios') ? 'active' : '' }}"
-                                href="{{ url('dev/usuarios') }}">
-                                <i class="fas fa-users-viewfinder nav-icon"></i><span class="nav-text">Consulta
-                                    Usuario</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
+        
                 <!-- PROVEEDOR -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingProveedor">
@@ -113,9 +82,8 @@
                                 <i class="fas fa-calendar-times nav-icon"></i><span class="nav-text">Cita No Programada</span>
                             </a>
 
-                                  
-                            <a class="nav-link {{ request()->is(almacen/recibo-mercancia') ? 'active' : '' }}"
-                                href="{{ url(almacen/recibo-mercancia') }}">
+                            <a class="nav-link {{ request()->is('almacen/recibo-mercancia') ? 'active' : '' }}"
+                                href="{{ url('almacen/recibo-mercancia') }}">
                                 <i class="fas fa-file-invoice  nav-icon"></i><span class="nav-text">Recibo de Mercancía</span>
                             </a>
 

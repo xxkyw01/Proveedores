@@ -1,0 +1,1 @@
+<?php /**PATH C:\Users\ygonzalez\Synology\Home\Escritorio\Proveedores\resources\views/includes/footer.blade.php ENDPATH**/ ?>
