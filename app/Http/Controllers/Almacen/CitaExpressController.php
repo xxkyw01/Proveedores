@@ -29,7 +29,6 @@ class CitaExpressController extends Controller
             'inputs' => $request->all()
         ]);
 
-        // Validar sesión
         if (!session()->has('Usuario')) {
             Log::warning('Intento de registrar sin sesión', ['ip' => $request->ip()]);
 
@@ -39,7 +38,6 @@ class CitaExpressController extends Controller
             ], 401);
         }
 
-        // Validación de datos
         try {
             $request->validate([
                 'sucursal_id'   => 'required|integer',
@@ -91,7 +89,6 @@ class CitaExpressController extends Controller
                 ]
             );
 
-            // Obtener el nombre de la sucursal
             $sucursalNombre = DB::connection('sqlsrv_proveedores')
                 ->table('sucursales')
                 ->where('id', $request->input('sucursal_id'))
@@ -102,9 +99,9 @@ class CitaExpressController extends Controller
                 'mesadecontrol.centro@laconcha.com.mx',
                 'mesadecontrol@laconcha.com.mx'
             ])
-                ->cc(['auxdesarrollador.it@laconcha.com.mx'])
+                ->bcc(['auxdesarrollador.it@laconcha.com.mx','sistemas@laconcha.com.mx'])
                 ->send(new CitaExpressMail(
-                    $sucursalNombre,  // ← ahora envías el nombre real
+                    $sucursalNombre,
                     $tipoEntrega,
                     $proveedor,
                     $request->input('fecha'),

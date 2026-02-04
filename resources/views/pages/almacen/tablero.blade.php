@@ -13,9 +13,8 @@
     <div class="container-fluid con-sidebar">
 
         <div class="row justify-content-center">
-            {{-- Mostrar tabla solo si hay selección --}}
+
             @if (!in_array($rolId, [2]))
-                {{-- Mostrar la cabecera --}}
                 <div class="card-cabecera mx-auto text-center mb-4">
                     <h4 class="text-orange fw-bold mb-1">{{ $sucursal->nombre ?? '' }}</h4>
                     <h3>
@@ -39,15 +38,11 @@
                 </div>
         </div>
         @endif
-    </div> {{-- Cierra container-fluid --}}
+    </div>
 
-
-    {{-- Tabla --}}
     
     <div class="container-fluid con-sidebar">
-
         <div class="row justify-content-center">
-
     <div id="contenedor-tabla" class="table-responsive" style="overflow-x: auto; min-width: 100%;">
         <table class="table text-center table-bordered" style="border-radius: 10px; overflow: hidden;">
             <thead class="bg-dark text-white">
@@ -71,19 +66,14 @@
                     @endphp
                     @if ($horaFila >= $horaActual)
                         <tr>
-                            {{-- Mostrar hora --}}
                             <td style="background-color: #f1f3f5;" class="fw-bold">
                                 {{ \Carbon\Carbon::parse($fila->hora)->format('H:i') }}
                             </td>
 
-                            {{-- Mostrar disponibilidad de cada columna --}}
                             @foreach ($fila as $col => $valor)
                                 @if ($col !== 'hora')
-                                    {{-- Mostrar tipo de vehículo y estado, si están disponibles --}}
                                     <td class="{{ $valor === 'Disponible' ? 'bg-success' : 'bg-danger' }} text-white fw-semibold"
                                         style="font-size: 1.00rem;" title="{{ $valor }}">
-
-                                        {{-- Mostrar el estado y tipo de vehículo, limitando el texto      --}}
                                         {{ \Illuminate\Support\Str::limit($valor, 100) }}
 
 
@@ -100,7 +90,7 @@
     </div>
 
         </div>
-    </div> {{-- Cierra container-fluid --}} 
+    </div> 
 
     <script>
         function MultiQuery() {

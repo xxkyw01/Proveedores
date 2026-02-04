@@ -41,5 +41,4 @@ class DashboardController extends Controller
         'sucursalId'      => $sucursalId,
     ]);
 }
-
 }

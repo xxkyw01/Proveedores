@@ -25,8 +25,6 @@ class ProveedorAuthController extends Controller
 
         $user = $request->input('user');
         $password = $request->input('password');
-
-        // 1. Verificar si es PROVEEDOR
         $proveedor = DB::connection('sqlsrv_proveedores')->table('proveedor_usuarios')
             ->where('username', $user)
             ->where('activo', 'Y')
@@ -44,7 +42,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('proveedor.dashboard');
         }
 
-        // 2. Verificar si es ADMINISTRADOR
         $admin = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')

@@ -15,11 +15,10 @@ class TableroController extends Controller
     {
         $rolId = session('Usuario.IdRol');
         $sucursalUsuario = session('Usuario.SucursalID');
-         // Si el rol es Admin, Compras, Dev -> puede elegir sucursal
         if (in_array($rolId, [1, 3, 4, 5])) {
-            $sucursal_id = $request->get('sucursal_id') ?? 1; // valor por defecto
+            $sucursal_id = $request->get('sucursal_id') ?? 1;
         } else {
-            $sucursal_id = $sucursalUsuario; // almacén
+            $sucursal_id = $sucursalUsuario;
         }
 
         $sucursales = Sucursal::all();
@@ -29,14 +28,11 @@ class TableroController extends Controller
         ]);
     }
 
-
     public function mostrar(Request $request)
     {
         $sucursal_id = $request->get('sucursal_id');
         $rolId = session('Usuario.IdRol');
         $sucursalUsuario = session('Usuario.SucursalID');
-
-        // Almacén forzamos su sucursal si no mandó nada
         if ($rolId == 2 && !$sucursal_id) {
             $sucursal_id = $sucursalUsuario;
         }

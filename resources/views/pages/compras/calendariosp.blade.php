@@ -7,7 +7,6 @@
     <x-sidebar />
 
 
-    {{--  Enlace de Estilo --}}
     <link rel="stylesheet" href="{{ asset('assets/css/rol/compras/Calendario_disponibilidad.css') }}">
 
     <div class="container-fluid mt-3 con-sidebar">

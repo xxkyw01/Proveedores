@@ -72,8 +72,8 @@ class CitaNoProgramadaController extends Controller
     public function obtenerSerieOC($entidad_id)
     {
         $series = [
-            1 => 'ZO', // Guadalajara
-            4 => 'ZC'  // Guanajuato
+            1 => 'ZO',
+            4 => 'ZC'  
         ];
 
         return response()->json(['serie_oc' => $series[$entidad_id] ?? null]);
@@ -82,8 +82,8 @@ class CitaNoProgramadaController extends Controller
     private function obtenerSeriePorSucursal($sucursal_id)
     {
         $series = [
-            1 => 'ZO', // Guadalajara
-            4 => 'ZC', // Guanajuato
+            1 => 'ZO',
+            4 => 'ZC', 
         ];
         return $series[$sucursal_id] ?? null;
     }
@@ -185,11 +185,10 @@ class CitaNoProgramadaController extends Controller
 
             $sucursalId = $request->input('sucursal_id');
             $fecha = $request->input('fecha');
-            $idUser  = $request->input('idUser'); // corregido
+            $idUser  = $request->input('idUser'); 
             $proveedorId = $request->input('proveedor_id');
             $tipoEvento = 'No Programada';
 
-            // --- Validación 1: No permitir vehículos con mismo andén y hora ---
             $combinaciones = [];
             foreach ($vehiculos as $vehiculo) {
                 $clave = $vehiculo['anden_id'] . '-' . $vehiculo['hora'];
@@ -202,7 +201,6 @@ class CitaNoProgramadaController extends Controller
                 $combinaciones[] = $clave;
             }
 
-            // --- Validación 2: Revisar si ya existe una reservación en ese horario ---
             foreach ($vehiculos as $vehiculo) {
                 $yaExiste = Reservacion::where('fecha', $fecha)
                     ->whereRaw("CAST(hora AS TIME) = ?", [$vehiculo['hora']])
@@ -219,10 +217,8 @@ class CitaNoProgramadaController extends Controller
                 }
             }
 
-            // --- Insertar cada vehículo como una reservación ---
             foreach ($vehiculos as $vehiculo) {
                 $reservacion = new Reservacion();
-
                 $reservacion->sucursal_id = $sucursalId;
                 $reservacion->transporte_id = $vehiculo['transporte_id'];
                 $reservacion->fecha = $fecha;
@@ -235,12 +231,9 @@ class CitaNoProgramadaController extends Controller
                 $reservacion->anden_id = $vehiculo['anden_id'];
                 $reservacion->estado = 'Confirmada';
                 $reservacion->tipo_evento = 'No Programada';
-
                 $reservacion->save();
             }
 
-
-              // --- Enviar correo electrónico ---
         $evidenciasURL = collect($rutasEvidencias)
             ->map(fn($r) => asset('storage/' . $r))
             ->toArray();

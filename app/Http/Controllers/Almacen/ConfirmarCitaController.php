@@ -184,7 +184,7 @@ class ConfirmarCitaController extends Controller
                         ));
                 } elseif ($estadoNuevo === 'Cancelada') {
                     Mail::to($destinatario)
-                        ->cc($copiasInternas)
+                        ->bcc($copiasInternas)
                         ->send(new \App\Mail\CitaCancelada(
                             $saludo,
                             $cita->proveedor_nombre,

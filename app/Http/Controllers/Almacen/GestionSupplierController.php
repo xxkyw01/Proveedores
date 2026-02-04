@@ -427,7 +427,7 @@ class GestionSupplierController extends Controller
         $sucursalId = (int)$res->sucursal_id;
     
         try {
-            $serieOC = $this->poSeriePorSucursal($sucursalId); // 'ZO' o 'ZC'
+            $serieOC = $this->poSeriePorSucursal($sucursalId);
         } catch (\Throwable $e) {
             return response()->json(['ok' => false, 'msg' => $e->getMessage()], 422);
         }
@@ -435,7 +435,6 @@ class GestionSupplierController extends Controller
         $ordenes = DB::connection('sqlsrv_proveedores')
             ->select("EXEC dbo.sp_Consultar_OrdenesCompraAbiertas ?, ?", [$cardCode, $serieOC]);
     
-        // filtra las ya agregadas
         $ya = DB::connection('sqlsrv_proveedores')
             ->table('reservacion_orden_compra')
             ->where('reservacion_id', $reservacionId)
@@ -501,7 +500,6 @@ private function grpoSeriePorSucursal(int $sucursalId): int
     }
     return (int)$map[$sucursalId];
 }
-
 
     public function sapValidarGRPO(Request $req)
     {
@@ -714,9 +712,7 @@ private function grpoSeriePorSucursal(int $sucursalId): int
             }
 
             $today = Carbon::now()->format('Y-m-d');
-            //$serie = $this->getSerieGRPOPorSucursal((int)$req->input('sucursal_id'));
             $serie = $this->grpoSeriePorSucursal((int)$req->input('sucursal_id'));
-
 
             $payload = [
                 'Series'       => $serie,
