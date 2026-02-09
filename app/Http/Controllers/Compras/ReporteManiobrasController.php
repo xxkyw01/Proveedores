@@ -32,7 +32,7 @@ class ReporteManiobrasController extends Controller
             $fechaInicio = $request->input('fechaInicio', Carbon::now()->startOfMonth()->toDateString());
             $fechaFin    = $request->input('fechaFin', Carbon::now()->toDateString());
 
-            Log::info("📤 Exportando reporte desde $fechaInicio hasta $fechaFin");
+            //Log::info("📤 Exportando reporte desde $fechaInicio hasta $fechaFin");
 
             $datos = DB::connection('sqlsrv_proveedores')->select("EXEC sp_reporte_maniobras_compras ?, ?", [
                 $fechaInicio,
@@ -49,9 +49,8 @@ class ReporteManiobrasController extends Controller
                 if (ob_get_level()) ob_end_clean();
 
                 $handle = fopen('php://output', 'w');
-                fwrite($handle, "\xEF\xBB\xBF"); // UTF-8 BOM para Excel acento 
+                fwrite($handle, "\xEF\xBB\xBF"); 
 
-                // Cabeceras
                 fputcsv($handle, [
                     'Folio',
                     'Fecha',
@@ -63,7 +62,7 @@ class ReporteManiobrasController extends Controller
                     'Ordenes de Compra',
                 ]);
 
-                // Filas
+
                 foreach ($datos as $r) {
                     fputcsv($handle, [
                         $r->reservacion_id,
@@ -86,7 +85,7 @@ class ReporteManiobrasController extends Controller
 
             return $response;
         } catch (\Throwable $e) {
-            Log::error('❌ Error al exportar reporte maniobras: ' . $e->getMessage());
+            //Log::error('❌ Error al exportar reporte maniobras: ' . $e->getMessage());
             abort(500, 'Error al generar el reporte.');
         }
     }

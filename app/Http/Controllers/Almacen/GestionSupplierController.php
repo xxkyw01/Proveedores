@@ -240,7 +240,7 @@ class GestionSupplierController extends Controller
 
             return response()->json($evento);
         } catch (\Throwable $e) {
-            Log::error('getDetails error: ' . $e->getMessage());
+            //Log::error('getDetails error: ' . $e->getMessage());
             return response()->json(['error' => 'Error interno al obtener detalles'], 500);
         }
     }
@@ -312,7 +312,7 @@ class GestionSupplierController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente.']);
         } catch (\Throwable $e) {
-            Log::error('actualizarEstado error: ' . $e->getMessage());
+            //Log::error('actualizarEstado error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()], 500);
         }
     }
@@ -547,10 +547,10 @@ private function grpoSeriePorSucursal(int $sucursalId): int
     {
         try {
             $docNum = (int) trim($docNum);
-            Log::info('sapGetPO IN', ['docNum' => $docNum]);
+            //Log::info('sapGetPO IN', ['docNum' => $docNum]);
 
             $qHead = "PurchaseOrders?\$filter=DocNum eq $docNum";
-            Log::info('sapGetPO qHead', ['q' => $qHead]);
+            //Log::info('sapGetPO qHead', ['q' => $qHead]);
 
             $headArr = $this->slToArray($sl->request('GET', $qHead));
 
@@ -566,7 +566,7 @@ private function grpoSeriePorSucursal(int $sucursalId): int
             $docEntry = $po['DocEntry'] ?? null;
 
             if (!$docEntry) {
-                Log::error('sapGetPO sin DocEntry', ['po' => $po]);
+                //Log::error('sapGetPO sin DocEntry', ['po' => $po]);
                 return response()->json([
                     'ok'  => false,
                     'msg' => 'La respuesta de SAP no contiene DocEntry',
@@ -575,7 +575,7 @@ private function grpoSeriePorSucursal(int $sucursalId): int
             }
 
             $qLines = "PurchaseOrders($docEntry)";
-            Log::info('sapGetPO qLines', ['q' => $qLines]);
+            //Log::info('sapGetPO qLines', ['q' => $qLines]);
 
             $poFull = $this->slToArray($sl->request('GET', $qLines));
             $lines  = $poFull['DocumentLines'] ?? [];
@@ -587,10 +587,10 @@ private function grpoSeriePorSucursal(int $sucursalId): int
             ]);
         } catch (ClientException $e) {
             $body = (string) $e->getResponse()->getBody();
-            Log::error('sapGetPO ClientException', [
+            /* Log::error('sapGetPO ClientException', [
                 'msg'     => $e->getMessage(),
                 'sapBody' => $body,
-            ]);
+            ]); */
 
             return response()->json([
                 'ok'      => false,
@@ -598,10 +598,10 @@ private function grpoSeriePorSucursal(int $sucursalId): int
                 'sapBody' => json_decode($body, true) ?? $body,
             ], 500);
         } catch (\Throwable $e) {
-            Log::error('sapGetPO error', [
+            /* Log::error('sapGetPO error', [
                 'msg'   => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-            ]);
+            ]); */
 
             return response()->json([
                 'ok'  => false,
@@ -662,7 +662,7 @@ private function grpoSeriePorSucursal(int $sucursalId): int
 
         try {
             $qHead = "PurchaseOrders?\$filter=DocNum eq $docNum";
-            Log::info('crearGRPO qHead', ['q' => $qHead]);
+            //Log::info('crearGRPO qHead', ['q' => $qHead]);
 
             $headArr = $this->slToArray($sl->request('GET', $qHead));
 
@@ -678,7 +678,7 @@ private function grpoSeriePorSucursal(int $sucursalId): int
             $docEntry = $po['DocEntry'] ?? null;
 
             if (!$docEntry) {
-                Log::error('crearGRPO sin DocEntry', ['po' => $po]);
+                //Log::error('crearGRPO sin DocEntry', ['po' => $po]);
                 return response()->json([
                     'ok'  => false,
                     'msg' => 'La respuesta de SAP no contiene DocEntry',
@@ -724,7 +724,7 @@ private function grpoSeriePorSucursal(int $sucursalId): int
                 'DocumentLines' => $docLines,
             ];
 
-            Log::info('crearGRPO payload', $payload);
+            //Log::info('crearGRPO payload', $payload);
 
             $res  = $sl->request('POST', 'PurchaseDeliveryNotes', ['json' => $payload]);
             $json = $this->slToArray($res);
@@ -736,10 +736,10 @@ private function grpoSeriePorSucursal(int $sucursalId): int
             ], 200);
         } catch (ClientException $e) {
             $body = (string) $e->getResponse()->getBody();
-            Log::error('crearGRPO ClientException', [
+            /* Log::error('crearGRPO ClientException', [
                 'msg'     => $e->getMessage(),
                 'sapBody' => $body,
-            ]);
+            ]); */
 
             return response()->json([
                 'ok'      => false,
@@ -747,10 +747,10 @@ private function grpoSeriePorSucursal(int $sucursalId): int
                 'sapBody' => json_decode($body, true) ?? $body,
             ], 500);
         } catch (\Throwable $e) {
-            Log::error('crearGRPO error', [
+            /* Log::error('crearGRPO error', [
                 'msg'   => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-            ]);
+            ]); */
 
             return response()->json([
                 'ok'  => false,

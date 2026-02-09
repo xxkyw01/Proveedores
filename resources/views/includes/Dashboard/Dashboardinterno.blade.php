@@ -5,14 +5,13 @@
     @include('includes.scripts.bootstrap')
     <script src="https://code.highcharts.com/highcharts.js"></script>
 
-    {{-- Sidebar dinámico por rol/sesión --}}
+
     <x-sidebar/> 
 
-    {{--  Enlace de Estilo --}}
     <link rel="stylesheet" href="{{ asset('assets/css/rol/General/Dashboard/DashboardInterno.css') }}">
     <div class="container-fluid con-sidebar">
         <div class="row justify-content-center">
-            {{-- Filtros (centrados, fondo blanco) --}}
+    
             <div class="container mb-3">
                 <div class="card kpi-filters shadow-sm mx-auto">
                     <form class="row g-3 align-items-end justify-content-center text-center" method="get">
@@ -56,8 +55,6 @@
 
         </div>
 
-
-        {{-- Tarjetas KPI --}}
         <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
             <div class="col">
                 <div class="card shadow-sm border-0 p-3 text-center">
@@ -85,13 +82,11 @@
             </div>
         </div>
 
-        {{-- Dona principal por evento --}}
         <div class="card shadow-sm border-0 p-3 mb-3">
             <h6 class="mb-2">Eventos (participación %)</h6>
             <div id="chartEventos"></div>
         </div>
 
-        {{-- Cuadrantes por evento --}}
         <div class="row row-cols-1 row-cols-md-2 g-3 mb-3">
             <div class="col">
                 <div class="card shadow-sm border-0 p-3">
@@ -119,7 +114,6 @@
             </div>
         </div>
 
-        {{-- Tendencia semanal + Sucursales apiladas --}}
         <div class="row g-3 mb-3">
             <div class="col-12 col-lg-7">
                 <div class="card shadow-sm border-0 p-3">
@@ -133,7 +127,6 @@
             </div>
         </div>
 
-        {{-- Top proveedores --}}
         <div class="row g-3 mb-3">
             <div class="col-12 col-lg-6">
                 <div class="card shadow-sm border-0 p-3">
@@ -149,40 +142,9 @@
             </div>
         </div>
 
-        {{-- Tabla semanal 
-        <div class="card shadow-sm border-0 p-3">
-            <table id="tablaSemanal" class="table table-sm table-striped mb-0 w-100">
-                <thead>
-                    <tr>
-                        <th>Semana</th>
-                        <th>Asistieron</th>
-                        <th>Canceladas</th>
-                        <th>No asistió</th>
-                        <th>Otros</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($tablaSemanal ?? [] as $r)
-                        <tr>
-                            <td>{{ $r['semana'] }}</td>
-                            <td>{{ $r['asistieron'] }}</td>
-                            <td>{{ $r['canceladas'] }}</td>
-                            <td>{{ $r['no_asistio'] }}</td>
-                            <td>{{ $r['otros'] }}</td>
-                            <td>{{ $r['total'] }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        --}}
-
     </div>
 
     <script>
-        // Datos desde el backend
         const donutEventos = @json($donutEventos ?? []);
         const panels = @json($panels ?? []);
         const tendencia = @json($tendencia ?? []);
@@ -190,7 +152,6 @@
         const topAsist = @json($topAsistieron ?? []);
         const topCancel = @json($topCancelados ?? []);
 
-        // ---------------- Dona principal ----------------
         Highcharts.chart('chartEventos', {
             chart: {
                 type: 'pie'
@@ -224,7 +185,6 @@
             }]
         });
 
-        // ------------- Cuadrantes por evento -------------
         function dataPanel(nombre) {
             const p = (panels || []).find(x => (x.evento || '').toLowerCase() === nombre.toLowerCase());
             if (!p) return [];
@@ -267,7 +227,6 @@
         renderPanel('panel-apartado', 'Apartado');
         renderPanel('panel-express', 'Paquetería Express');
 
-        // ------------- Tendencia por semana --------------
         Highcharts.chart('chartSemanas', {
             chart: {
                 type: 'column'
@@ -307,7 +266,6 @@
             ]
         });
 
-        // --------- Apiladas por sucursal (agrupadas) -----
         Highcharts.chart('chartSucursales', {
             chart: {
                 type: 'column'
@@ -360,7 +318,6 @@
             ]
         });
 
-        // ----------------- Top proveedores ----------------
         Highcharts.chart('chartTopAsist', {
             chart: {
                 type: 'bar'
@@ -403,7 +360,6 @@
             }]
         });
 
-        // ----------------- Tabla semanal ------------------
         $(function() {
             $('#tablaSemanal').DataTable({
                 paging: true,

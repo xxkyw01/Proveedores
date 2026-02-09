@@ -14,15 +14,10 @@
             <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
         </a>
 
-        <!--Mensajeria
-        <a class="nav-link {{ request()->is('proveedor/mensajeria') ? 'active' : '' }}" href="{{ url('proveedor/mensajeria') }}">
-            <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-        </a>
-    -->
-
         <a class="nav-link {{ request()->is('proveedor/citas') ? 'active' : '' }}" href="{{ url('proveedor/citas') }}">
             <i class="fas fa-calendar-plus nav-icon"></i><span class="nav-text">Solicitar Cita</span>
         </a>
+        
         <a class="nav-link {{ request()->is('proveedor/historial') ? 'active' : '' }}"
             href="{{ url('proveedor/historial') }}">
             <i class="fas fa-book nav-icon"></i><span class="nav-text">Consultar Citas</span>

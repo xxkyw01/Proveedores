@@ -99,7 +99,7 @@ class CitaExpressController extends Controller
                 'mesadecontrol.centro@laconcha.com.mx',
                 'mesadecontrol@laconcha.com.mx'
             ])
-                ->bcc(['auxdesarrollador.it@laconcha.com.mx','sistemas@laconcha.com.mx'])
+                ->bcc(['auxdesarrollador.it@laconcha.com.mx', 'sistemas@laconcha.com.mx'])
                 ->send(new CitaExpressMail(
                     $sucursalNombre,
                     $tipoEntrega,
@@ -112,7 +112,7 @@ class CitaExpressController extends Controller
 
 
 
-            Log::info('Resultado SP', ['resultado' => $resultado]);
+            //Log::info('Resultado SP', ['resultado' => $resultado]);
 
             return response()->json([
                 'success' => true,
@@ -120,10 +120,10 @@ class CitaExpressController extends Controller
                 'message' => 'Cita express registrada correctamente'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error al registrar cita express: ' . $e->getMessage(), [
+            /*    Log::error('Error al registrar cita express: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
-
+ */
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un problema al guardar la cita',

@@ -7,45 +7,17 @@
         </div>
     </div>
 
-
     <nav class="nav flex-column mt-2">
         <a class="nav-link {{ request()->is('mejora/dashboard') ? 'active' : '' }}" href="{{ url('mejora/dashboard') }}">
             <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
         </a>
 
-        <!-- dasboard -->
         <a class="nav-link {{ request()->is('almacen/KPIDashboard') ? 'active' : '' }}"
             href="{{ url('almacen/KPIDashboard') }}">
             <i class="fas fa-chart-pie nav-icon"></i><span class="nav-text"> Dashboard </span>
         </a>
 
-        <!---MENSAJE
-        <a class="nav-link {{ request()->is('mejora/mensajeria') ? 'active' : '' }}" href="{{ url('mejora/mensajeria') }}">
-            <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-        </a>
-        -->
-
         <div class="accordion" id="accordionSidebar">
-
-            <!-- PROVEEDOR
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingProveedor">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProveedor" aria-expanded="false" aria-controls="collapseProveedor">
-                        Proveedor
-                    </button>
-                </h2>
-                <div id="collapseProveedor" class="accordion-collapse collapse" aria-labelledby="headingProveedor" data-bs-parent="#accordionSidebar">
-                    <div class="accordion-body">
-                
-                        <a class="nav-link {{ request()->is('proveedor/historial') ? 'active' : '' }}" href="{{ url('proveedor/historial') }}">
-                            <i class="fas fa-book nav-icon"></i><span class="nav-text">Consultar Citas</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            -->
-
-            <!-- ALMACÉN -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingAlmacen">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -61,21 +33,14 @@
                             <i class="fas fa-calendar-day nav-icon"></i><span class="nav-text">Agenda
                                 Proveedores</span>
                         </a>
-                        <a class="nav-link {{ request()->is('almacen/tablero') ? 'active' : '' }}"
-                            href="{{ url('almacen/tablero') }}">
-                            <i class="fas fa-clock nav-icon"></i><span class="nav-text">Disponibilidad de
-                                Andenes</span>
-                        </a>
-                        <a class="nav-link {{ request()->is('almacen/confirmarCita') ? 'active' : '' }}"
-                            href="{{ url('almacen/confirmarCita') }}">
-                            <i class="fas fa-calendar-check nav-icon"></i><span class="nav-text">Confirmar
+                        <a class="nav-link {{ request()->is('proveedor/historial') ? 'active' : '' }}"
+                            href="{{ url('/proveedor/historial') }}">
+                            <i class="fas fa-book nav-icon"></i><span class="nav-text">Gestionar
                                 Cita</span>
-                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- COMPRAS -->
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingCompras">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -91,6 +56,10 @@
                             <i class="fas fa-clipboard-list nav-icon"></i><span class="nav-text">Reporte de
                                 Maniobras</span>
                         </a>
+                        <a class="nav-link {{ request()->is('compras/calendario') ? 'active' : '' }}"
+                            href="{{ url('/compras/calendario') }}">
+                            <i class="fas fa-calendar-days nav-icon"></i><span class="nav-text">Calendario
+                                Proveedores</span>
                     </div>
                 </div>
             </div>

@@ -36,7 +36,6 @@ class CalendarioSPController extends Controller
                 [$sucursal_id, $fecha]
             );
 
-            //Esta es la vista parcial 
             return view('pages.compras.partials.tabla_disponibilidad', compact('sucursal', 'fecha', 'tablaDisponibilidad'))->render();
         } catch (\Throwable $e) {
             return response("<div class='alert alert-danger p-2 text-center'>Error interno: {$e->getMessage()}</div>", 500);

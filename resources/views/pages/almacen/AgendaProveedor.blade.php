@@ -130,7 +130,7 @@
 
         const ROL_ID = {{ (int) $rolId }};
         const ES_ADMIN = [5].includes(ROL_ID);
-        const ES_ALMACEN = [2, 5].includes(ROL_ID);
+        //const ES_ALMACEN = [2, 5].includes(ROL_ID);
 
 
         function isWeekend(d) {
@@ -201,7 +201,6 @@
             const ancho = window.innerWidth;
             let cantidadDias = 1;
 
-            // PC: 3 columnas | Tablet: 2 columnas | Móvil: 1 columna
             if (ancho >= 992) cantidadDias = 3;
             else if (ancho >= 768) cantidadDias = 2;
             else cantidadDias = 1;
@@ -274,7 +273,6 @@
                             formatOrdenCompra(item.orden_compra) :
                             '';
 
-
                         let ocIcons = '';
 
                         if (hasComent) ocIcons += `
@@ -286,7 +284,6 @@
                     <a class="icono-info icono-evid" title="Ver evidencia" href="/almacen/evidencia/${item.id}" target="_blank" rel="noopener">
                         <i class="material-icons">attach_file</i>
                     </a>`;
-
 
                         const card = `
                         <div class="timeline-item">
@@ -356,7 +353,7 @@
 
                                 <!-- FOOTER -->
                                 <div class="timeline-card-footer">
-                                    ${ES_ALMACEN? `
+                                    ${ES_ADMIN? `
                                                                     <button class="btn-detalles btn btn-outline-secondary btn-sm w-30"
                                                                         onclick="showDetails(${item.id})">
                                                                         Ver Detalles

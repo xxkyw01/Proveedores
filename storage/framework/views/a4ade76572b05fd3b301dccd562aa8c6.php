@@ -41,7 +41,6 @@
 
     </nav>
 
-
     <a class="nav-link text-danger" href="<?php echo e(route('logout')); ?>"
         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
         <i class="fas fa-sign-out-alt nav-icon"></i>
@@ -51,14 +50,11 @@
     <form id="logout-form" action="<?php echo e(route('logout')); ?>" method="POST" style="display: none;">
         <?php echo csrf_field(); ?>
     </form>
-
 </div>
 
 <div class="main-content" id="main-content">
     <?php echo $__env->yieldContent('content'); ?>
 </div>
-
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

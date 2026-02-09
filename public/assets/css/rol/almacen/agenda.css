@@ -12,6 +12,7 @@ body {
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
   background-color: var(--bs-body-bg);
+  text-size-adjust: inherit;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -172,9 +173,9 @@ body {
   transform: translateX(-100%);
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.6) 50%,
-    rgba(255, 255, 255, 0) 100%
+    rgb(243, 138, 0) 0%,
+    rgba(234, 133, 0, 0.801) 50%,
+    rgba(255, 255, 255, 0.301) 100%
   );
   animation: skeleton-loading 1.4s infinite;
 }
@@ -219,6 +220,7 @@ body {
 }
 
 /* TIMELINE layout */
+
 .timeline {
   max-width: 900px;
   margin: 10px auto;
@@ -242,10 +244,13 @@ body {
 .timeline-marker {
   width: 60px;
   display: flex;
+  align-items: stretch;
   justify-content: center;
-  align-items: center;
   position: relative;
-  flex: 0 0 60px;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-content: space-around;
 }
 
 .circulo {
@@ -263,8 +268,7 @@ body {
   background-color: #ee7826;
   z-index: 2;
   left: 25px;
-  /* bottom: -10px; */
-  bottom: -790%; /* ajustado para que la línea sea más larga y cubra más espacio */
+  bottom: -790%;
 }
 
 /* TARJETA */
@@ -493,6 +497,7 @@ body {
   margin: 0;
 }
 .inp-recibir[type="number"] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
@@ -612,8 +617,7 @@ body {
     width: 7px;
   }
   .timeline-card {
-    padding: 12px 16px !important; /* antes 20px */
-    /* padding: 10px; */
+    padding: 12px 16px !important; 
     font-size: 0.85rem !important;
   }
   .btn-detalles {
@@ -699,69 +703,66 @@ body,
 }
 
 .timeline-card-footer {
-    padding: 6px 12px !important;
+  padding: 6px 12px !important;
 }
-
-
 
 /* ====== MODAL DETALLES OC – RESPONSIVE ====== */
 
 /* contenedor con scroll horizontal */
 .oc-table-wrapper {
-    width: 100%;
-    overflow-x: auto;
+  width: 100%;
+  overflow-x: auto;
 }
 
 /* que la tabla tenga un ancho mínimo para no romper palabras */
 .oc-table {
-    min-width: 520px;   /* ajusta si lo quieres más chico/grande */
+  min-width: 520px; /* ajusta si lo quieres más chico/grande */
 }
 
 /* encabezados: no los dejes partir letra por letra */
 #modalDetalles table[data-oc] th {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 
 /* versión móvil */
 @media (max-width: 576px) {
+  /* el modal que prácticamente ocupe el ancho del cel */
+  #modalDetalles .modal-dialog {
+    margin: 0.5rem;
+    max-width: 100%;
+  }
 
-    /* el modal que prácticamente ocupe el ancho del cel */
-    #modalDetalles .modal-dialog {
-        margin: 0.5rem;
-        max-width: 100%;
-    }
+  #modalDetalles .modal-content {
+    border-radius: 0.75rem;
+  }
 
-    #modalDetalles .modal-content {
-        border-radius: 0.75rem;
-    }
+  /* header del acordeón más compacto */
+  #modalDetalles .accordion-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.75rem;
+  }
 
-    /* header del acordeón más compacto */
-    #modalDetalles .accordion-button {
-        font-size: 0.9rem;
-        padding: 0.4rem 0.75rem;
-    }
+  /* input group de "No.Ref.del acreedor" más chiquito */
+  #modalDetalles .input-group-text {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+  #modalDetalles .inp-numatcard {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
 
-    /* input group de "No.Ref.del acreedor" más chiquito */
-    #modalDetalles .input-group-text {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
-    #modalDetalles .inp-numatcard {
-        font-size: 0.8rem;
-        padding: 0.25rem 0.5rem;
-    }
+  /* celdas de tabla más compactas */
+  #modalDetalles table[data-oc] th,
+  #modalDetalles table[data-oc] td {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+  }
 
-    /* celdas de tabla más compactas */
-    #modalDetalles table[data-oc] th,
-    #modalDetalles table[data-oc] td {
-        padding: 4px 6px;
-        font-size: 0.75rem;
-    }
-
-    /* input de recepción que no se salga */
-    #modalDetalles .inp-recibir {
-        max-width: 80px;
-        font-size: 0.8rem;
-        padding: 0.15rem 0.25rem;
-    }
+  /* input de recepción que no se salga */
+  #modalDetalles .inp-recibir {
+    max-width: 80px;
+    font-size: 0.8rem;
+    padding: 0.15rem 0.25rem;
+  }
 }

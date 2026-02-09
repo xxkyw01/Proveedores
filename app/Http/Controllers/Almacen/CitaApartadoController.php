@@ -67,7 +67,7 @@ class CitaApartadoController extends Controller
 
             return response()->json(['ok' => true, 'horarios' => $horarios]);
         } catch (\Throwable $e) {
-            Log::error('Disponibilidad (apartado): ' . $e->getMessage());
+            //Log::error('Disponibilidad (apartado): ' . $e->getMessage());
             return response()->json(['ok' => false, 'message' => 'Error al consultar disponibilidad.'], 500);
         }
     }
@@ -125,7 +125,7 @@ class CitaApartadoController extends Controller
                     $errors[]  = ['hora' => $hora, 'message' => $row->mensaje ?? 'No se pudo crear el apartado.'];
                 }
             } catch (\Throwable $e) {
-                Log::warning("Apartado fallo @{$hora}: " . $e->getMessage());
+                //Log::warning("Apartado fallo @{$hora}: " . $e->getMessage());
                 $errors[] = ['hora' => $hora, 'message' => 'Error al crear el apartado.'];
             }
         }

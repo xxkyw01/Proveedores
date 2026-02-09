@@ -48,13 +48,12 @@
             
                             <a class="nav-link {{ request()->is('proveedor/historial') ? 'active' : '' }}"
                                 href="{{ url('proveedor/historial') }}">
-                                <i class="fas fa-book nav-icon"></i><span class="nav-text">Historial de Proveedores</span>
+                                <i class="fas fa-book nav-icon"></i><span class="nav-text">Gestionar Cita</span>
                             </a>
                         </div>
                     </div>
                 </div>
 
-                <!-- ALMACÉN -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingAlmacen">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -74,7 +73,6 @@
                     </div>
                 </div>
 
-                <!-- COMPRAS -->
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingCompras">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -104,7 +102,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
 

@@ -2,7 +2,6 @@
 <div class="container-fluid con-sidebar">
     <div class="row justify-content-center">
 
-        <!-- Agendar -->
         <div class="col-lg-4 col-md-6 col-6 mb-3">
             <div class="wrimagecard wrimagecard-topimage">
                 <a href="{{ url('/proveedor/citas') }}">
@@ -16,7 +15,6 @@
             </div>
         </div>
 
-        <!-- Gestionar cita -->
         <div class="col-lg-4 col-md-6 col-6 mb-3">
             <div class="wrimagecard wrimagecard-topimage">
                 <a href="{{ url('/proveedor/historial') }}">
@@ -30,8 +28,7 @@
             </div>
         </div>
 
-
-    </div> {{-- Cierra row --}}
-</div> {{-- Cierra container-fluid --}}
+    </div> 
+</div> 
 
 

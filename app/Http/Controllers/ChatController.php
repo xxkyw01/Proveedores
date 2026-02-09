@@ -14,7 +14,6 @@ class ChatController extends Controller
         $contactos = [];
 
         if (session()->has('Proveedor')) {
-            // Es proveedor logueado
             $yo = session('Proveedor');
 
             $contactos = DB::connection('sqlsrv_proveedores')->table('usuarios')
@@ -52,7 +51,6 @@ class ChatController extends Controller
         try {
             $yo = session('Usuario') ?? session('Proveedor');
 
-            // Validaciones de sesión
             if (!$yo) {
                 return response()->json(['error' => 'No hay sesión activa'], 401);
             }
@@ -60,12 +58,10 @@ class ChatController extends Controller
             $yo_id = $yo['IdUsuario'] ?? $yo['id'];
             $yo_tipo = session()->has('Proveedor') ? 'P' : 'U';
 
-            // Validación tipo debe ser P o U
             if (!in_array($tipo, ['P', 'U'])) {
                 return response()->json(['error' => 'Tipo inválido'], 400);
             }
 
-            // MARCAR COMO LEÍDOS los mensajes recibidos por mí de ese contacto
             Mensaje::where('receptor_id', $yo_id)
                 ->where('receptor_tipo', $yo_tipo)
                 ->where('remitente_id', $id)
@@ -73,7 +69,6 @@ class ChatController extends Controller
                 ->where('leido', 0)
                 ->update(['leido' => 1]);
 
-            // Obtener los mensajes de ida y vuelta
             $mensajes = Mensaje::where(function ($q) use ($yo_id, $id, $tipo) {
                 $q->where('remitente_id', $yo_id)
                     ->where('receptor_id', $id)
@@ -109,8 +104,6 @@ class ChatController extends Controller
         ]);
         $mensaje->save();
 
-        // Enviar evento al WebSocket manual
-        //probablemente aqui tendria q cambiar el url local a dominio 
         try {
             Http::post('http://127.0.0.1:3001/nuevo-mensaje', [
                 'receptor_id' => $request->receptor_id,
@@ -118,7 +111,6 @@ class ChatController extends Controller
                 'mensaje' => $request->mensaje
             ]);
         } catch (\Throwable $e) {
-            // Puedes loguear o ignorar si no es crítico
             logger()->error('Error al notificar al WebSocket', [
                 'mensaje' => $e->getMessage(),
                 'linea' => $e->getLine(),

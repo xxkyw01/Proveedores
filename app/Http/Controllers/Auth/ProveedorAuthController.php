@@ -8,9 +8,24 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Http;
 
 class ProveedorAuthController extends Controller
 {
+    private function validateRecaptcha(Request $request): bool
+    {
+        $token = $request->input('g-recaptcha-response'); // v2 manda este campo solo
+        if (!$token) return false;
+
+        $resp = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => config('services.recaptcha.secret_key'),
+            'response' => $token,
+            'remoteip' => $request->ip(), // opcional
+        ])->json();
+
+        return (bool)($resp['success'] ?? false);
+    }
+
     public function showLoginForm()
     {
         return view('auth.login');
@@ -22,6 +37,13 @@ class ProveedorAuthController extends Controller
             'user' => 'required|string',
             'password' => 'required|string|min:8',
         ]);
+
+        if (!$this->validateRecaptcha($request)) {
+            return redirect()
+                ->back()
+                ->withErrors(['errorMsg' => 'Verificación reCAPTCHA fallida. Por favor, inténtalo de nuevo.'])
+                ->withInput($request->only('user'));
+        }
 
         $user = $request->input('user');
         $password = $request->input('password');
@@ -61,7 +83,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        // 3. usuario de ALMACÉN
         $almacen = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')
@@ -82,7 +103,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('almacen.dashboard');
         }
 
-        // 4. usuario de COMPRAS
         $compras = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')
@@ -102,7 +122,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('compras.dashboard');
         }
 
-        // 5. usuario de Mejora
         $mejora = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')
@@ -123,7 +142,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('mejora.dashboard');
         }
 
-        // 6. usuario de Desarrollador
         $dev = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')
@@ -144,7 +162,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('dev.dashboard');
         }
 
-        // 7. usuario de Auditoría
         $auditoria = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')
@@ -165,7 +182,6 @@ class ProveedorAuthController extends Controller
             return redirect()->route('auditoria.dashboard');
         }
 
-        // 8. Usuario de Monitor
         $monitor = DB::connection('sqlsrv_proveedores')->table('usuarios')
             ->where('Codigo', $user)
             ->where('Activo', 'Y')
@@ -194,10 +210,34 @@ class ProveedorAuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();      
-        $request->session()->regenerateToken(); 
-        return redirect()->route('proveedor.login')
-            ->with('logoutMsg', '¡Sesión cerrada exitosamente!');
+        //Auth::logout(); // Cierra la sesión de Laravel
+        $request->session()->invalidate(); // Invalida la sesión actual
+        $request->session()->flush(); // Elimina todos los datos de la sesión
+        $request->session()->regenerateToken(); // Regenera el token CSRF para seguridad
+        return redirect('/')->with([
+            'message' => 'Has cerrado sesión exitosamente.',
+            'alert-type' => 'success'
+        ]);
+    }
+
+    public static function redirect()
+    {
+        if (session()->has('Proveedor')) {
+            return redirect()->route('proveedor.dashboard');
+        } elseif (session()->has('Usuario')) {
+            $rol = session('Usuario.IdRol');
+            return match ($rol) {
+                1 => redirect()->route('admin.dashboard'),
+                2 => redirect()->route('almacen.dashboard'),
+                3 => redirect()->route('compras.dashboard'),
+                4 => redirect()->route('mejora.dashboard'),
+                5 => redirect()->route('dev.dashboard'),
+                7 => redirect()->route('auditoria.dashboard'),
+                8 => redirect()->route('monitor.dashboard'),
+                default => redirect('/login')->withErrors(['errorMsg' => 'Rol de usuario no reconocido.']),
+            };
+        } else {
+            return redirect('/login');
+        }
     }
 }

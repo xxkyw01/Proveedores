@@ -15,25 +15,9 @@
                 <i class="fas fa-home nav-icon"></i><span class="nav-text">Inicio</span>
             </a>
 
-            <!---MENSAJE
-        <a class="nav-link <?php echo e(request()->is('almacen/mensajeria') ? 'active' : ''); ?>" href="<?php echo e(url('almacen/mensajeria')); ?>">
-            <i class="fas fa-commenting nav-icon"></i><span class="nav-text">Mensaje</span>
-        </a>
-        -->
-
-            <!-- dasboard -->
-            <a class="nav-link <?php echo e(request()->is('almacen/KPIDashboard') ? 'active' : ''); ?>"
-                href="<?php echo e(url('almacen/KPIDashboard')); ?>">
-                <i class="fas fa-chart-pie nav-icon"></i><span class="nav-text"> Dashboard </span>
-            </a>
-
             <a class="nav-link <?php echo e(request()->is('almacen/AgendaProveedor') ? 'active' : ''); ?>"
                 href="<?php echo e(url('almacen/AgendaProveedor')); ?>">
                 <i class="fas fa-calendar-day nav-icon"></i><span class="nav-text">Agenda Proveedores</span>
-            </a>
-            <a class="nav-link <?php echo e(request()->is('almacen/tablero') ? 'active' : ''); ?>"
-                href="<?php echo e(url('almacen/tablero')); ?>">
-                <i class="fas fa-clock nav-icon"></i><span class="nav-text">Disponibilidad de Andenes</span>
             </a>
             <a class="nav-link <?php echo e(request()->is('almacen/confirmarCita') ? 'active' : ''); ?>"
                 href="<?php echo e(url('almacen/confirmarCita')); ?>">
@@ -45,12 +29,6 @@
                 <i class="fas fa-calendar-days nav-icon"></i><span class="nav-text"> Calendario
                     Proveedores</span>
             </a>
-
-            <a class="nav-link <?php echo e(request()->is('/almacen/cita-express') ? 'active' : ''); ?>"
-                href="<?php echo e(url('/almacen/cita-express')); ?>">
-                <i class="fas fa-truck-fast  nav-icon"></i><span class="nav-text">Cita Express</span>
-            </a>
-
 
             <a class="nav-link <?php echo e(request()->is('almacen/citas-no-programadas') ? 'active' : ''); ?>"
                 href="<?php echo e(url('almacen/citas-no-programadas')); ?>">

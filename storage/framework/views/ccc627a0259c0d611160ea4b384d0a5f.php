@@ -169,12 +169,9 @@
             </div>
         </div>
 
-        
-
     </div>
 
     <script>
-        // Datos desde el backend
         const donutEventos = <?php echo json_encode($donutEventos ?? [], 15, 512) ?>;
         const panels = <?php echo json_encode($panels ?? [], 15, 512) ?>;
         const tendencia = <?php echo json_encode($tendencia ?? [], 15, 512) ?>;
@@ -182,7 +179,6 @@
         const topAsist = <?php echo json_encode($topAsistieron ?? [], 15, 512) ?>;
         const topCancel = <?php echo json_encode($topCancelados ?? [], 15, 512) ?>;
 
-        // ---------------- Dona principal ----------------
         Highcharts.chart('chartEventos', {
             chart: {
                 type: 'pie'
@@ -216,7 +212,6 @@
             }]
         });
 
-        // ------------- Cuadrantes por evento -------------
         function dataPanel(nombre) {
             const p = (panels || []).find(x => (x.evento || '').toLowerCase() === nombre.toLowerCase());
             if (!p) return [];
@@ -259,7 +254,6 @@
         renderPanel('panel-apartado', 'Apartado');
         renderPanel('panel-express', 'Paquetería Express');
 
-        // ------------- Tendencia por semana --------------
         Highcharts.chart('chartSemanas', {
             chart: {
                 type: 'column'
@@ -299,7 +293,6 @@
             ]
         });
 
-        // --------- Apiladas por sucursal (agrupadas) -----
         Highcharts.chart('chartSucursales', {
             chart: {
                 type: 'column'

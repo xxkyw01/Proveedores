@@ -14,7 +14,6 @@ use Carbon\Carbon;
 
 class CitaController extends Controller
 {
-    // PASO 1: Mostrar formulario de cita con ciudades y transportes
     public function index()
     {
         $ciudades = Entidad::select('id', 'nombre')->get();
@@ -24,7 +23,6 @@ class CitaController extends Controller
         return view('pages.proveedor.cita', compact('ciudades', 'transportes',  'precioCaja'));
     }
 
-    // Obtener estado según la ciudad seleccionada
     public function obtenerEstado($id)
     {
         $entidad = Entidad::find($id);
@@ -34,7 +32,6 @@ class CitaController extends Controller
         return response()->json(['estado' => $entidad->nombre]);
     }
 
-    // PASO 2: Obtener horarios disponibles en la sucursal
     public function getDisponibilidad(Request $request)
     {
         $request->validate([
@@ -66,7 +63,6 @@ class CitaController extends Controller
         }
     }
 
-    // Finalmente, se redirige al usuario a la vista de citas con un mensaje de éxito o error
     public function store(Request $request)
     {
         try {
@@ -78,8 +74,6 @@ class CitaController extends Controller
             $ordenesCompra  = $request->input('orden_compra');
             $foliosFactura  = $request->input('folios_factura');
             $tipoEvento     = $request->input('tipo_evento');
-
-            // Validación 1: No permitir vehículos con mismo andén y hora
             $combinaciones = [];
             foreach ($vehiculos as $vehiculo) {
                 $clave = $vehiculo['anden_id'] . '-' . $vehiculo['hora'];
@@ -92,7 +86,6 @@ class CitaController extends Controller
                 $combinaciones[] = $clave;
             }
 
-            // Validación 2: Revisar si ya existe una reservación en ese horario
             foreach ($vehiculos as $vehiculo) {
                 $yaExiste = DB::connection('sqlsrv_proveedores')
                     ->table('reservaciones')
@@ -111,7 +104,6 @@ class CitaController extends Controller
                 }
             }
 
-            //Insertar cada vehículo como una reservación y guardar IDs
             $reservacionIds = [];
 
             foreach ($vehiculos as $vehiculo) {
@@ -149,7 +141,6 @@ class CitaController extends Controller
                 if ($reservacionId) {
                     $reservacionIds[] = $reservacionId;
 
-                    //  Actualizar folios de factura si existen
                     foreach ($ordenesCompra as $orden) {
                         if (!empty($foliosFactura[$orden])) {
                             DB::connection('sqlsrv_proveedores')
@@ -164,7 +155,6 @@ class CitaController extends Controller
                 }
             }
 
-            //  Datos para correo
             $nombreSucursal = DB::connection('sqlsrv_proveedores')
                 ->table('sucursales')
                 ->where('id', $sucursalId)
@@ -197,8 +187,15 @@ class CitaController extends Controller
                 $horarios[] = ['detalle' => $detalle];
             }
 
-            //  Enviar correo de confirmación
-            Mail::to(['mesadecontrol@laconcha.com.mx', 'auxdesarrollador.it@laconcha.com.mx' , 'sistemas@laconcha.com.mx'])->send(
+            $idSucursal = $sucursalId; 
+            $emailDestinatarios = 'auxdesarrollador.it@laconcha.com.mx,sistemas@laconcha.com.mx'; // 2 correos por default
+            if ($idSucursal == 1) {
+                $emailDestinatarios = 'mesadecontrol@laconcha.com.mx,auxdesarrollador.it@laconcha.com.mx,sistemas@laconcha.com.mx';
+            } elseif ($idSucursal == 4) {
+                $emailDestinatarios = 'mesadecontrol.centro@laconcha.com.mx,auxdesarrollador.it@laconcha.com.mx,sistemas@laconcha.com.mx';
+            }
+
+            Mail::to(explode(',', $emailDestinatarios))->send(
                 new \App\Mail\CorreoCitaConfirmada($fecha, $nombreSucursal, $horarios, $nombreproveedor)
             );
 
@@ -215,7 +212,6 @@ class CitaController extends Controller
         }
     }
 
-    // Obtener sucursales según la ciudad seleccionada
     public function obtenerSucursales($id)
     {
         $sucursales = DB::connection('sqlsrv_proveedores')
@@ -227,7 +223,6 @@ class CitaController extends Controller
         return response()->json($sucursales);
     }
 
-    //Para obtener la consulta de busque de proveedor de la vista proveedores/Cita del paso n°4 donde dice q ingrese el id de proveddor y me despliegua los datos
     public function obtenerDatosProveedor($codigo)
     {
         try {
@@ -262,7 +257,6 @@ class CitaController extends Controller
         }
     }
 
-    //Para obtener los articulos x cada orden de compra cunado este abierto  o pendinetes 
     public function obtenerArticulosPendientes(Request $request)
     {
         $numeroOrden = $request->numeroOrden;
@@ -294,7 +288,6 @@ class CitaController extends Controller
         return redirect()->back()->with('success', 'Cita registrada con éxito. Solamente  espera que la recepcion te la confirme.');
     }
 
-    // Para obtener andenes según la sucursal seleccionada
     public function obtenerAndenes($sucursalId)
     {
         $andenes = DB::connection('sqlsrv_proveedores')
@@ -305,7 +298,6 @@ class CitaController extends Controller
         return response()->json($andenes);
     }
 
-    // Carga la serie de orden de compra dependiento de la sucursal seleccionada
     public function obtenerOrdenesCompra(Request $request)
     {
         //$codigoProveedor = $request->codigoProveedor;
@@ -334,23 +326,21 @@ class CitaController extends Controller
         }
     }
 
-    // Este método es para mostrar en la consola el nombre de la serie según la sucursal seleccionada
     public function obtenerSerieOC($entidad_id)
     {
         $series = [
-            1 => 'ZO', // Guadalajara
-            4 => 'ZC'  // Guanajuato
+            1 => 'ZO',
+            4 => 'ZC'
         ];
 
         return response()->json(['serie_oc' => $series[$entidad_id] ?? null]);
     }
 
-    // Método interno para usar la lógica de la serie dentro del controlador
     private function obtenerSeriePorSucursal($sucursal_id)
     {
         $series = [
-            1 => 'ZO', // Guadalajara
-            4 => 'ZC', // Guanajuato
+            1 => 'ZO',
+            4 => 'ZC',
 
         ];
 
@@ -360,7 +350,6 @@ class CitaController extends Controller
     public function enviarSolicitudCorreo(Request $request)
     {
         try {
-            // $codigo = $request->input('codigoProveedor');
             if (session()->has('Proveedor')) {
                 $codigo = session('Proveedor.CardCode');
             }
@@ -374,15 +363,13 @@ class CitaController extends Controller
 
             $proveedor = $datos[0];
 
-            // Enviar siempre a este correo
             Mail::to('facturas.compras@laconcha.com.mx', 'auxdesarrollador.it@laconcha.com.mx')->send(
                 new \App\Mail\SolicitudActualizacionProveedor($proveedor, $campos)
             );
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            // Log para depuración
-            Log::error('Error al enviar solicitud de actualización: ' . $e->getMessage());
+            // Log::error('Error al enviar solicitud de actualización: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -392,15 +379,11 @@ class CitaController extends Controller
         }
     }
 
-    //Obteer el precio x cada 
     public function obtenerPrecioPorCaja($codigoProveedor)
     {
         $precio = ProveedorUsuario::where('CardCode', $codigoProveedor)->value('precio_por_caja');
-
-        // Si no existe, retornar 2.50 como valor por defecto
         return response()->json([
             'precio' => $precio ?? 2.50
         ]);
     }
-
 }

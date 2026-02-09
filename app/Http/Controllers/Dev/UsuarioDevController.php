@@ -24,7 +24,6 @@ class UsuarioDevController extends Controller
 
         $username = $request->username;
 
-        // Revisar si ya existe el usuario
         if ($request->rol === 'proveedor') {
             $existe = DB::connection('sqlsrv_proveedores')->table('proveedor_usuarios')
                 ->where('username', $username)

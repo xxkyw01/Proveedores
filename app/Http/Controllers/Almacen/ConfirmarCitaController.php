@@ -22,8 +22,8 @@ class ConfirmarCitaController extends Controller
         if (!in_array($rolId, [1, 3, 4, 5])) {
             $sucursal_id = $sucursalUsuario;
         }
-        Log::info("Sucursal por sesión: " . $sucursalUsuario);
-        Log::info("Sucursal usada: " . ($sucursal_id ?? 'Todas'));
+        //Log::info("Sucursal por sesión: " . $sucursalUsuario);
+        //Log::info("Sucursal usada: " . ($sucursal_id ?? 'Todas'));
 
         $sucursales = Sucursal::all();
 
@@ -161,7 +161,6 @@ class ConfirmarCitaController extends Controller
 
             $saludo = $this->generarSaludo();
             $fechaFormateada = Carbon::parse($cita->fecha)->locale('es')->translatedFormat('l d \d\e F \d\e Y');
-
             $correoProveedor = $cita->Correo ?? null;
             $correoContacto = $cita->Correo_contacto ?? null;
             $destinatario = $correoProveedor ?: $correoContacto;
@@ -170,7 +169,7 @@ class ConfirmarCitaController extends Controller
             if ($destinatario && filter_var($destinatario, FILTER_VALIDATE_EMAIL)) {
                 if ($estadoNuevo === 'Confirmada') {
                     Mail::to($destinatario)
-                        ->cc($copiasInternas)
+                        ->bcc($copiasInternas)
                         ->send(new \App\Mail\CitaConfirmada(
                             $saludo,
                             $cita->proveedor_nombre,

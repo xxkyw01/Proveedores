@@ -10,7 +10,6 @@ class RolAdmin
     {
         if (session()->has('Usuario')) {
             $rol = session('Usuario')['IdRol'] ?? null;
-            //1 = Admin, 5 = Desarrollador
             if (in_array($rol, [1 , 5])) {
                 return $next($request);
             }

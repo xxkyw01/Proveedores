@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html class="no-js h-100" lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <meta http-equiv="Cache-Control" content="no-store" />
-<script src="https://www.google.com/recaptcha/api.js"></script>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 <?php echo $__env->make('includes.scripts.SweetAlert2', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
 <head>
     <title>Login Proveedor</title>
     <?php echo $__env->make('includes.head', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+    <script>
+        function onSubmit(token) {
+            document.getElementById("login-form").submit();
+        }
+    </script>
 </head>
 
 <body class="bg-cream d-flex flex-column h-100">
+
     <main class="flex-shrink-0">
+
         <div class="loader-in" id="loader">
             <img src="<?php echo e(asset('assets/img/splash.png')); ?>" alt="Materias Primas La Concepción">
         </div>
@@ -51,7 +60,6 @@
                                 <?php endif; ?>
 
                                 <?php if(session('errors') || $errors->has('errorMsg')): ?>
-                                    
                                     <?php
                                         $User = '';
                                         $Pass = '';
@@ -102,29 +110,19 @@
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" name="record" id="form-record" <?php echo e($Checked); ?>>
                                         <label class="form-check-label" for="form-record">Recordarme</label>
-                                    </div>
+                                    </div>--->
 
-                                    --->
+                                    
 
                                     <div class="d-grid gap-2">
-                                        <button type="submit" class="g-recaptcha btn btn-outline-orange"
-                                            data-sitekey="6Lc0RBElAAAAAPF_CoI37q6Y2QpbBvAMjceYLfoK"
-                                            data-callback='onSubmit' data-action='submit'>
-                                            INGRESO <i class="fas fa-sign-in-alt"></i>
+                                        <button class="g-recaptcha btn btn-primary"
+                                            data-sitekey="<?php echo e(config('services.recaptcha.site_key')); ?>"
+                                            data-callback="onSubmit" data-action="login">INICIAR SESSION <i
+                                                class="fas fa-sign-in-alt"></i>
                                         </button>
                                     </div>
+                                    
                                 </form>
-
-                                <?php if(session('logoutMsg')): ?>
-                                    <script>
-                                        Swal.fire({
-                                            icon: 'info',
-                                            title: "<?php echo e(session('logoutMsg')); ?>",
-                                            toast: true
-                                        });
-                                        Android.showToast("<?php echo e(session('logoutMsg')); ?>");
-                                    </script>
-                                <?php endif; ?>
 
                             </div>
                         </div>
@@ -135,48 +133,69 @@
 
         <footer class="footer mt-auto py-1 bg-footer fixed-bottom"></footer>
     </main>
-    <script>
-        window.history.forward();
+</body>
 
-        function onSubmit(token) {
-            document.getElementById("login-form").submit();
+</html>
+
+
+
+<?php if(session('logoutMsg')): ?>
+    < script>
+        Swal.fire({
+        icon: 'info',
+        title: "<?php echo e(session('logoutMsg')); ?>",
+        toast: true
+        });
+        Android.showToast("<?php echo e(session('logoutMsg')); ?>");
+        </script>
+<?php endif; ?>
+
+<script>
+    window.history.forward();
+
+    function onSubmit(token) {
+        document.getElementById("login-form").submit();
+    }
+
+    window.addEventListener("load", function() {
+        setTimeout(() => document.getElementById("loader").classList.toggle("loader-out"), 5000);
+    });
+
+    $(document).ready(function() {
+        const User = "<?php echo e($User); ?>";
+        const Pass = "<?php echo e($Pass); ?>";
+        const Checked = "<?php echo e($Checked); ?>";
+        const divLogin = document.getElementById('divLogin');
+        const divLoged = document.getElementById('divLoged');
+
+        if (User || Pass || Checked) {
+            divLoged.style.display = 'block';
+            divLogin.style.display = 'none';
+        } else {
+            divLogin.style.display = 'block';
+            divLoged.style.display = 'none';
+        }
+    });
+
+    document.getElementById("myLink").addEventListener("click", function(event) {
+        event.preventDefault();
+
+        const divLogin = document.getElementById('divLogin');
+        const divLoged = document.getElementById('divLoged');
+
+        $('user').val('');
+        $('password').val('');
+        $('record').prop('checked', false);
+
+        if (divLogin.style.display === 'none') {
+            divLogin.style.display = 'block';
+            divLoged.style.display = 'none';
+        } else {
+            divLoged.style.display = 'block';
+            divLogin.style.display = 'none';
         }
 
-        window.addEventListener("load", function() {
-            setTimeout(() => document.getElementById("loader").classList.toggle("loader-out"), 6000);
-        });
+    });
+</script>
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const divLogin = document.getElementById('divLogin');
-            const divLoged = document.getElementById('divLoged');
-
-            const user = "<?php echo e($User); ?>";
-            const pass = "<?php echo e($Pass); ?>";
-            const check = "<?php echo e($Checked); ?>";
-
-            if (user || pass || check) {
-                divLoged.style.display = 'block';
-                divLogin.style.display = 'none';
-            } else {
-                divLoged.style.display = 'none';
-                divLogin.style.display = 'block';
-            }
-
-            document.getElementById("myLink").addEventListener("click", function(e) {
-                e.preventDefault();
-                document.getElementById('form-user').value = '';
-                document.getElementById('form-pass').value = '';
-
-                document.getElementById('form-record').checked = false;
-                /* const chk = document.getElementById('form-record');
-                if (chk) chk.checked = false; */
-
-                divLoged.style.display = 'none';
-                divLogin.style.display = 'block';
-            });
-        });
-    </script>
-    
-</body>
-</html>
 <?php /**PATH C:\Users\ygonzalez\Synology\Home\Escritorio\Proveedores\resources\views/auth/login.blade.php ENDPATH**/ ?>
