@@ -9,6 +9,7 @@ vendor/
 /public/storage
 /storage/*.key
 /storage/framework/cache/
+/storage/framework/
 /storage/framework/sessions/
 /storage/framework/testing/
 /storage/logs/
