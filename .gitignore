@@ -1,0 +1,17 @@
+.vscode/
+.idea/
+node_modules/
+vendor/
+.env
+/.phpunit.result.cache
+
+# Laravel storage and build outputs
+/public/storage
+/storage/*.key
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/logs/
+
+# Build
+/build/
