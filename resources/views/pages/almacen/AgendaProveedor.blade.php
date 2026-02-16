@@ -128,6 +128,29 @@
         let currentStartIndex = 0;
         let recepcionEnProceso = false;
 
+    
+        window._agendaCache = window._agendaCache || {
+            inFlight: new Set(),
+            data: new Map(),
+            ttl: 30 * 1000 // 30s
+        };
+     
+        window._agendaDebug = window._agendaDebug || {
+            renderAgendaCount: 0,
+            loadAgendaCount: new Map(),
+            events: []
+        };
+
+        function _agendaDebugLog(ev, info) {
+            try {
+                const now = Date.now();
+                window._agendaDebug.events.push({ t: now, ev, info });
+                if (window._agendaDebug.events.length > 80) window._agendaDebug.events.shift();
+                console.debug('[Agenda][' + ev + ']', info);
+            } catch (e) {
+              
+            }
+        }
         const ROL_ID = {{ (int) $rolId }};
         const ES_ADMIN = [5].includes(ROL_ID);
         //const ES_ALMACEN = [2, 5].includes(ROL_ID);
@@ -199,6 +222,8 @@
 
         function renderAgenda() {
             const ancho = window.innerWidth;
+            window._agendaDebug.renderAgendaCount++;
+            _agendaDebugLog('renderAgenda', { count: window._agendaDebug.renderAgendaCount, currentStartIndex, ancho });
             let cantidadDias = 1;
 
             if (ancho >= 992) cantidadDias = 3;
@@ -226,73 +251,42 @@
             actualizarVisibilidadFlechas();
         }
 
-        function loadAgendaDataForDate(date, index) {
-            const formattedDate = ymdLocal(date);
-            const sucursalId = document.getElementById('sucursal_id')?.value || '{{ $sucursal_id }}';
-            const timeline = document.getElementById(`timeline-${index}`);
+        function handleAgendaDataResponse(data, timeline, formattedDate, index) {
+            _agendaDebugLog('handleAgendaDataResponse', { index, formattedDate, items: Array.isArray(data) ? data.length : 0 });
+            if (!timeline) return;
+            timeline.innerHTML = '';
 
-            if (timeline) {
-                renderSkeletonTimeline(index, 1);
-            }
+            data.sort((a, b) => {
+                const ha = (a?.hora ?? '').slice(0, 5);
+                const hb = (b?.hora ?? '').slice(0, 5);
+                if (!ha && !hb) return 0;
+                if (!ha) return 1;
+                if (!hb) return -1;
+                return new Date(`1970-01-01T${ha}:00`) - new Date(`1970-01-01T${hb}:00`);
+            });
 
-            fetch(`/almacen/agenda/data?fecha=${formattedDate}&sucursal_id=${sucursalId}`)
-                .then(async r => {
-                    const text = await r.text();
+            data.forEach(item => {
+                const hasComent = !!(item.tiene_comentario ?? (item.commit_afterrecep && String(item
+                    .commit_afterrecep).trim().length));
+                const hasEvid = !!(item.tiene_evidencia ?? (item.evidencia_nombre || item.evidencias ||
+                    item.evidencia_path));
+                const ocBadges = (typeof formatOrdenCompra === 'function') ? formatOrdenCompra(item.orden_compra) : '';
 
-                    if (!r.ok) {
-                        throw new Error(`HTTP ${r.status}: ${text.slice(0, 200)}`);
-                    }
+                let ocIcons = '';
 
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        throw new Error(`Respuesta NO JSON (${r.status}): ${text.slice(0, 200)}`);
-                    }
-                })
-
-                .then(data => {
-                    if (!timeline) return;
-                    timeline.innerHTML = '';
-
-                    data.sort((a, b) => {
-                        const ha = (a?.hora ?? '').slice(0, 5);
-                        const hb = (b?.hora ?? '').slice(0, 5);
-                        if (!ha && !hb) return 0;
-                        if (!ha) return 1;
-                        if (!hb) return -1;
-                        return new Date(`1970-01-01T${ha}:00`) - new Date(`1970-01-01T${hb}:00`);
-                    });
-
-                    data.forEach(item => {
-                        const hasComent = !!(item.tiene_comentario ?? (item.commit_afterrecep && String(item
-                            .commit_afterrecep).trim().length));
-                        const hasEvid = !!(item.tiene_evidencia ?? (item.evidencia_nombre || item.evidencias ||
-                            item.evidencia_path));
-                        //const ocBadges = formatOrdenCompra(item.orden_compra);
-                        const ocBadges = (typeof formatOrdenCompra === 'function') ?
-                            formatOrdenCompra(item.orden_compra) :
-                            '';
-
-                        let ocIcons = '';
-
-                        if (hasComent) ocIcons += `
+                if (hasComent) ocIcons += `
                     <span class="icono-info icono-coment" title="Tiene comentario" onclick="showDetails(${item.id})">
                         <i class="material-icons">mode_comment</i>
                     </span>`;
 
-                        if (hasEvid) ocIcons += `
+                if (hasEvid) ocIcons += `
                     <a class="icono-info icono-evid" title="Ver evidencia" href="/almacen/evidencia/${item.id}" target="_blank" rel="noopener">
                         <i class="material-icons">attach_file</i>
                     </a>`;
 
-                        const card = `
+                const card = `
                         <div class="timeline-item">
-                            <div class="timeline-marker">
-                                <div class="linea-con-circulo">
-                                    <div class="circulo"></div>
-                                    <div class="linea"></div>
-                                </div>
-                            </div>
+                            <div class="timeline-marker"></div>
 
                             <div class="timeline-card">
                                 <!-- BODY -->
@@ -365,13 +359,76 @@
                             </div>
 
                         </div>`;
-                        timeline.insertAdjacentHTML('beforeend', card);
-                        marcarIndicadores(item.id);
-                    });
-                })
+                timeline.insertAdjacentHTML('beforeend', card);
+                enqueueIndicator(item.id);
+            });
+        }
 
+        function loadAgendaDataForDate(date, index) {
+            const formattedDate = ymdLocal(date);
+            const sucursalId = document.getElementById('sucursal_id')?.value || '{{ $sucursal_id }}';
+            const timeline = document.getElementById(`timeline-${index}`);
+            const key = `${formattedDate}::${sucursalId}`;
+
+            _agendaDebugLog('loadAgendaDataForDate:start', { key, index, formattedDate });
+
+            if (timeline) {
+                renderSkeletonTimeline(index, 1);
+            }
+
+            const cache = window._agendaCache;
+            const now = Date.now();
+
+            if (cache.data.has(key)) {
+                const entry = cache.data.get(key);
+                if ((now - entry.ts) < cache.ttl) {
+                    try {
+                        _agendaDebugLog('loadAgendaDataForDate:cacheHit', { key });
+                        handleAgendaDataResponse(entry.data, timeline, formattedDate, index);
+                        return;
+                    } catch (e) {
+                        console.warn('[Agenda] fallo render cache, refetch', e);
+                    }
+                } else {
+                    cache.data.delete(key);
+                }
+            }
+
+            if (cache.inFlight.has(key)) {
+                _agendaDebugLog('loadAgendaDataForDate:inFlight', { key });
+                return;
+            }
+            cache.inFlight.add(key);
+
+            _agendaDebugLog('loadAgendaDataForDate:fetchStart', { key });
+
+            fetch(`/almacen/agenda/data?fecha=${formattedDate}&sucursal_id=${sucursalId}`)
+                .then(async r => {
+                    const text = await r.text();
+
+                    if (!r.ok) {
+                        throw new Error(`HTTP ${r.status}: ${text.slice(0, 200)}`);
+                    }
+
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        throw new Error(`Respuesta NO JSON (${r.status}): ${text.slice(0, 200)}`);
+                    }
+                })
+                .then(data => {
+                    _agendaDebugLog('loadAgendaDataForDate:fetchSuccess', { key, items: Array.isArray(data) ? data.length : 0 });
+                
+                    try {
+                        cache.data.set(key, { data: data, ts: Date.now() });
+                    } catch (e) {
+                        console.warn('[Agenda] no se pudo cachear respuesta', e);
+                    }
+                    handleAgendaDataResponse(data, timeline, formattedDate, index);
+                })
                 .catch(err => {
                     console.error('[Agenda] Error', formattedDate, err);
+                    _agendaDebugLog('loadAgendaDataForDate:error', { key, message: String(err && err.message ? err.message : err) });
                     if (timeline) {
                         timeline.innerHTML = `
                     <div class="text-danger" style="padding:8px 12px;">
@@ -379,6 +436,10 @@
                         <small>${escapeHTML(String(err.message||err))}</small>
                     </div>`;
                     }
+                })
+                .finally(() => {
+                    cache.inFlight.delete(key);
+                    _agendaDebugLog('loadAgendaDataForDate:finally', { key });
                 });
         }
 
@@ -391,12 +452,7 @@
                 html +=
                     `<div class="timeline-item skeleton-card">
 
-                <div class="timeline-marker">
-                    <div class="linea-con-circulo">
-                        <div class="circulo skeleton-bg"></div>
-                        <div class="linea skeleton-bg"></div>
-                    </div>
-                </div>
+                <div class="timeline-marker"></div>
 
                 <div class="timeline-card">
                     <div class="orden-compra mb-2">
@@ -457,46 +513,93 @@
             return `${y}-${m}-${day}`;
         }
 
-        function marcarIndicadores(id) {
-            fetch(`/almacen/agenda/detalles/${id}`)
-                .then(async r => {
-                    const text = await r.text();
-                    if (!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0,200)}`);
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        throw new Error(`Respuesta NO JSON (${r.status}): ${text.slice(0,200)}`);
-                    }
-                })
-                .then(d => {
-                    const cont = document.getElementById(`oc-icons-${id}`);
-                    if (!cont) return;
+        window._agendaIndicators = window._agendaIndicators || {
+            cache: new Map(), // id -> data
+            queue: [],
+            inFlight: 0,
+            concurrency: 4,
+            started: false,
+            drainTimer: null
+        };
 
-                    const icons = [];
+        function _updateIndicatorDom(id, d) {
+            try {
+                const cont = document.getElementById(`oc-icons-${id}`);
+                if (!cont) return;
+                const icons = [];
+                const tieneComentario = d && d.commit_afterrecep && String(d.commit_afterrecep).trim().length;
+                const tieneEvidencia = d && ((d.evidencia_path && d.evidencia_nombre) || d.evidencias);
+                if (tieneComentario) {
+                    icons.push(`<span class="icono-info icono-coment" title="Tiene comentario" onclick="showDetails(${id})"><i class="material-icons">mode_comment</i></span>`);
+                }
+                if (tieneEvidencia) {
+                    icons.push(`<a class="icono-info icono-evid" title="Ver evidencia" href="/almacen/evidencia/${id}" target="_blank" rel="noopener"><i class="material-icons">attach_file</i></a>`);
+                }
+                cont.innerHTML = icons.join('');
+            } catch (e) {
+                console.warn('[_updateIndicatorDom] error', id, e);
+            }
+        }
 
-                    const tieneComentario = d.commit_afterrecep && String(d.commit_afterrecep).trim().length;
-                    const tieneEvidencia = (d.evidencia_path && d.evidencia_nombre) || d.evidencias;
+        function processIndicatorQueue() {
+            const s = window._agendaIndicators;
+            if (s.inFlight >= s.concurrency) return;
+            if (!s.queue.length) return;
 
-                    if (tieneComentario) {
-                        icons.push(`
-                        <span class="icono-info icono-coment" title="Tiene comentario" onclick="showDetails(${id})">
-                            <i class="material-icons">mode_comment</i>
-                        </span>
-                        `);
-                    }
-                    if (tieneEvidencia) {
-                        icons.push(`
-                        <a class="icono-info icono-evid" title="Ver evidencia" href="/almacen/evidencia/${id}" target="_blank" rel="noopener">
-                            <i class="material-icons">attach_file</i>
-                        </a>
-                        `);
-                    }
+            while (s.inFlight < s.concurrency && s.queue.length) {
+                const id = s.queue.shift();
+                if (!id) continue;
+                if (s.cache.has(id)) {
+                    _updateIndicatorDom(id, s.cache.get(id));
+                    continue;
+                }
 
-                    cont.innerHTML = icons.join('');
-                })
-                .catch(err => {
-                    console.warn('[marcarIndicadores] error', id, err);
-                });
+                s.inFlight++;
+                fetch(`/almacen/agenda/detalles/${id}`)
+                    .then(async r => {
+                        const text = await r.text();
+                        if (!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0,200)}`);
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            throw new Error(`Respuesta NO JSON (${r.status}): ${text.slice(0,200)}`);
+                        }
+                    })
+                    .then(d => {
+                        try {
+                            s.cache.set(id, d);
+                            _updateIndicatorDom(id, d);
+                        } catch (e) {
+                            console.warn('[processIndicatorQueue] cache/update failed', id, e);
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('[marcarIndicadores queue] error', id, err);
+                    })
+                    .finally(() => {
+                        s.inFlight--;
+                        setTimeout(processIndicatorQueue, 0);
+                    });
+            }
+        }
+
+        function enqueueIndicator(id) {
+            const s = window._agendaIndicators;
+            if (!id) return;
+            if (s.cache.has(id)) {
+                _updateIndicatorDom(id, s.cache.get(id));
+                return;
+            }
+            if (s.queue.indexOf(id) !== -1) return;
+            s.queue.push(id);
+            if (!s.started) {
+                s.started = true;
+                s.drainTimer = setTimeout(() => {
+                    processIndicatorQueue();
+                }, 900);
+            } else {
+                setTimeout(processIndicatorQueue, 200);
+            }
         }
 
         function changeDate(step) {
@@ -627,6 +730,16 @@
         });
 
         window.addEventListener('resize', renderAgenda);
+
+        document.addEventListener('click', (ev) => {
+            try {
+                if (window.innerWidth > 767) return;
+                const card = ev.target.closest('.timeline-card');
+                if (!card) return;
+                if (ev.target.closest('button, a, input')) return;
+                card.classList.toggle('expanded');
+            } catch (e) {  }
+        }, { passive: true });
 
         function formatTime12h(hora = '') {
             if (!hora) return '';
@@ -1585,7 +1698,6 @@
 </body>
 </html>`;
 
-            // escritura estable + esperar carga
             win.document.open();
             win.document.write(html);
             win.document.close();
@@ -1721,31 +1833,26 @@
         function parseOrdenCompra(raw) {
             if (raw == null) return [];
 
-            // si ya viene array
             if (Array.isArray(raw)) return raw.map(x => String(x).trim()).filter(Boolean);
 
-            // si viene string
+        
             if (typeof raw === 'string') {
                 const s = raw.trim();
                 if (!s) return [];
 
-                // intenta JSON primero
                 if ((s.startsWith('[') && s.endsWith(']')) || (s.startsWith('{') && s.endsWith('}'))) {
                     try {
                         const j = JSON.parse(s);
                         if (Array.isArray(j)) return j.map(x => String(x).trim()).filter(Boolean);
                     } catch (_) {
-                        /* cae al split */
                     }
                 }
 
-                // fallback split
                 return s.split(',')
                     .map(x => x.replace(/[\[\]"]/g, '').trim())
                     .filter(Boolean);
             }
 
-            // cualquier otra cosa
             return [String(raw).trim()].filter(Boolean);
         }
 

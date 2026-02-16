@@ -28,10 +28,10 @@ Route::get('/', function () {
     return view('auth.login');
 })->name('login');
 
-    Route::get('login', [ProveedorAuthController::class, 'showLoginForm'])->name('proveedor.login');
-    Route::post('login', [ProveedorAuthController::class, 'login'])->name('proveedor_login_post');
-    Route::post('logout', [ProveedorAuthController::class, 'logout'])->name('logout');
-    Route::get('redirect', [ProveedorAuthController::class, 'redirect'])->name('redirect');
+Route::get('login', [ProveedorAuthController::class, 'showLoginForm'])->name('proveedor.login');
+Route::post('login', [ProveedorAuthController::class, 'login'])->name('proveedor_login_post');
+Route::post('logout', [ProveedorAuthController::class, 'logout'])->name('logout');
+Route::get('redirect', [ProveedorAuthController::class, 'redirect'])->name('redirect');
 
 
 Route::middleware(['proveedor', 'prevent-back-history'])->prefix('proveedor')->group(function () {
@@ -115,6 +115,8 @@ Route::middleware(['almacen', 'prevent-back-history'])->prefix('almacen')->group
     Route::get('/recepcion/po/{docNum}', [GestionSupplierController::class, 'sapGetPO']);
     Route::post('/recepcion/grpo/validar', [GestionSupplierController::class, 'sapValidarGRPO'])->name('almacen.grpo.validar');
     Route::post('/recepcion/grpo', [GestionSupplierController::class, 'crearGRPO'])->name('almacen.grpo.crear');
+    Route::post('/recepcion/scan-barcode', [GestionSupplierController::class, 'scanBarcode'])->name('almacen.recepcion.scan');
+
 
     //4.10 SAP Consulta de Ordenes de Compra
     Route::get('/recibo-mercancia', [GestionSupplierController::class, 'reciboMercancia'])->name('almacen.reciboMercancia');
@@ -190,4 +192,3 @@ Route::get('/404', function () {
 Route::get('/500', function () {
     return response()->view('errors.500', [], 500);
 })->name('500');
-

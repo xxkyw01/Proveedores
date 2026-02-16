@@ -22,8 +22,7 @@
 
     <div class="container-fluid con-sidebar">
         <div class="row ">
-            <div class="detallesCompras col-lg-4 col-md-5 left-panel"
-                style="max-height: 100vh; overflow-y: auto; border-right: 1px solid #ddd; padding: 20px;">
+            <div class="detallesCompras col-lg-4 col-md-5 left-panel panel-left">
                 <div class="mb-4 d-flex align-items-center justify-content-between">
                     <h4 class="fw-bold mb-0">Órdenes de Compra</h4>
 
@@ -53,7 +52,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-8 col-md-7 right-panel" style="max-height: 100vh; overflow-y: auto; ">
+            <div class="col-lg-8 col-md-7 right-panel panel-right">
                 <div id="detallesDesktop" class="detallesContainer">
                     <div class="text-center text-muted mt-5">
                         <p>Selecciona una orden de compra para ver detalles</p>
@@ -95,8 +94,29 @@
         </div>
     </div>
 
+            <div class="modal fade" id="scannerFallbackModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-sm modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Escanear</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div style="text-align:left;">
+                                <p style="margin:0 0 8px;">Pega o escanea el código y presiona "Procesar".</p>
+                                <input id="scannerFallbackInput" type="text" inputmode="text" placeholder="Pegar/escanea código"
+                                    class="form-control" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="scannerFallbackProcess" class="btn btn-primary">Procesar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <script>
+            <script>
         const SERIES_BY_SUC = {
             "1": 156,
             "4": 157
@@ -244,24 +264,99 @@
                 const hora = formatHoraAMPM(o.hora) || 'S/H';
 
                 return `<button type="button" class="orden-card" onclick="selectOrden(${o.id}, this)" 
-                        data-oc="${titulo}" data-proveedor="${prov.toLowerCase()}" style="width:100%;text-align:left;">
-                        <div style="display:flex;align-items:center;gap:12px;width:100%;">
-                            <div style="flex:0 0 60%;min-width:0;overflow:hidden;text-overflow:ellipsis;">
-                                <div class="titulo" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">OC ${titulo}</div>
-                                <div class="prov" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#666;">${prov}</div>
+                        data-oc="${titulo}" data-proveedor="${prov.toLowerCase()}">
+                        <div class="orden-row">
+                            <div class="orden-left">
+                                <div class="titulo">OC ${titulo}</div>
+                                <div class="prov">${prov}</div>
                             </div>
-                            <div style="flex:0 0 30%;text-align:right;min-width:0;padding-left:8px;padding-right:8px;">
-                                <div class="text-muted small" style="font-weight:700;font-size:0.95rem;">${hora}</div>
-                                <div class="text-muted small" style="font-size:0.8rem;">${fecha}</div>
-                            </div>
-                            <div style="flex:0 0 10%;display:flex;padding-left:6px;padding-right:6px;height:100%;">
-                                <span role="button" aria-label="Editar cita" class="btn-edit-cita" onclick="event.stopPropagation(); abrirEditarCita(${o.id}, this)" title="Editar cita" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fff3e6;border:1px solid #ffd6b0;color:#ee7826;cursor:pointer;padding:0;">
-                                    <i class="fa fa-pen" aria-hidden="true" style="font-size:14px;line-height:1;margin:0;"></i>
+                            <div class="orden-meta">
+                                <div class="meta-block">
+                                    <div class="meta-time text-muted small">${hora}</div>
+                                    <div class="meta-date text-muted small">${fecha}</div>
+                                </div>
+                                <span role="button" aria-label="Editar cita" class="btn-edit-cita edit-btn" onclick="event.stopPropagation(); abrirEditarCita(${o.id}, this)" title="Editar cita">
+                                    <i class="fa fa-pen edit-icon" aria-hidden="true"></i>
                                 </span>
                             </div>
                         </div>
                         </button>`;
             }).join('');
+            setTimeout(bindSwipeHandlers, 0);
+        }
+
+        function bindSwipeHandlers() {
+            const cards = document.querySelectorAll('.orden-card');
+            cards.forEach(card => {
+                const row = card.querySelector('.orden-row');
+                const actionEl = card.querySelector('.orden-action') || card.querySelector('.btn-edit-cita');
+                if (!row) return;
+
+                let startX = 0;
+                let currentX = 0;
+                let dragging = false;
+                let rafId = null;
+
+                const actionWidth = actionEl ? Math.min(88, actionEl.offsetWidth || 64) : 64;
+                const maxTranslate = -Math.max(48, actionWidth + 8);
+
+                function setTranslate(x) {
+                    row.style.transform = `translateX(${x}px)`;
+                }
+
+                function onPointerDown(e) {
+                    startX = e.clientX;
+                    currentX = 0;
+                    dragging = true;
+                    row.style.transition = 'none';
+                    try {
+                        card.setPointerCapture(e.pointerId);
+                    } catch (err) {}
+                }
+
+                function onPointerMove(e) {
+                    if (!dragging) return;
+                    currentX = e.clientX - startX;
+                    let x = Math.min(0, Math.max(maxTranslate, currentX));
+                    if (rafId) cancelAnimationFrame(rafId);
+                    rafId = requestAnimationFrame(() => setTranslate(x));
+                }
+
+                function onPointerUp(e) {
+                    if (!dragging) return;
+                    dragging = false;
+                    if (rafId) cancelAnimationFrame(rafId);
+                    row.style.transition = 'transform .18s ease';
+
+                    const threshold = maxTranslate / 2;
+                    if (currentX <= threshold) {
+                        setTranslate(maxTranslate);
+                        card.classList.add('reveal-edit');
+                    } else {
+                        setTranslate(0);
+                        card.classList.remove('reveal-edit');
+                    }
+                    try {
+                        card.releasePointerCapture(e.pointerId);
+                    } catch (err) {}
+                }
+
+                card.addEventListener('pointerdown', onPointerDown, {
+                    passive: true
+                });
+                card.addEventListener('pointermove', onPointerMove, {
+                    passive: true
+                });
+                card.addEventListener('pointerup', onPointerUp);
+                card.addEventListener('pointercancel', onPointerUp);
+
+                card.addEventListener('click', (ev) => {
+                    if (Math.abs(currentX) > 10) {
+                        ev.stopPropagation();
+                        ev.preventDefault();
+                    }
+                });
+            });
         }
 
         async function abrirEditarCita(reservacionId, btnEl) {
@@ -282,20 +377,20 @@
                 };
 
                 const html = `
-                    <div style="text-align:left;">
-                        <div style="margin-bottom:8px;">
+                    <div class="text-left">
+                        <div class="u-mb-8">
                             <label class="form-label">Estado</label>
                             <select id="swal-estado" class="form-select">
                         ${Object.keys(options).map(k=>`<option value="${k}">${options[k]}</option>`).join('')}
                     </select>
                         </div>
 
-                        <div style="margin-bottom:8px;">
+                        <div class="u-mb-8">
                             <label class="form-label">Comentario</label>
-                            <textarea id="swal_comentario" class="form-control" rows="3" placeholder="Comentario...">${escapeHTML(currentComentario)}</textarea>
+                            <textarea id="swal_comentario" class="form-control textarea-full" rows="3" placeholder="Comentario...">${escapeHTML(currentComentario)}</textarea>
                         </div>
 
-                        <div style="margin-bottom:8px;">
+                        <div class="u-mb-8">
                             <label class="form-label">Adjuntar archivo (evidencia)</label>
                             <input type="file" id="swal_evidencia" class="form-control" />
                         </div>
@@ -431,17 +526,17 @@
 
             const html = `
             ${ES_ADMIN || ES_ALMACEN ? `
-                                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-                                <button type="button" class="btn btn-outline-orange btn-sm" onclick="abrirModalAgregarOC()">
-                                + Agregar OC
-                                </button>
-                                <small class="text-muted" style="align-self:center;">Adjunta otra OC a esta cita</small>
-                                </div>` 
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-outline-orange btn-sm" onclick="abrirModalAgregarOC()">
+                        + Agregar OC
+                    </button>
+                    <small class="text-muted" style="align-self:center;">Adjunta otra OC a esta cita</small>
+                </div>` 
             : ''}
 
             <div class="detalle-header">
-            <h5 style="margin:0;">ORDEN DE COMPRA ${ocNumDisplay}</h5>
-            <div style="margin-top:8px;">
+            <h5 class="no-margin">ORDEN DE COMPRA ${ocNumDisplay}</h5>
+            <div class="mt-8">
                 <strong>Proveedor:</strong> ${escapeHTML(orden.proveedor_nombre || 'N/A')}<br>
                 <strong>Fecha cita:</strong> ${escapeHTML(orden.fecha || 'N/A')}<br>
                 <strong>Hora:</strong> ${escapeHTML(formatHoraAMPM(orden.hora) || 'N/A')}<br>
@@ -449,30 +544,29 @@
             </div>
             </div>
 
-
             <div id="articulosList">
             <div class="text-muted">Cargando artículos</div>
             </div>
             <div class="comentario-area">
             <label for="numeroReferencia">Folio de la Factura del Proveedor</label>
-            <input type="text" id="numeroReferencia" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;margin-bottom:12px;">
+            <input type="text" id="numeroReferencia" class="input-full" />
             </div>
 
             <div class="comentario-area">
             <label for="comentarios">Comentarios</label>
-            <textarea id="comentarios" rows="3"
-                style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;"
-                placeholder="Observaciones..."></textarea>
+            <textarea id="comentarios" rows="3" class="textarea-full" placeholder="Observaciones..."></textarea>
             </div>
 
             <div class="botones-action">
                 ${ES_ADMIN ? `
-                                    <button class="btn-cancel" type="button" onclick="previsualizarGRPO()">Previsualizar</button>
-                                    ` : ''                
+                    <button class="btn-cancel" type="button" onclick="previsualizarGRPO()">Previsualizar</button>
+                    ` : ''                
                 }
+            <button class="btn-scanner" type="button"  onclick="openScanner(false)">Escanear</button>
             <button class="btn-confirm" type="button" onclick="confirmarSeleccion()">Confirmar</button>
             <button class="btn-cancel" type="button" data-bs-dismiss="modal" onclick="cerrarDetalles()">Cerrar</button>
             </div>
+
         `;
             if (isMobileView()) {
                 openDetallesModal(html);
@@ -489,9 +583,22 @@
                 inp.id = 'scanInputHidden';
                 inp.type = 'text';
                 inp.autocomplete = 'off';
+                inp.autocapitalize = 'off';
+                inp.autocorrect = 'off';
+                inp.spellcheck = false;
+                inp.inputMode = 'numeric';
+        
                 inp.style.position = 'fixed';
-                inp.style.left = '-9999px';
-                inp.style.top = '0';
+                inp.style.left = '8px';
+                inp.style.bottom = '8px';
+                inp.style.width = '1px';
+                inp.style.height = '1px';
+                inp.style.opacity = '0.01';
+                inp.style.zIndex = '2147483647';
+                inp.style.border = 'none';
+                inp.style.background = 'transparent';
+                inp.style.padding = '0';
+                inp.style.margin = '0';
                 document.body.appendChild(inp);
 
                 inp.addEventListener('keydown', (e) => {
@@ -502,6 +609,32 @@
                         if (raw) onScanResult(raw);
                     }
                 });
+
+                inp.addEventListener('paste', (e) => {
+                    const pasted = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+                    setTimeout(() => {
+                        const raw = (inp.value || pasted || '').trim();
+                        inp.value = '';
+                        if (raw) onScanResult(raw);
+                    }, 50);
+                });
+
+                (function attachAutoSubmit() {
+                    let timer = null;
+                    const T_DELAY = 200; 
+                    function clearTimer() { if (timer) { clearTimeout(timer); timer = null; } }
+                    inp.addEventListener('input', (e) => {
+                        clearTimer();
+                        const val = (inp.value || '').trim();
+                        if (!val) return;
+                        timer = setTimeout(() => {
+                            const raw = (inp.value || '').trim();
+                            inp.value = '';
+                            if (raw) onScanResult(raw);
+                        }, T_DELAY);
+                    });
+                    inp.addEventListener('blur', () => clearTimer());
+                })();
             }
             return inp;
         }
@@ -532,22 +665,6 @@
             return s;
         }
 
-        function findRowByScannedCode(code) {
-            const wanted = normCode(code);
-
-            const rows = getSelectedRowsFromTable();
-            for (const tr of rows) {
-                const inp = tr.querySelector('input.inp-recibir');
-                if (!inp) continue;
-
-                const itemcode = normCode(inp.dataset.itemcode || '');
-                if (itemcode && itemcode === wanted) return tr;
-
-                const visibleCode = normCode(tr.children[1]?.querySelector('div:first-child')?.textContent?.trim() || '');
-                if (visibleCode && visibleCode === wanted) return tr;
-            }
-            return null;
-        }
 
         function applyScanToRow(tr, mode = 'add1') {
             const chk = tr.querySelector('input.chk-art');
@@ -583,24 +700,134 @@
             } catch {}
         }
 
-        function onScanResult(raw) {
-            const code = parseScannedCode(raw);
-            const tr = findRowByScannedCode(code);
-
-            if (!tr) {
-                Swal.fire('No encontrado', `No pude localizar el artículo: ${escapeHTML(code)}`, 'warning');
-                return;
+        async function onScanResult(raw) {
+            if (!currentOrder) {
+                return Swal.fire('Sin OC', 'Selecciona una OC primero.', 'info');
             }
 
-            applyScanToRow(tr, 'add1');
+            const barcode = String(raw || '').trim();
+            if (!barcode) return;
+            const tr = findRowByBarcodeLocal(barcode);
+            if (!tr) {
+                return Swal.fire('No encontrado', `Ese barcode no está en la tabla cargada.\n${barcode}`, 'warning');
+            }
+            const inp = tr.querySelector('input.inp-recibir');
+            if (!inp) return;
+            const pendiente = Number(inp.dataset.pendiente || 0);
+            const current = Number(inp.value || 0);
+            const itemCode = tr.children[1]?.querySelector('div:first-child')?.textContent?.trim() || 'Artículo';
+            const max = pendiente > 0 ? Math.floor(pendiente) : 999999;
+
+            const {
+                value: qty
+            } = await Swal.fire({
+                title: 'Cantidad a recibir',
+                html: `
+                    <div style="text-align:left">
+                        <div style="margin-bottom:6px"><b>${escapeHTML(itemCode)}</b></div>
+                        <div style="font-size:12px;color:#666;margin-bottom:10px">Barcode: ${escapeHTML(barcode)}</div>
+                        <div style="font-size:12px;color:#666;margin-bottom:10px">Pendiente: <b>${max}</b></div>
+                    </div>
+                `,
+                input: 'number',
+                inputValue: current > 0 ? current : 1,
+                inputAttributes: {
+                    min: 1,
+                    max: String(max),
+                    step: 1
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Aplicar',
+                cancelButtonText: 'Cancelar',
+                preConfirm: (val) => {
+                    const n = Number(val);
+                    if (!Number.isFinite(n) || n <= 0) {
+                        Swal.showValidationMessage('Pon una cantidad válida (mayor a 0).');
+                        return false;
+                    }
+                    if (n > max) {
+                        Swal.showValidationMessage(`No puede ser mayor que ${max}.`);
+                        return false;
+                    }
+                    return Math.floor(n);
+                }
+            });
+
+            if (!qty) return;
+
+            const chk = tr.querySelector('input.chk-art');
+            if (chk && !chk.checked) chk.checked = true;
+
+            inp.value = String(qty);
+
+            tr.style.outline = '2px solid #22c55e';
+            tr.style.outlineOffset = '-2px';
+            setTimeout(() => {
+                tr.style.outline = '';
+                tr.style.outlineOffset = '';
+            }, 900);
+
+            try {
+                tr.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            } catch {}
+
             Swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon: 'success',
-                title: `OK: ${code}`,
+                title: `OK: ${qty} unidad(es)`,
                 showConfirmButton: false,
-                timer: 900
+                timer: 1500
             });
+        }
+
+        function findRowByScannedCode(code) {
+            const wanted = normCode(code);
+
+            const rows = getSelectedRowsFromTable();
+            for (const tr of rows) {
+                const inp = tr.querySelector('input.inp-recibir');
+                if (!inp) continue;
+                const itemcode = normCode(inp.dataset.itemcode || '');
+                if (itemcode && itemcode === wanted) return tr;
+                const visibleCode = normCode(tr.children[1]?.querySelector('div:first-child')?.textContent?.trim() || '');
+                if (visibleCode && visibleCode === wanted) return tr;
+            }
+            return null;
+        }
+
+        function findRowBySAP(docNum, baseLine, itemCode) {
+            const rows = getSelectedRowsFromTable();
+            const wantedItem = normCode(itemCode);
+
+            for (const tr of rows) {
+                const inp = tr.querySelector('input.inp-recibir');
+                if (!inp) continue;
+                const trDocNum = Number(inp.dataset.docnum || inp.dataset.oc || 0);
+                const trBase = Number(inp.dataset.baseline || -1);
+                const trItem = normCode(inp.dataset.itemcode || '');
+
+                if (trDocNum === Number(docNum) && trBase === Number(baseLine)) return tr;
+                if (trDocNum === Number(docNum) && trItem === wantedItem) return tr;
+            }
+            return null;
+        }
+
+        function findRowByBarcodeLocal(barcodeRaw) {
+            const b = String(barcodeRaw || '').trim();
+            if (!b) return null;
+
+            const rows = getSelectedRowsFromTable();
+            for (const tr of rows) {
+                const bp = String(tr.dataset.barcodep || '').trim();
+                const bd = String(tr.dataset.barcoded || '').trim();
+                if (bp === b || bd === b) return tr;
+                if ((tr.textContent || '').includes(b)) return tr;
+            }
+            return null;
         }
 
         function openScanner(manual = false) {
@@ -624,6 +851,88 @@
                 }).then(r => {
                     if (r.isConfirmed) onScanResult(r.value);
                 });
+            }
+
+
+            if (isMobileView()) {
+                const modalEl = document.getElementById('scannerFallbackModal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                const input = document.getElementById('scannerFallbackInput');
+                const btn = document.getElementById('scannerFallbackProcess');
+
+                function clearHandlers() {
+                    btn.removeEventListener('click', onProcess);
+                    input.removeEventListener('keydown', onKeydown);
+                    input.removeEventListener('paste', onPaste);
+                }
+
+                function onProcess() {
+                    const raw = (input.value || '').trim();
+                    input.value = '';
+                    if (raw) {
+                        modal.hide();
+                        clearHandlers();
+                        onScanResult(raw);
+                    }
+                }
+
+                function onKeydown(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        onProcess();
+                    }
+                }
+
+                function onPaste() {
+                    setTimeout(() => {
+                        onProcess();
+                    }, 50);
+                }
+
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    // Try focusing several times — some mobile browsers need a delay
+                    try { input.focus(); } catch {}
+                    setTimeout(() => { try { input.focus(); input.click(); input.setSelectionRange(0, 9999); } catch {} }, 50);
+                    setTimeout(() => { try { input.focus(); input.click(); input.setSelectionRange(0, 9999); } catch {} }, 250);
+
+                    // If user taps the modal area, ensure input gets focus
+                    const onTouch = () => { try { input.focus(); input.click(); } catch {} };
+                    modalEl.addEventListener('touchstart', onTouch, { passive: true });
+                    // Remove the touch handler when modal hidden
+                    modalEl.addEventListener('hidden.bs.modal', () => {
+                        try { modalEl.removeEventListener('touchstart', onTouch); } catch {}
+                    }, { once: true });
+                }, { once: true });
+
+                btn.addEventListener('click', onProcess);
+                input.addEventListener('keydown', onKeydown);
+                input.addEventListener('paste', onPaste);
+                // Auto-process after a short pause of input (helps hardware scanners that don't send Enter)
+                (function attachAutoSubmitModal() {
+                    let timer = null;
+                    const T_DELAY = 200; // ms
+                    const clearTimer = () => { if (timer) { clearTimeout(timer); timer = null; } };
+                    const onInput = () => {
+                        clearTimer();
+                        const v = (input.value || '').trim();
+                        if (!v) return;
+                        timer = setTimeout(() => {
+                            onProcess();
+                        }, T_DELAY);
+                    };
+                    input.addEventListener('input', onInput);
+                    // ensure handlers are removed when clearing
+                    const oldClear = clearHandlers;
+                    clearHandlers = function() {
+                        try { input.removeEventListener('input', onInput); } catch {}
+                        try { btn.removeEventListener('click', onProcess); } catch {}
+                        try { input.removeEventListener('keydown', onKeydown); } catch {}
+                        try { input.removeEventListener('paste', onPaste); } catch {}
+                    };
+                })();
+
+                modal.show();
+                return;
             }
 
             const inp = ensureScanInput();
@@ -671,10 +980,7 @@
             const filas = getSelectedRowsFromTable();
             const sucursalId = Number(document.getElementById('sucursal_id')?.value || 0);
 
-            const serieGRPO = Number(SERIES_BY_SUC[String(sucursalId)] || 157); // default ZC
-
-            /* const serieGRPO = Number(SERIES_BY_SUC[String(sucursalId)] || 0);
-            if (!serieGRPO) throw new Error(`Sucursal sin serie GRPO configurada: ${sucursalId}`); */
+            const serieGRPO = Number(SERIES_BY_SUC[String(sucursalId)] || 157);
 
             const seleccion = [];
             filas.forEach(tr => {
@@ -847,16 +1153,16 @@
 
             if (!Array.isArray(ocList) || !ocList.length) {
                 cont.innerHTML = `
-                    <div style="display:flex;gap:12px;align-items:center;padding:14px;border-radius:10px;background:#fff7ed;border:1px solid #ffedde;color:#92400e;box-shadow:0 6px 18px rgba(16,24,40,0.03);">
-                        <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#fff3e0;border-radius:8px;border:1px solid #ffd8a8;">
+                    <div class="info-block info-warning">
+                        <div class="icon-box">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                 <path d="M11 7h2v6h-2zM11 15h2v2h-2z" fill="#92400e"/>
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z" stroke="#ffd6a5" stroke-width="1.2"/>
                             </svg>
                         </div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-weight:700;color:#92400e;">OC inválida</div>
-                            <div style="font-size:0.95rem;color:#7c7c7c;margin-top:4px;">No se proporcionó ninguna orden de compra válida. Verifica la OC y vuelve a intentarlo. || O agrega una Orden de compra existente</div>
+                        <div class="info-body">
+                            <div class="info-title">OC inválida</div>
+                            <div class="info-text">No se proporcionó ninguna orden de compra válida. Verifica la OC y vuelve a intentarlo. || O agrega una Orden de compra existente</div>
                         </div>
                     </div>
                 `;
@@ -864,8 +1170,8 @@
             }
 
             cont.innerHTML = `
-                <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:#fff;border:1px solid #eee;box-shadow:0 6px 18px rgba(16,24,40,0.04);">
-                    <div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
+                <div class="info-block info-loading">
+                    <div class="icon-box spinner">
                         <svg width="34" height="34" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <circle cx="25" cy="25" r="20" fill="none" stroke="#f0f0f0" stroke-width="4"></circle>
                             <path fill="#ee7826" d="M25 5a20 20 0 0 1 0 40" transform="rotate(0 25 25)">
@@ -873,11 +1179,11 @@
                             </path>
                         </svg>
                     </div>
-                    <div style="flex:1;min-width:0;">
-                        <div style="font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Cargando artículos</div>
-                        <div style="font-size:0.9rem;color:#6b7280;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Orden(es) de Compra(s): ${escapeHTML(ocList.join(', '))}</div>
+                    <div class="info-body">
+                        <div class="info-title">Cargando artículos</div>
+                        <div class="info-text">Orden(es) de Compra(s): ${escapeHTML(ocList.join(', '))}</div>
                     </div>
-                    <div style="font-size:0.85rem;color:#6b7280;white-space:nowrap;">Por favor espere...</div>
+                    <div class="info-meta">Por favor espere...</div>
                 </div>
             `;
 
@@ -931,18 +1237,18 @@
                 }
 
                 let table = `
-                <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+                <div class="table-actions flex-gap">
                     <button type="button" class="btn btn-sm btn-outline-primary" onclick="seleccionarTodoArt()">Seleccionar todo</button>
                     <button type="button" class="btn btn-sm btn-outline-secondary" onclick="limpiarSeleccionArt()">Limpiar</button>
                 </div>
-                <table id="tablaArticulos" class="tabla-articulos display d-none" style="width:100%;table-layout:auto;">
+                <table id="tablaArticulos" class="tabla-articulos display d-none table-auto">
                     <thead class="d-none d-md-table-header-group">
                     <tr>
-                        <th style="width:48px;text-align:center;">✓</th>
-                        <th style="text-align:left;">Código - Artículo</th>
-                        <th style="width:1%;white-space:nowrap;text-align:center;">Cantidad + UM</th>
-                        <th style="width:1%;white-space:nowrap;text-align:center;">Recepción</th>
-                        <th style="width:90px;text-align:center;">OC</th>
+                        <th class="th-center th-48">✓</th>
+                        <th class="th-left">Código - Artículo</th>
+                        <th class="th-center th-nowrap">Cantidad + UM</th>
+                        <th class="th-center th-nowrap">Recepción</th>
+                        <th class="th-center th-90">OC</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -957,28 +1263,30 @@
                     const oc = escapeHTML(String(a.__oc || ''));
                     const cantDisplay = cant % 1 === 0 ? cant : cant.toFixed(2);
 
+                    const barcode = escapeHTML(String(a.BarcodePrincipal || a.Barcode || a.CodigoBarras || '')
+                        .trim());
+                    const barcodeDetalle = escapeHTML(String(a.BarcodeDetalle || '').trim());
+
+
                     table += `
                     <tr>
-                    <td style="text-align:center;padding:12px;width:48px;">
-                        <input type="checkbox" class="chk-art" aria-label="Seleccionar artículo ${code}" style="width:24px;height:24px;cursor:pointer;">
+                    <td class="td-center td-48">
+                        <input type="checkbox" class="chk-art" aria-label="Seleccionar artículo ${code}">
                     </td>
-                    <td style="padding:8px;">
-                        <div style="font-weight:700;">${code}</div>
-                        <div style="font-size:0.9em;color:#666;">${desc}</div>
+                    <td class="td-pad">
+                    <div class="codigo-strong">${code}</div>
+                    <div class="desc-muted">${desc}</div>
+                    ${barcode ? `<div class="barcode-muted">Barcode: <b>${barcode}</b></div>` : ''}
                     </td>
-                    <td style="text-align:center;padding:8px;white-space:nowrap;">
-                        <div style="font-weight:700;">${cantDisplay}</div>
-                        <div class="text-muted small" style="font-size:0.8rem;">${um || '-'}</div>
+
+                    <td class="td-center td-nowrap">
+                        <div class="codigo-strong">${cantDisplay}</div>
+                        <div class="text-muted small meta-um">${um || '-'}</div>
                     </td>
-                    <td style="text-align:center;white-space:nowrap;">
-                        <input type="number" min="0" step="1"
-                        class="inp-recibir"
-                        data-pendiente="${cant}"
-                        data-oc="${oc}"
-                        data-um="${um}"
-                        placeholder="0" style="width:90px;padding:6px;" />
+                    <td class="td-center td-nowrap">
+                        <input type="number" min="0" step="1" class="inp-recibir" data-pendiente="${cant}" data-oc="${oc}" data-um="${um}" placeholder="0" />
                     </td>
-                    <td style="text-align:center;font-size:0.85em;color:#999;">${oc}</td>
+                    <td class="td-center td-oc">${oc}</td>
                     </tr>
                 `;
                 });
@@ -1148,8 +1456,8 @@
                 paging: false,
                 info: false,
                 lengthChange: false,
-                scrollY: isMobile ? '55vh' : '45vh',
-                scrollCollapse: false,
+                scrollY: isMobile ? '50vh' : '40vh',
+                scrollCollapse: true,
                 responsive: false,
                 scrollX: false,
                 language: {
@@ -1265,13 +1573,13 @@
                 style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;font-size:14px;" 
                 onkeyup="filtrarArticulos(this.value)">
                 </div>
-                <table class="tabla-articulos" data-oc="${escapeHTML(String(rows[0]?.oc||''))}" style="width:100%;table-layout:auto;">
+                <table class="tabla-articulos table-auto" data-oc="${escapeHTML(String(rows[0]?.oc||''))}">
                     <thead>
                         <tr>
-                            <th style="width:48px;text-align:center;">✓</th>
-                            <th style="text-align:left;">Código - Artículo</th>
-                            <th style="width:1%;white-space:nowrap;text-align:center;">Cantidad + UM</th>
-                            <th style="width:1%;white-space:nowrap;text-align:center;">Recepción</th>
+                            <th class="th-center th-48">✓</th>
+                            <th class="th-left">Código - Artículo</th>
+                            <th class="th-center th-nowrap">Cantidad + UM</th>
+                            <th class="th-center th-nowrap">Recepción</th>
                         </tr>
                     </thead>
             <tbody>`;
@@ -1284,12 +1592,12 @@
                 const cantDisplay = cant % 1 === 0 ? cant : cant.toFixed(2);
                 const idx = i + 1;
                 table += `<tr data-idx="${idx}" data-codigo="${code.toLowerCase()}" data-nombre="${desc.toLowerCase()}">
-                <td style="text-align:center;padding:12px;width:48px;">
-                    <input type="checkbox" class="chk-art" data-idx="${idx}" onchange="onChkToggle(this)" style="width:24px;height:24px;cursor:pointer;">
+                <td class="td-center td-48">
+                    <input type="checkbox" class="chk-art" data-idx="${idx}" onchange="onChkToggle(this)">
                 </td>
-                <td style="padding:8px;">
-                    <div style="font-weight:700;">${code}</div>
-                    <div style="font-size:0.9em;color:#666;">${desc}</div>
+                <td class="td-pad">
+                    <div class="codigo-strong">${code}</div>
+                    <div class="desc-muted">${desc}</div>
                 </td>
                 <td style="text-align:center;padding:8px;white-space:nowrap;">
                     <div style="font-weight:700;">${cantDisplay}</div>
@@ -1894,8 +2202,8 @@
                 </table>
 
                 ${comentarios ? `
-                                        <div class="notes"><b>Comentarios:</b><br/>${esc(comentarios)}</div>
-                                        ` : ''}
+                        <div class="notes"><b>Comentarios:</b><br/>${esc(comentarios)}</div>
+                        ` : ''}
 
                         <div class="sign">
                         <div class="line">Entrega (Proveedor)</div>

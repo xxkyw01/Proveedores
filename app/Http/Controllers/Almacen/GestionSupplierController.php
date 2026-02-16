@@ -115,7 +115,7 @@ class GestionSupplierController extends Controller
             $fecha       = $request->input('fecha');
             $sucursal_id = (int) $request->input('sucursal_id');
             $fechaInicio = \Carbon\Carbon::parse($fecha)->subDays(7)->format('Y-m-d');
-            
+
             $rows = DB::connection('sqlsrv_proveedores')->select(
                 "EXEC sp_consultar_reservaciones_todas @fechaInicio = ?",
                 [$fechaInicio]
@@ -258,9 +258,32 @@ class GestionSupplierController extends Controller
     public function getArticulosPendientes($orden)
     {
         $articulos = DB::connection('sqlsrv_proveedores')
-            ->select("EXEC sp_Consultar_ArticulosPendientes @NumeroOrdenCompra = ?", [$orden]);
+            //->select("EXEC sp_Consultar_ArticulosPendientes @NumeroOrdenCompra = ?", [$orden]);
+            ->select("EXEC sp_Consultar_ArticulosPendientes_v2 @NumeroOrdenCompra = ?", [(int)$orden]);
 
         return response()->json($articulos);
+    }
+
+    public function scanBarcode(Request $request)
+    {
+        $request->validate([
+            'docNum'   => 'required|integer',
+            'barcode'  => 'required|string|max:100',
+        ]);
+
+        $docNum  = (int) $request->input('docNum');
+        $barcode = trim((string) $request->input('barcode'));
+
+        $row = DB::connection('sqlsrv_proveedores')->selectOne(
+            "EXEC dbo.sp_PO_ResolverBarcode @NumeroOrdenCompra = ?, @Barcode = ?",
+            [$docNum, $barcode]
+        );
+        
+        if (!$row) {
+            return response()->json(['ok' => 0, 'msg' => 'Sin respuesta del SP'], 200);
+        }
+
+        return response()->json($row, 200);
     }
 
     public function actualizarEstado(Request $request)
@@ -415,38 +438,38 @@ class GestionSupplierController extends Controller
     public function ocsDisponiblesParaReservacion($id)
     {
         $reservacionId = (int)$id;
-    
+
         $res = DB::connection('sqlsrv_proveedores')->table('reservaciones')
             ->select('id', 'proveedor_id', 'sucursal_id')
             ->where('id', $reservacionId)
             ->first();
-    
+
         if (!$res) return response()->json(['ok' => false, 'msg' => 'Reservación no encontrada'], 404);
-    
+
         $cardCode = trim((string)$res->proveedor_id);
         $sucursalId = (int)$res->sucursal_id;
-    
+
         try {
             $serieOC = $this->poSeriePorSucursal($sucursalId);
         } catch (\Throwable $e) {
             return response()->json(['ok' => false, 'msg' => $e->getMessage()], 422);
         }
-    
+
         $ordenes = DB::connection('sqlsrv_proveedores')
             ->select("EXEC dbo.sp_Consultar_OrdenesCompraAbiertas ?, ?", [$cardCode, $serieOC]);
-    
+
         $ya = DB::connection('sqlsrv_proveedores')
             ->table('reservacion_orden_compra')
             ->where('reservacion_id', $reservacionId)
             ->pluck('orden_compra')
             ->map(fn($x) => (string)$x)
             ->toArray();
-    
+
         $ordenesFiltradas = array_values(array_filter($ordenes, function ($o) use ($ya) {
             $num = (string)($o->NumeroOrdenCompra ?? $o->DocNum ?? '');
             return $num !== '' && !in_array($num, $ya, true);
         }));
-    
+
         return response()->json([
             'ok' => true,
             'cardCode' => $cardCode,
@@ -454,7 +477,7 @@ class GestionSupplierController extends Controller
             'serie' => $serieOC,
             'ordenes' => $ordenesFiltradas
         ]);
-    }    
+    }
 
     public function ocsDeReservacion($id)
     {
@@ -476,35 +499,35 @@ class GestionSupplierController extends Controller
     private function getSerieGRPOPorSucursal(int $sucursalId): int
     {
         $map = [
-            1 => 156, 
-            4 => 157, 
+            1 => 156,
+            4 => 157,
         ];
 
-        return $map[$sucursalId] ?? 156; 
+        return $map[$sucursalId] ?? 156;
     }
 
     private function poSeriePorSucursal(int $sucursalId): string
-{
-    $map = config('sap_series.po_series_by_sucursal', []);
-    if (!isset($map[$sucursalId])) {
-        throw new \RuntimeException("Sucursal sin serie PO configurada: $sucursalId");
+    {
+        $map = config('sap_series.po_series_by_sucursal', []);
+        if (!isset($map[$sucursalId])) {
+            throw new \RuntimeException("Sucursal sin serie PO configurada: $sucursalId");
+        }
+        return $map[$sucursalId];
     }
-    return $map[$sucursalId];
-}
 
-private function grpoSeriePorSucursal(int $sucursalId): int
-{
-    $map = config('sap_series.grpo_series_by_sucursal', []);
-    if (!isset($map[$sucursalId])) {
-        throw new \RuntimeException("Sucursal sin serie GRPO configurada: $sucursalId");
+    private function grpoSeriePorSucursal(int $sucursalId): int
+    {
+        $map = config('sap_series.grpo_series_by_sucursal', []);
+        if (!isset($map[$sucursalId])) {
+            throw new \RuntimeException("Sucursal sin serie GRPO configurada: $sucursalId");
+        }
+        return (int)$map[$sucursalId];
     }
-    return (int)$map[$sucursalId];
-}
 
     public function sapValidarGRPO(Request $req)
     {
         $docNum      = (int) $req->input('docNum');
-        $sucursal_id = (int) $req->input('sucursal_id'); 
+        $sucursal_id = (int) $req->input('sucursal_id');
         $cardCode    = trim((string) $req->input('cardCode', ''));
         $numAtCard   = trim((string) $req->input('numAtCard', ''));
         $lines       = $req->input('lines', []);
