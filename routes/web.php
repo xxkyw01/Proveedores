@@ -33,7 +33,6 @@ Route::post('login', [ProveedorAuthController::class, 'login'])->name('proveedor
 Route::post('logout', [ProveedorAuthController::class, 'logout'])->name('logout');
 Route::get('redirect', [ProveedorAuthController::class, 'redirect'])->name('redirect');
 
-
 Route::middleware(['proveedor', 'prevent-back-history'])->prefix('proveedor')->group(function () {
     Route::get('/dashboard', fn() => view('index_proveedor'))->name('proveedor.dashboard');
     Route::get('/menu', [ProveedorMenuController::class, 'menu'])->name('proveedor.menu');
@@ -154,7 +153,7 @@ Route::middleware(['admin', 'prevent-back-history'])->prefix('admin')->group(fun
 Route::middleware(['dev', 'prevent-back-history'])->prefix('dev')->group(function () {
     Route::get('/dashboard', fn() => view('index_dev'))->name('dev.dashboard');
     Route::get('/crear-usuario', [UsuarioDevController::class, 'formulario'])->name('dev.formulario');
-    Route::get('/usuari os', [UsuarioDevController::class, 'listarUsuarios'])->name('dev.usuarios');
+    Route::get('/usuarios', [UsuarioDevController::class, 'listarUsuarios'])->name('dev.usuarios');
     Route::post('/usuarios/actualizar-password', [UsuarioDevController::class, 'cambiarPasswordUsuario'])->name('dev.usuario.password');
     Route::post('/crear-usuario', [UsuarioDevController::class, 'crear'])->name('dev.crear');
     Route::get('/mensajeria', [ChatController::class, 'index'])->name('dev.mensajeria');

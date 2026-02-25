@@ -14,12 +14,103 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+/* Mobile: layout compacto pero sin comprimir contenido */
+@media (max-width: 767px) {
+  .timeline-item {
+    padding: 0 0 8px 0;
+  }
+  .timeline-card {
+    padding: 8px 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+  /* Mostrar contenido apilado en móvil para evitar que se oculte */
+  .timeline-card .timeline-card-body {
+    display: block;
+    padding: 6px 0;
+  }
+  .timeline-card .timeline-card-body i.material-icons {
+    font-size: 1.2rem;
+    color: #ee7826;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  .detalle-proveedor {
+    display: block;
+    padding-left: 6px;
+  }
+  .prov-name {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hora {
+    display: block;
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  /* Forzar color y lectura en móviles (evitar tarjetas "en blanco") */
+  .timeline-card,
+  .timeline-card * {
+    color: #222 !important;
+  }
+  .timeline-card {
+    min-height: 52px;
+  }
+
+  /* Ocultar elementos secundarios para mantener tarjeta compacta sin recortar */
+  .orden-compra,
+  .status-badge,
+  .evento-badge,
+  .timeline-marker,
+  .iconos-oc {
+    display: none !important;
+  }
+  /* ocultar transporte y lugar en la vista compacta */
+  .transport,
+  .place {
+    display: none !important;
+  }
+
+  .timeline-card-footer {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    justify-content: flex-end;
+  }
+
+  /* Forzar que el contenedor detalle-proveedor (y sus hijos) se muestre pese a reglas globales */
+  .timeline-card .timeline-card-body > .detalle-proveedor {
+    display: block !important;
+  }
+  .timeline-card .timeline-card-body > .detalle-proveedor .prov-name {
+    display: block !important;
+    color: #222 !important;
+  }
+  .timeline-card .timeline-card-body > .detalle-proveedor .hora {
+    display: block !important;
+    color: #444 !important;
+  }
+  /* Asegurar que el texto no sea transparente ni oculto */
+  .timeline-card .timeline-card-body > .detalle-proveedor * {
+    color: inherit !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+
 :root {
   --bp-mobile: 430px;
   --bp-tablet-min: 768px;
   --bp-tablet-max: 991px;
   --bp-desktop: 992px;
-  /* responsive font scale */
+
   --fs-base: clamp(13px, 1.4vw, 16px);
   --fs-sm: clamp(11px, 1.1vw, 13px);
   --fs-md: clamp(14px, 1.6vw, 18px);
@@ -37,33 +128,27 @@ body {
   --nav-btn-size: clamp(34px, 4.2vw, 48px);
 }
 
-
-.container-fluid{
+.container-fluid {
   --bs-gutter-x: 1.5rem;
   --bs-gutter-y: 0;
   padding: 0px !important;
   width: 100%;
-  margin-right: auto;
-  margin-left: auto;
 }
 
 .agenda-scroll {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Estado visual cuando excede */
 .cell-excede {
   outline: 2px solid #e53935;
   background: #fff1f1;
 }
 
-/* ===== TIMELINE & ITEMS ====== */
 .timeline-item {
   transition: all 0.5s ease;
   opacity: 1;
 }
 
-/* animación de nuevos items */
 .timeline-item.new-item {
   animation: highlight 2s ease;
 }
@@ -79,7 +164,7 @@ body {
 
 .columna-dia {
   position: relative;
-    padding: 0px !important;
+  padding: 0px !important;
 }
 
 .navbar-dias {
@@ -88,7 +173,6 @@ body {
   border-bottom: 1px solid #eee;
 }
 
-/* componentes */
 .orden-compra {
   display: flex;
   align-items: center;
@@ -175,7 +259,6 @@ body {
   color: #ee7826;
 }
 
-/* SKELETON placeholders */
 .skeleton-card {
   opacity: 0.9;
 }
@@ -237,10 +320,7 @@ body {
   border-radius: 12px;
 }
 
-/* TIMELINE layout */
-
 .timeline {
-  /* use full available width of the column to avoid mixed card widths */
   width: 100%;
   max-width: none;
   margin: 6px 0;
@@ -251,10 +331,9 @@ body {
   display: block;
 }
 
-/* item */
 .timeline-item {
   display: flex;
-  align-items: stretch; /* ensure marker and card have same height */
+  align-items: stretch;
   gap: var(--gap-base);
   margin-bottom: calc(var(--gap-base) / 2);
   flex-wrap: nowrap;
@@ -262,7 +341,6 @@ body {
   box-sizing: border-box;
 }
 
-/* marcador vertical */
 .timeline-marker {
   width: var(--timeline-marker-width);
   flex: 0 0 var(--timeline-marker-width);
@@ -274,7 +352,6 @@ body {
   flex-direction: column;
 }
 
-/* render circle and line as pseudo-elements so they scale with card size */
 .timeline-marker::before,
 .timeline-marker::after {
   content: "";
@@ -283,7 +360,6 @@ body {
   transform: translateX(-50%);
 }
 .timeline-marker::after {
-  /* full-height vertical line centered in the marker area */
   width: var(--timeline-line-width);
   background-color: #ee7826;
   top: 0;
@@ -292,7 +368,6 @@ body {
   border-radius: 4px;
 }
 .timeline-marker::before {
-  /* circle sits above the vertical line, slightly inset from top */
   width: var(--timeline-circle-size);
   height: var(--timeline-circle-size);
   background-color: #ee7826;
@@ -302,12 +377,10 @@ body {
   box-shadow: 0 0 0 4px rgba(238, 120, 38, 0.06);
 }
 
-/* ensure marker sits above card so the vertical line is visible */
 .timeline-marker {
   z-index: 3;
 }
 
-/* hide legacy elements if present in markup */
 .timeline-marker .circulo,
 .timeline-marker .linea {
   display: none !important;
@@ -594,6 +667,49 @@ body {
     font-size: var(--fs-sm);
     border-radius: 10px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+  /* Ajustes: mostrar solo proveedor + hora en una línea; ocultar iconos secundarios */
+  .timeline-card .timeline-card-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+  }
+  .timeline-card .timeline-card-body i.material-icons {
+    display: none !important;
+  }
+  .timeline-card .timeline-card-body i.material-icons.arrow-icon {
+    display: inline-block !important;
+    color: #ee7826;
+    margin-right: 6px;
+  }
+  .timeline-card .detalle-proveedor {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
+  .timeline-card .detalle-proveedor i.material-icons {
+    display: none !important;
+  }
+  .timeline-card .detalle-proveedor .prov-name {
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .timeline-card .detalle-proveedor .hora {
+    font-weight: 700;
+    color: #333;
+    flex: 0 0 auto;
+  }
+  .timeline-card .orden-compra,
+  .timeline-card .iconos-oc,
+  .timeline-marker {
+    display: none !important;
   }
   .timeline-card h5 {
     font-size: var(--fs-md);

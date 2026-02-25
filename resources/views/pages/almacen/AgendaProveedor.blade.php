@@ -14,10 +14,8 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <div class="container-fluid con-sidebar">
-        <div class="row justify-content-center">
-
-            <div class="d-flex justify-content-center align-items-center gap-2 nav-agenda-row">
+    <div class="row con-sidebar">
+            <div class="d-flex justify-content-center align-items-center nav-agenda-row">
                 <button id="btn-prev" class="btn btn-orange btn-nav-agenda d-flex align-items-center justify-content-center"
                     onclick="moverAgenda(-1)">
                     <i class="material-icons">chevron_left</i>
@@ -48,7 +46,6 @@
                 </button>
             </div>
 
-
             <div class="row">
                 <!-- Ayer -->
                 <div class="col columna-dia" data-index="0" id="col-ayer">
@@ -62,7 +59,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Hoy -->
                 <div class="col columna-dia" data-index="1" id="col-hoy">
                     <div class="container mt-4">
@@ -90,11 +86,8 @@
                 </div>
 
             </div>
-
-        </div>
     </div>
 
-    <!-- Modal -->
     <div class="modal fade" id="modalDetalles" tabindex="-1" role="dialog" aria-labelledby="modalDetallesLabel"
         aria-hidden="true" data-bs-focus="false">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
@@ -128,13 +121,12 @@
         let currentStartIndex = 0;
         let recepcionEnProceso = false;
 
-    
         window._agendaCache = window._agendaCache || {
             inFlight: new Set(),
             data: new Map(),
             ttl: 30 * 1000 // 30s
         };
-     
+
         window._agendaDebug = window._agendaDebug || {
             renderAgendaCount: 0,
             loadAgendaCount: new Map(),
@@ -144,11 +136,15 @@
         function _agendaDebugLog(ev, info) {
             try {
                 const now = Date.now();
-                window._agendaDebug.events.push({ t: now, ev, info });
+                window._agendaDebug.events.push({
+                    t: now,
+                    ev,
+                    info
+                });
                 if (window._agendaDebug.events.length > 80) window._agendaDebug.events.shift();
                 console.debug('[Agenda][' + ev + ']', info);
             } catch (e) {
-              
+
             }
         }
         const ROL_ID = {{ (int) $rolId }};
@@ -223,7 +219,11 @@
         function renderAgenda() {
             const ancho = window.innerWidth;
             window._agendaDebug.renderAgendaCount++;
-            _agendaDebugLog('renderAgenda', { count: window._agendaDebug.renderAgendaCount, currentStartIndex, ancho });
+            _agendaDebugLog('renderAgenda', {
+                count: window._agendaDebug.renderAgendaCount,
+                currentStartIndex,
+                ancho
+            });
             let cantidadDias = 1;
 
             if (ancho >= 992) cantidadDias = 3;
@@ -252,7 +252,11 @@
         }
 
         function handleAgendaDataResponse(data, timeline, formattedDate, index) {
-            _agendaDebugLog('handleAgendaDataResponse', { index, formattedDate, items: Array.isArray(data) ? data.length : 0 });
+            _agendaDebugLog('handleAgendaDataResponse', {
+                index,
+                formattedDate,
+                items: Array.isArray(data) ? data.length : 0
+            });
             if (!timeline) return;
             timeline.innerHTML = '';
 
@@ -270,7 +274,8 @@
                     .commit_afterrecep).trim().length));
                 const hasEvid = !!(item.tiene_evidencia ?? (item.evidencia_nombre || item.evidencias ||
                     item.evidencia_path));
-                const ocBadges = (typeof formatOrdenCompra === 'function') ? formatOrdenCompra(item.orden_compra) : '';
+                const ocBadges = (typeof formatOrdenCompra === 'function') ? formatOrdenCompra(item.orden_compra) :
+                    '';
 
                 let ocIcons = '';
 
@@ -300,7 +305,7 @@
                                                 </span>
                                             </div>
 
-                                            <i class="material-icons" style="font-size: 1.5rem; vertical-align: middle;">arrow_forward</i>
+                                            <i class="material-icons arrow-icon" style="font-size: 1.5rem; vertical-align: middle;">arrow_forward</i>
   
                                             <div class="d-inline-block">
                                                 <span class="d-inline-block p-2 evento-badge ${getEventClass(item?.tipo_evento)}">
@@ -318,27 +323,27 @@
 
                                     <div class="detalle-proveedor">
                                         <div class="d-flex align-items-center gap-2 mb-2">
-                                            <i class="material-icons" style="font-size: 1.5rem;">store</i>
-                                            <strong class="text-truncate">
-                                                ${escapeHTML(item.proveedor_nombre || 'Paqueteria Express / Cita no programada')}
-                                            </strong>
+                                                <i class="material-icons" style="font-size: 1.5rem;">store</i>
+                                                <strong class="text-truncate prov-name">
+                                                    ${escapeHTML(item.proveedor_nombre || 'Paqueteria Express / Cita no programada')}
+                                                </strong>
                                         </div>
 
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <i class="material-icons" style="font-size: 1.5rem;">access_time</i>
-                                            <span>${formatTime12h(item.hora) || 'No especificado'}</span>
+                                            <span class="hora">${formatTime12h(item.hora) || 'No especificado'}</span>
                                         </div>
 
                                         <div class="d-flex align-items-center gap-2 mb-2">
                                             <i class="material-icons" style="font-size: 1.5rem;">local_shipping</i>
-                                            <span class="text-truncate">
+                                            <span class="text-truncate transport">
                                                 ${escapeHTML(item.transporte_nombre || 'No especificado')}
                                             </span>
                                         </div>
 
                                         <div class="d-flex align-items-center gap-2">
                                             <i class="material-icons" style="font-size: 1.5rem;">place</i>
-                                            <span class="text-truncate">
+                                            <span class="text-truncate place">
                                                 ${escapeHTML(item.Lugar || 'No especificado')}
                                             </span>
                                         </div>
@@ -348,10 +353,10 @@
                                 <!-- FOOTER -->
                                 <div class="timeline-card-footer">
                                     ${ES_ADMIN? `
-                                                                    <button class="btn-detalles btn btn-outline-secondary btn-sm w-30"
-                                                                        onclick="showDetails(${item.id})">
-                                                                        Ver Detalles
-                                                                    </button>`:''
+                                                                        <button class="btn-detalles btn btn-outline-secondary btn-sm w-30"
+                                                                            onclick="showDetails(${item.id})">
+                                                                            Ver Detalles
+                                                                        </button>`:''
                                     }
 
                                 </div>
@@ -370,7 +375,11 @@
             const timeline = document.getElementById(`timeline-${index}`);
             const key = `${formattedDate}::${sucursalId}`;
 
-            _agendaDebugLog('loadAgendaDataForDate:start', { key, index, formattedDate });
+            _agendaDebugLog('loadAgendaDataForDate:start', {
+                key,
+                index,
+                formattedDate
+            });
 
             if (timeline) {
                 renderSkeletonTimeline(index, 1);
@@ -383,7 +392,9 @@
                 const entry = cache.data.get(key);
                 if ((now - entry.ts) < cache.ttl) {
                     try {
-                        _agendaDebugLog('loadAgendaDataForDate:cacheHit', { key });
+                        _agendaDebugLog('loadAgendaDataForDate:cacheHit', {
+                            key
+                        });
                         handleAgendaDataResponse(entry.data, timeline, formattedDate, index);
                         return;
                     } catch (e) {
@@ -395,14 +406,23 @@
             }
 
             if (cache.inFlight.has(key)) {
-                _agendaDebugLog('loadAgendaDataForDate:inFlight', { key });
+                _agendaDebugLog('loadAgendaDataForDate:inFlight', {
+                    key
+                });
                 return;
             }
             cache.inFlight.add(key);
 
-            _agendaDebugLog('loadAgendaDataForDate:fetchStart', { key });
+            _agendaDebugLog('loadAgendaDataForDate:fetchStart', {
+                key
+            });
 
-            fetch(`/almacen/agenda/data?fecha=${formattedDate}&sucursal_id=${sucursalId}`)
+            fetch(`/almacen/agenda/data?fecha=${formattedDate}&sucursal_id=${sucursalId}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
                 .then(async r => {
                     const text = await r.text();
 
@@ -417,10 +437,16 @@
                     }
                 })
                 .then(data => {
-                    _agendaDebugLog('loadAgendaDataForDate:fetchSuccess', { key, items: Array.isArray(data) ? data.length : 0 });
-                
+                    _agendaDebugLog('loadAgendaDataForDate:fetchSuccess', {
+                        key,
+                        items: Array.isArray(data) ? data.length : 0
+                    });
+
                     try {
-                        cache.data.set(key, { data: data, ts: Date.now() });
+                        cache.data.set(key, {
+                            data: data,
+                            ts: Date.now()
+                        });
                     } catch (e) {
                         console.warn('[Agenda] no se pudo cachear respuesta', e);
                     }
@@ -428,7 +454,10 @@
                 })
                 .catch(err => {
                     console.error('[Agenda] Error', formattedDate, err);
-                    _agendaDebugLog('loadAgendaDataForDate:error', { key, message: String(err && err.message ? err.message : err) });
+                    _agendaDebugLog('loadAgendaDataForDate:error', {
+                        key,
+                        message: String(err && err.message ? err.message : err)
+                    });
                     if (timeline) {
                         timeline.innerHTML = `
                     <div class="text-danger" style="padding:8px 12px;">
@@ -439,7 +468,9 @@
                 })
                 .finally(() => {
                     cache.inFlight.delete(key);
-                    _agendaDebugLog('loadAgendaDataForDate:finally', { key });
+                    _agendaDebugLog('loadAgendaDataForDate:finally', {
+                        key
+                    });
                 });
         }
 
@@ -530,10 +561,14 @@
                 const tieneComentario = d && d.commit_afterrecep && String(d.commit_afterrecep).trim().length;
                 const tieneEvidencia = d && ((d.evidencia_path && d.evidencia_nombre) || d.evidencias);
                 if (tieneComentario) {
-                    icons.push(`<span class="icono-info icono-coment" title="Tiene comentario" onclick="showDetails(${id})"><i class="material-icons">mode_comment</i></span>`);
+                    icons.push(
+                        `<span class="icono-info icono-coment" title="Tiene comentario" onclick="showDetails(${id})"><i class="material-icons">mode_comment</i></span>`
+                        );
                 }
                 if (tieneEvidencia) {
-                    icons.push(`<a class="icono-info icono-evid" title="Ver evidencia" href="/almacen/evidencia/${id}" target="_blank" rel="noopener"><i class="material-icons">attach_file</i></a>`);
+                    icons.push(
+                        `<a class="icono-info icono-evid" title="Ver evidencia" href="/almacen/evidencia/${id}" target="_blank" rel="noopener"><i class="material-icons">attach_file</i></a>`
+                        );
                 }
                 cont.innerHTML = icons.join('');
             } catch (e) {
@@ -555,7 +590,12 @@
                 }
 
                 s.inFlight++;
-                fetch(`/almacen/agenda/detalles/${id}`)
+                fetch(`/almacen/agenda/detalles/${id}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
                     .then(async r => {
                         const text = await r.text();
                         if (!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0,200)}`);
@@ -738,8 +778,10 @@
                 if (!card) return;
                 if (ev.target.closest('button, a, input')) return;
                 card.classList.toggle('expanded');
-            } catch (e) {  }
-        }, { passive: true });
+            } catch (e) {}
+        }, {
+            passive: true
+        });
 
         function formatTime12h(hora = '') {
             if (!hora) return '';
@@ -1020,8 +1062,8 @@
         function getSeriePorSucursalId() {
             const sid = Number(document.getElementById('sucursal_id')?.value || '0');
             const mapa = {
-                1: 156, // Matriz
-                4: 157, // Guadalajara
+                1: 156, 
+                4: 157,
             };
             return mapa[sid] || 156;
         }
@@ -1132,11 +1174,10 @@
                 tbl.querySelectorAll('tbody tr').forEach(tr => {
                     const chk = tr.querySelector('input[type="checkbox"]');
                     const inp = tr.querySelector('input.inp-recibir');
-
-                    if (chk) chk.checked = false; // desmarcar check
+                    if (chk) chk.checked = false; 
                     if (inp) {
-                        inp.value = ''; // limpiar input
-                        inp.dispatchEvent(new Event('input')); // refrescar totales
+                        inp.value = ''; 
+                        inp.dispatchEvent(new Event('input')); 
                     }
                 });
             });
@@ -1152,14 +1193,12 @@
             const pendiente = Number(inp.dataset.pendiente || 0) || 0;
 
             if (chk.checked) {
-                // poner el pendiente
                 inp.value = pendiente ? String(Math.floor(pendiente)) : '';
             } else {
-                // limpiar
                 inp.value = '';
             }
 
-            inp.dispatchEvent(new Event('input')); // vuelve a calcular sumas/resumen
+            inp.dispatchEvent(new Event('input')); 
         }
 
         function previewGRPO() {
@@ -1237,7 +1276,13 @@
             return 'oc-' + String(v).replace(/[^a-zA-Z0-9_-]/g, '-');
         };
 
-        function fetchJsonOrThrow(url, opt) {
+        function fetchJsonOrThrow(url, opt = {}) {
+            opt = opt || {};
+            opt.headers = Object.assign({
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }, opt.headers || {});
+
             return fetch(url, opt).then(async r => {
                 const text = await r.text();
 
@@ -1457,7 +1502,8 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrf
+                            'X-CSRF-TOKEN': csrf,
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({
                             docNum: Number(oc),
@@ -1634,10 +1680,10 @@
     </table>
 
     ${comentAlm ? `
-                  <div style="margin-top:8px;">
-                    <strong>Comentario de almacén:</strong><br>
-                    <div style="border:1px solid #ddd;border-radius:4px;padding:6px 8px;background:#fff;">${esc(comentAlm)}</div>
-                  </div>` : ''}
+                      <div style="margin-top:8px;">
+                        <strong>Comentario de almacén:</strong><br>
+                        <div style="border:1px solid #ddd;border-radius:4px;padding:6px 8px;background:#fff;">${esc(comentAlm)}</div>
+                      </div>` : ''}
   </section>
 `;
 
@@ -1835,7 +1881,7 @@
 
             if (Array.isArray(raw)) return raw.map(x => String(x).trim()).filter(Boolean);
 
-        
+
             if (typeof raw === 'string') {
                 const s = raw.trim();
                 if (!s) return [];
@@ -1844,8 +1890,7 @@
                     try {
                         const j = JSON.parse(s);
                         if (Array.isArray(j)) return j.map(x => String(x).trim()).filter(Boolean);
-                    } catch (_) {
-                    }
+                    } catch (_) {}
                 }
 
                 return s.split(',')
@@ -1860,7 +1905,12 @@
         window.showDetails = function(id) {
             document.getElementById('reservacionId').value = id;
 
-            fetch(`/almacen/agenda/detalles/${id}`)
+            fetch(`/almacen/agenda/detalles/${id}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
                 .then(async r => {
                     const text = await r.text();
 
@@ -1974,12 +2024,12 @@
                                     Limpiar
                                     </button>
                                     ${ES_ADMIN? `
-                                                                        <button type="button" class="btn btn-success btn-sm" onclick="previewGRPO()">
-                                                                        Previsualizar
-                                                                        </button>
-                                                                        <button type="button" class="btn btn-secondary btn-sm" onclick="imprimirModal()">
-                                                                        Imprimir
-                                                                        </button>`:''
+                                                                            <button type="button" class="btn btn-success btn-sm" onclick="previewGRPO()">
+                                                                            Previsualizar
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-secondary btn-sm" onclick="imprimirModal()">
+                                                                            Imprimir
+                                                                            </button>`:''
                                     }
                                 </div>
 
@@ -2000,13 +2050,13 @@
                                             ${rows.map(r => {
                                             const inputId = `rec-${oid}-${r.idx}`;
                                             return `<tr>
-                                                                        <td style="padding:6px;border:1px solid #eee;text-align:center;">${r.idx}</td>
-                                                                        <td style="padding:6px;border:1px solid #eee;text-align:center;"><input type="checkbox"class="chk-linea" style="transform:scale(1.2);accent-color:#ee7826;" onchange="toggleLinea(this)"></td>
-                                                                        <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.code)}</td>
-                                                                        <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.desc)}</td>
-                                                                        <td style="padding:6px;border:1px solid #eee;text-align:right;">${r.cant % 1 === 0 ? r.cant : r.cant.toFixed(2)} ${escapeHTML(r.um)}</td>
-                                                                        <td class="sticky-right" style="padding:6px;border:1px solid #eee;text-align:right;"> <input id="${inputId}"class="form-control form-control-sm inp-recibir" type="number" inputmode="numeric" step="1" min="0" aria-label="Cantidad a recibir" placeholder="0" style="text-align:right;" data-pendiente="${r.cant}" data-desc="${escapeHTML(r.desc).replace(/"/g,'&quot;')}" data-um="${escapeHTML(r.um).replace(/"/g,'&quot;')}" /></td>
-                                                                    </tr>`;}).join('')}
+                                                                            <td style="padding:6px;border:1px solid #eee;text-align:center;">${r.idx}</td>
+                                                                            <td style="padding:6px;border:1px solid #eee;text-align:center;"><input type="checkbox"class="chk-linea" style="transform:scale(1.2);accent-color:#ee7826;" onchange="toggleLinea(this)"></td>
+                                                                            <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.code)}</td>
+                                                                            <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.desc)}</td>
+                                                                            <td style="padding:6px;border:1px solid #eee;text-align:right;">${r.cant % 1 === 0 ? r.cant : r.cant.toFixed(2)} ${escapeHTML(r.um)}</td>
+                                                                            <td class="sticky-right" style="padding:6px;border:1px solid #eee;text-align:right;"> <input id="${inputId}"class="form-control form-control-sm inp-recibir" type="number" inputmode="numeric" step="1" min="0" aria-label="Cantidad a recibir" placeholder="0" style="text-align:right;" data-pendiente="${r.cant}" data-desc="${escapeHTML(r.desc).replace(/"/g,'&quot;')}" data-um="${escapeHTML(r.um).replace(/"/g,'&quot;')}" /></td>
+                                                                        </tr>`;}).join('')}
                                         </tbody>
 
                                         <tfoot>
