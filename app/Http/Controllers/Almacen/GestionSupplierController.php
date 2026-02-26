@@ -187,6 +187,37 @@ class GestionSupplierController extends Controller
             ->value('nombre');
     }
 
+    
+    public function guardarCodigoBarra(Request $request)
+    {
+        $request->validate([
+            'barcode'  => 'required|string|max:100',
+            'item_code' => 'required|string|max:100',
+            'uom' => 'required|string|max:10',
+        ]);
+
+        $barcode = trim((string) $request->input('barcode'));
+        $itemCode = trim((string) $request->input('item_code'));
+        $uom = trim((string) $request->input('uom'));
+
+        try {
+            DB::connection('sqlsrv_proveedores')->table('barcode')->insert([
+                'barcode' => $barcode,
+                'item_code' => $itemCode,
+                'estado' => 'PENDIENTE',
+                'uom' => $uom,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json(['ok' => true, 'msg' => 'Código de barras guardado correctamente'], 200);
+        } catch (\Throwable $e) {
+            Log::error('guardarCodigoBarra error: ' . $e->getMessage(), ['barcode' => $barcode, 'item_code' => $itemCode, 'uom' => $uom]);
+            $msg = config('app.debug') ? $e->getMessage() : 'Error al guardar el código de barras';
+            return response()->json(['ok' => false, 'msg' => $msg], 500);
+        }
+    }
+
     public function getDetails($id)
     {
         try {

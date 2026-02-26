@@ -115,6 +115,7 @@ Route::middleware(['almacen', 'prevent-back-history'])->prefix('almacen')->group
     Route::post('/recepcion/grpo/validar', [GestionSupplierController::class, 'sapValidarGRPO'])->name('almacen.grpo.validar');
     Route::post('/recepcion/grpo', [GestionSupplierController::class, 'crearGRPO'])->name('almacen.grpo.crear');
     Route::post('/recepcion/scan-barcode', [GestionSupplierController::class, 'scanBarcode'])->name('almacen.recepcion.scan');
+    Route::post('/guardar-codigo-barra', [GestionSupplierController::class, 'guardarCodigoBarra']);
 
 
     //4.10 SAP Consulta de Ordenes de Compra

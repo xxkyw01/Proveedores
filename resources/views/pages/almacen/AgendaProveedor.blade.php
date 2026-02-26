@@ -84,7 +84,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
     </div>
 
@@ -97,15 +96,14 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" id="reservacionId">
-                    <input type="hidden" id="reservacionFecha">
-                    <input type="hidden" id="reservacionHora">
+                    <input type="hidden" id="reservacionId" value="" />
+                    <input type="hidden" id="reservacionFecha" value="" />
+                    <input type="hidden" id="reservacionHora" value="" />
                     <div id="contenidoModal"></div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-orange" onclick="editarEstado()">Cambiar Status</button>
-                    <button type="button" class="btn btn-success" onclick="confirmarRecepcion()">Confirmar</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
 
@@ -1068,189 +1066,35 @@
             return mapa[sid] || 156;
         }
 
+        // Captura/recepción deshabilitada en esta vista (solo consulta visual)
         function setupQtyValidation(rootEl) {
-            const inputs = rootEl.querySelectorAll('input.inp-recibir');
-            inputs.forEach(inp => {
-                inp.addEventListener('wheel', (e) => e.target.blur(), {
-                    passive: true
-                });
-                inp.addEventListener('keydown', (ev) => {
-                    const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Home',
-                        'End'
-                    ];
-                    if (allowed.includes(ev.key)) return;
-                    if (!/^\d$/.test(ev.key)) ev.preventDefault();
-                });
-                inp.addEventListener('input', (ev) => {
-                    ev.target.value = ev.target.value.replace(/[^\d]/g, '');
-                    syncCheckboxWithInput(ev.target);
-                    validarYRefrescar(ev.target);
-                });
-                inp.addEventListener('blur', (ev) => validarYRefrescar(ev.target, true));
-            });
-
-            function validarYRefrescar(el, showAlert = false) {
-                const pendiente = Number(el.dataset.pendiente || 0);
-                let val = el.value === '' ? '' : Number(el.value);
-                const td = el.closest('td');
-
-                if (el.value === '') {
-                    td?.classList.remove('cell-excede');
-                    refreshResumen(rootEl);
-                    return;
-                }
-                if (!Number.isFinite(val) || val < 0) val = 0;
-                if (!Number.isInteger(val)) val = Math.floor(val);
-                if (val > pendiente) {
-                    td?.classList.add('cell-excede');
-                    if (showAlert) showWarn('Cantidad excedida',
-                        `No puedes recibir más de ${new Intl.NumberFormat('es-MX').format(pendiente)} (pendiente).`);
-                    val = pendiente;
-                } else td?.classList.remove('cell-excede');
-
-                el.value = String(val);
-                refreshResumen(rootEl);
-            }
+            // función deshabilitada intencionalmente
+            return;
         }
 
         function refreshResumen(scope = document) {
-            const rows = [...scope.querySelectorAll('input.inp-recibir')];
-            let lineasSel = 0,
-                totalUds = 0;
-            rows.forEach(inp => {
-                const qty = (inp.value || '').trim() === '' ? 0 : Number(inp.value);
-                if (qty > 0) {
-                    lineasSel++;
-                    totalUds += qty;
-                }
-            });
-
-            const lblLineas = document.getElementById('lblLineasSeleccionadas');
-            const lblUnids = document.getElementById('lblTotalUnidades');
-            if (lblLineas) lblLineas.textContent = new Intl.NumberFormat('es-MX').format(lineasSel);
-            if (lblUnids) lblUnids.textContent = new Intl.NumberFormat('es-MX').format(totalUds);
-
-            scope.querySelectorAll('table[data-oc]').forEach(tbl => {
-                let sum = 0;
-                tbl.querySelectorAll('input.inp-recibir').forEach(i => {
-                    if ((i.value || '').trim()) sum += Number(i.value);
-                });
-                const foot = tbl.querySelector('tfoot .sum-oc');
-                if (foot) foot.textContent = new Intl.NumberFormat('es-MX').format(sum);
-            });
+            // No-op: resumen de recepción deshabilitado en esta vista
+            return;
         }
 
         function autollenarPendientes(scope = document, soloChequeados = false) {
-            const tablas = scope.querySelectorAll('table[data-oc]');
-            let marcados = 0;
-
-            tablas.forEach(tbl => {
-                tbl.querySelectorAll('tbody tr').forEach(tr => {
-                    const chk = tr.querySelector('input[type="checkbox"]');
-                    const inp = tr.querySelector('input.inp-recibir');
-                    if (!chk || !inp) return;
-
-                    // si soloChequeados = true, sólo toca las filas que ya están marcadas
-                    if (soloChequeados && !chk.checked) return;
-
-                    const pendiente = Number(inp.dataset.pendiente || 0) || 0;
-
-                    // si es autollenado general, marca el check
-                    if (!soloChequeados) chk.checked = true;
-
-                    inp.value = pendiente ? String(Math.floor(pendiente)) : '';
-                    inp.dispatchEvent(new Event('input')); // para refrescar totales
-                    marcados++;
-                });
-            });
-
-            if (soloChequeados && marcados === 0) {
-                showWarn('Nada seleccionado', 'Marca al menos una línea para autollenar.');
-            }
+            // Deshabilitado: autollenado no aplicable en vista de solo consulta
+            showWarn('Función deshabilitada', 'Autollenar pendientes está deshabilitado en esta vista.');
         }
 
         function limpiarCaptura(scope = document) {
-            scope.querySelectorAll('table[data-oc]').forEach(tbl => {
-                tbl.querySelectorAll('tbody tr').forEach(tr => {
-                    const chk = tr.querySelector('input[type="checkbox"]');
-                    const inp = tr.querySelector('input.inp-recibir');
-                    if (chk) chk.checked = false; 
-                    if (inp) {
-                        inp.value = ''; 
-                        inp.dispatchEvent(new Event('input')); 
-                    }
-                });
-            });
+            // No-op: captura deshabilitada
+            return;
         }
 
         function toggleLinea(chk) {
-            const tr = chk.closest('tr');
-            if (!tr) return;
-
-            const inp = tr.querySelector('input.inp-recibir');
-            if (!inp) return;
-
-            const pendiente = Number(inp.dataset.pendiente || 0) || 0;
-
-            if (chk.checked) {
-                inp.value = pendiente ? String(Math.floor(pendiente)) : '';
-            } else {
-                inp.value = '';
-            }
-
-            inp.dispatchEvent(new Event('input')); 
+            // No-op: selección de línea deshabilitada
+            return;
         }
 
         function previewGRPO() {
-            const scope = document.getElementById('contenidoModal');
-            scope.querySelectorAll('input.inp-recibir').forEach(inp => inp.dispatchEvent(new Event('blur')));
-
-            const entradas = [...scope.querySelectorAll('table[data-oc]')].flatMap(tbl => {
-                const ocNum = Number(tbl.dataset.oc);
-                return [...tbl.querySelectorAll('input.inp-recibir')].map(inp => {
-                    const qty = (inp.value || '').trim() === '' ? 0 : Number(inp.value);
-                    if (!qty) return null;
-                    return {
-                        oc: ocNum,
-                        docEntry: Number(inp.dataset.docentry || 0),
-                        BaseLine: Number(inp.dataset.baseline || -1),
-                        Quantity: qty,
-                        //TaxCode: (inp && inp.dataset ? inp.dataset.taxcode : undefined),
-                        WarehouseCode: (inp && inp.dataset ? inp.dataset.whs : undefined),
-                        ItemCode: (inp && inp.dataset ? inp.dataset.itemcode : undefined)
-                    };
-
-                }).filter(Boolean);
-            });
-
-            if (!entradas.length) {
-                return showWarn('Sin captura', 'No hay cantidades para previsualizar.');
-            }
-
-            const byOC = {};
-            for (const e of entradas) {
-                byOC[e.oc] = byOC[e.oc] || [];
-                byOC[e.oc].push({
-                    BaseLine: e.BaseLine,
-                    ItemCode: e.ItemCode,
-                    //TaxCode: e.TaxCode,
-                    Quantity: e.Quantity,
-                    WarehouseCode: e.WarehouseCode,
-                });
-            }
-            const payloads = Object.entries(byOC).map(([oc, lines]) => ({
-                docNum: Number(oc),
-                docEntry: entradas.find(e => e.oc === Number(oc))?.docEntry || 0,
-                comments: 'Recepción desde Intranet Proveedores 📦 ',
-                lines
-            }));
-
-            Swal.fire({
-                width: 500,
-                title: 'Payload(s) GRPO',
-                html: `<pre style="text-align:left;white-space:pre-wrap;background:#f7f7f8;padding:12px;border-radius:8px;max-height:60vh;overflow:auto;">${escapeHTML(JSON.stringify(payloads,null,2))}</pre>`,
-                confirmButtonText: 'OK'
-            });
+            // Previsualización de GRPO deshabilitada en vista de solo consulta
+            showWarn('Función deshabilitada', 'Previsualizar recepciones está deshabilitado en esta vista.');
         }
 
         if (typeof escapeHTML !== 'function') {
@@ -1300,282 +1144,7 @@
             });
         }
 
-        async function confirmarRecepcion() {
-            if (recepcionEnProceso) {
-                return Swal.fire({
-                    icon: 'info',
-                    title: 'Recepción en proceso',
-                    text: 'Ya se está creando la recepción en SAP, no es necesario volver a presionar el botón.'
-                });
-            }
 
-            document.querySelectorAll('#contenidoModal input.inp-recibir')
-                .forEach(inp => inp.dispatchEvent(new Event('blur')));
-
-            const csrf = document.querySelector("meta[name='csrf-token']").getAttribute('content');
-            const sucursalId = Number(document.getElementById('sucursal_id')?.value || 0);
-            const seleccion = collectCheckedLines(document.getElementById('contenidoModal'));
-            if (!seleccion.length) {
-                return Swal.fire({
-                    icon: 'info',
-                    title: 'Sin selección',
-                    text: 'Marca líneas y captura cantidades para continuar.'
-                });
-            }
-
-            const {
-                rows,
-                grand
-            } = buildPreviewTableRows(seleccion);
-
-            const headerHtml = buildPreviewHeader(seleccion);
-
-            const ok = await Swal.fire({
-                icon: 'question',
-                title: '¿Confirmar recepción?',
-                html: `
-                <div style="text-align:left;max-height:50vh;overflow:auto;">
-
-                    ${headerHtml} 
-
-                    <table style="width:100%;border-collapse:collapse;">
-                        <thead>
-                        <tr>
-                            <th style="border:1px solid #ccc;padding:6px;background:#f0f0f0;text-align:left;">Descripción</th>
-                            <th style="border:1px solid #ccc;padding:6px;background:#f0f0f0;text-align:right;">Cantidad a recibir</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        ${rows}
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <td style="border:1px solid #ddd;padding:6px;text-align:right;font-weight:700;">Total</td>
-                            <td style="border:1px solid #ddd;padding:6px;text-align:right;font-weight:800;">${fmt(grand)}</td>
-                        </tr>
-                        </tfoot>
-                    </table>
-                    <div style="margin-top:10px;color:#666;font-size:.9rem;">
-                        Se crearán las recepciones en SAP según lo mostrado.
-                    </div>
-                </div>`,
-                showCancelButton: true,
-                confirmButtonText: 'Sí, continuar',
-                cancelButtonText: 'Revisar'
-            }).then(r => r.isConfirmed);
-
-            if (!ok) return;
-
-            recepcionEnProceso = true;
-
-            const porOC = {};
-            document.querySelectorAll('#contenidoModal table[data-oc]').forEach(tbl => {
-                const oc = Number(tbl.dataset.oc);
-
-                const numAtCard = tbl.closest('.accordion-item')
-                    ?.querySelector('.inp-numatcard')
-                    ?.value?.trim() || '';
-
-                let cardCode = '';
-                const sampleInp = tbl.querySelector('tbody input.inp-recibir');
-                if (sampleInp) {
-                    cardCode = sampleInp.dataset.cardcode || '';
-                }
-
-                const comentarioSap = tbl.closest('.accordion-item')
-                    ?.querySelector('.inp-comentario-grpo')
-                    ?.value?.trim() || '';
-
-                const lines = [];
-                tbl.querySelectorAll('tbody tr').forEach(tr => {
-                    const chk = tr.querySelector('input[type="checkbox"]');
-                    const inp = tr.querySelector('input.inp-recibir');
-                    if (!chk || !inp || !chk.checked) return;
-
-                    const raw = (inp.value || '').trim();
-                    const qty = raw === '' ? 0 : Number(raw);
-                    if (!(qty > 0)) return;
-
-                    const baseLine = parseInt(inp.dataset.baseline || '-1', 10);
-                    const pendiente = parseFloat(inp.dataset.pendiente || '0') || 0;
-
-                    if (baseLine < 0) {
-                        showWarn('Línea sin BaseLine',
-                            `El artículo ${inp.dataset.itemcode || '(sin código)'} no quedó ligado a SAP.`
-                        );
-                        throw new Error('baseline_missing');
-                    }
-                    if (qty > pendiente) {
-                        showWarn('Cantidad excedida', 'La cantidad a recibir supera el pendiente.');
-                        throw new Error('exceso');
-                    }
-
-                    lines.push({
-                        BaseLine: baseLine,
-                        ItemCode: inp.dataset.itemcode || undefined,
-                        //TaxCode: inp.dataset.taxcode || undefined,
-                        Quantity: qty,
-                        WarehouseCode: inp.dataset.whs || undefined
-                    });
-                });
-
-                if (lines.length) {
-                    if (!numAtCard) {
-                        showWarn('Falta referencia', 'Captura el No. ref. del acreedor para esta OC.');
-                        throw new Error('numAtCard_missing');
-                    }
-                    if (!cardCode) {
-                        showWarn('Falta proveedor', 'No tengo el CardCode de la OC en SAP.');
-                        throw new Error('cardcode_missing');
-                    }
-
-                    porOC[oc] = {
-                        numAtCard,
-                        cardCode,
-                        lines,
-                        comentarioSap
-                    };
-                }
-            });
-
-            const ocs = Object.keys(porOC);
-            if (!ocs.length) {
-                return Swal.fire({
-                    icon: 'info',
-                    title: 'Sin cambios',
-                    text: 'No ingresaste cantidades a recibir.'
-                });
-            }
-            const btn = document.querySelector('.modal-footer .btn.btn-success');
-            const oldText = btn ? btn.textContent : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = 'Creando recepción…';
-            }
-
-            try {
-                const mensajesOK = [];
-                const errores = [];
-
-                for (const oc of ocs) {
-                    const {
-                        numAtCard,
-                        cardCode,
-                        lines,
-                        comentarioSap
-                    } = porOC[oc];
-
-                    const commentSap = comentarioSap ?
-                        `${comentarioSap} | Recepción desde Intranet Proveedores ${Number(oc)}` :
-                        `Recepción desde Intranet Proveedores ${Number(oc)}`;
-
-                    const valid = await fetch('/almacen/recepcion/grpo/validar', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrf,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            docNum: Number(oc),
-                            sucursal_id: sucursalId,
-                            cardCode,
-                            numAtCard,
-                            lines
-                        })
-                    }).then(async r => {
-                        const text = await r.text();
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(`Respuesta NO JSON (${r.status}): ${text.substring(0,200)}`);
-                        }
-                    });
-
-
-                    if (!valid.ok) {
-                        errores.push(`OC ${oc}: ${(valid.errors || [valid.msg]).join('\n')}`);
-                        continue;
-                    }
-
-                    const createRes = await fetch('/almacen/recepcion/grpo', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrf,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            docNum: Number(oc),
-                            cardCode: cardCode,
-                            comments: commentSap,
-                            numAtCard,
-                            sucursal_id: sucursalId,
-                            lines
-                        })
-                    }).then(async r => {
-                        const text = await r.text();
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(`Respuesta NO JSON (${r.status}): ${text.substring(0,200)}`);
-                        }
-                    });
-
-                    if (createRes.ok) {
-                        const docNumGrpo = createRes?.data?.DocNum ?? null;
-
-                        mensajesOK.push(`GRPO <b>${docNumGrpo || '(sin DocNum)'}</b> creado (OC ${oc})`);
-
-                        grposCreados.push({
-                            oc: Number(oc),
-                            docNum: docNumGrpo,
-                            numAtCard,
-                            cardCode,
-                            comments: commentSap
-                        });
-                    } else {
-                        errores.push(`OC ${oc}: ${createRes.msg || 'Error al crear Entrada de mercancia'}`);
-                        console.error('Error creando Entrada de mercancia:', createRes);
-                    }
-                }
-
-                if (mensajesOK.length && !errores.length) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Recepción creada',
-                        html: mensajesOK.join('<br>'),
-                        showCancelButton: true,
-                        confirmButtonText: 'Imprimir reporte',
-                        cancelButtonText: 'Cerrar'
-                    }).then(res => {
-                        if (res.isConfirmed) {
-                            imprimirReporteGRPO(grposCreados, seleccion, window.recepcionContext || null);
-                        } else {
-                            location.reload();
-                        }
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        html: errores.join('<br>') || 'No se creó ninguna recepción.'
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: String(err.message || err)
-                });
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = oldText;
-                }
-                recepcionEnProceso = false;
-            }
-        }
 
 
         const usuario = @json(session('Usuario.Nombre') ?? (session('Usuario.UserName') ?? 'Usuario'));
@@ -1763,30 +1332,8 @@
         }
 
         function collectCheckedLines(scope = document) {
-            const res = [];
-            scope.querySelectorAll('table[data-oc]').forEach(tbl => {
-                const oc = Number(tbl.dataset.oc);
-                tbl.querySelectorAll('tbody tr').forEach(tr => {
-                    const chk = tr.querySelector('input[type="checkbox"]');
-                    const inp = tr.querySelector('input.inp-recibir');
-                    if (!chk || !inp) return;
-                    const raw = (inp.value || '').trim();
-                    const qty = raw === '' ? 0 : Number(raw);
-                    if (!chk.checked || !(qty > 0)) return;
-
-                    const code = (tr.children[2]?.textContent || '').trim();
-                    const desc = (tr.children[3]?.textContent || '').trim();
-                    res.push({
-                        oc,
-                        code,
-                        desc,
-                        qty,
-                        tr,
-                        tbl
-                    });
-                });
-            });
-            return res;
+            // Recepción deshabilitada: no hay líneas seleccionables en la vista simplificada
+            return [];
         }
 
         function fmt(n) {
@@ -1845,35 +1392,10 @@
         }
 
         function buildPreviewHeader(seleccion) {
-            const scope = document.getElementById('contenidoModal');
-            const ocs = Array.from(new Set(seleccion.map(it => it.oc)));
-            let html = '';
-            ocs.forEach(oc => {
-                const tbl = scope.querySelector(`table[data-oc="${oc}"]`);
-                if (!tbl) return;
-
-                const numAtCard = tbl.closest('.accordion-item')
-                    ?.querySelector('.inp-numatcard')
-                    ?.value?.trim() || '';
-
-                const comentarioSap = tbl.closest('.accordion-item')
-                    ?.querySelector('.inp-comentario-grpo')
-                    ?.value?.trim() || '';
-
-                html +=
-                    `<div style="margin-bottom:10px;
-                            padding:8px 10px;
-                            border:1px solid #ffd2a6;
-                            border-radius:6px;
-                            background:#fff7ef;
-                            font-size:.85rem;">
-                    <div style="font-weight:700;margin-bottom:4px;">OC ${oc}</div>
-                    <div><strong>No. ref. del acreedor:</strong> ${escapeHTML(numAtCard || 'Sin captura')}</div>
-                    <div><strong>Comentario recepción:</strong> ${escapeHTML(comentarioSap || 'Sin comentario')}</div>
-                </div>`;
-            });
-
-            return html;
+            // Simplificado: solo mostrar OC en el header de previsualización
+            const ocs = Array.from(new Set((seleccion || []).map(it => it.oc)));
+            if (!ocs.length) return '';
+            return ocs.map(oc => `<div style="margin-bottom:10px;padding:8px 10px;border:1px solid #ffd2a6;border-radius:6px;background:#fff7ef;font-size:.85rem;"><div style="font-weight:700;">OC ${escapeHTML(String(oc))}</div></div>`).join('');
         }
 
         function parseOrdenCompra(raw) {
@@ -1988,85 +1510,26 @@
                                 console.log('ROWS:', rows.length);
 
                                 let html =
-                                    `<div class="row g-2 mb-2">
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <strong>
-                                                <span class="input-group-text" style="background-color: #ffc0999e;" id="basic-addon1">
-                                                    # Folio del Proveedor
-                                                </span>
-                                            </strong>
-                                        </div>
-                                        <input class="form-control form-control-sm inp-numatcard"
-                                            placeholder="Remisión || Folio proveedor" />
-                                    </div>
-                                </div>
-
-                                <div class="row g-2 mb-2">
-                                    <div class="col-12">
-                                        <label class="form-label mb-1" style="font-size:.85rem;">
-                                            Comentario de recepción (se enviará a SAP)
-                                        </label>
-                                        <textarea class="form-control form-control-sm inp-comentario-grpo"
-                                                rows="2"
-                                                placeholder="Comentario para SAP (opcional)"></textarea>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex gap-2 mb-2">
-                                    <button type="button" class="btn btn-outline-orange btn-sm"
-                                    onclick="autollenarPendientes(document.getElementById('contenidoModal'), false)">
-                                    Autollenar
-                                    </button>
-
-                                    <button type="button" class="btn btn-light btn-sm"
-                                    onclick="limpiarCaptura(document.getElementById('contenidoModal'))">
-                                    Limpiar
-                                    </button>
-                                    ${ES_ADMIN? `
-                                                                            <button type="button" class="btn btn-success btn-sm" onclick="previewGRPO()">
-                                                                            Previsualizar
-                                                                            </button>
-                                                                            <button type="button" class="btn btn-secondary btn-sm" onclick="imprimirModal()">
-                                                                            Imprimir
-                                                                            </button>`:''
-                                    }
-                                </div>
-
-                                <div class="oc-table-wrapper">
-                                    <table data-oc="${orden}" class="table-sticky-right oc-table" style="width:100%;border-collapse:collapse;margin-top:10px;">
-                                        <thead>
-                                            <tr style="background:#ffc0999e;">
-                                                <th style="padding:8px;border:1px solid #ddd;width:40px;text-align:center;">#</th>
-                                                <th style="padding:8px;border:1px solid #ddd;width:50px;text-align:center;">✓</th>
-                                                <th style="padding:8px;border:1px solid #ddd;text-align:left;">Código</th>
-                                                <th style="padding:8px;border:1px solid #ddd;text-align:left;">Artículo</th>
-                                                <th style="padding:8px;border:1px solid #ddd;width:80px;text-align:right;">Pendiente</th>
-                                                <th style="padding:8px;border:1px solid #ddd;width:100px;text-align:center;">Recepción</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            ${rows.map(r => {
-                                            const inputId = `rec-${oid}-${r.idx}`;
-                                            return `<tr>
-                                                                            <td style="padding:6px;border:1px solid #eee;text-align:center;">${r.idx}</td>
-                                                                            <td style="padding:6px;border:1px solid #eee;text-align:center;"><input type="checkbox"class="chk-linea" style="transform:scale(1.2);accent-color:#ee7826;" onchange="toggleLinea(this)"></td>
-                                                                            <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.code)}</td>
-                                                                            <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.desc)}</td>
-                                                                            <td style="padding:6px;border:1px solid #eee;text-align:right;">${r.cant % 1 === 0 ? r.cant : r.cant.toFixed(2)} ${escapeHTML(r.um)}</td>
-                                                                            <td class="sticky-right" style="padding:6px;border:1px solid #eee;text-align:right;"> <input id="${inputId}"class="form-control form-control-sm inp-recibir" type="number" inputmode="numeric" step="1" min="0" aria-label="Cantidad a recibir" placeholder="0" style="text-align:right;" data-pendiente="${r.cant}" data-desc="${escapeHTML(r.desc).replace(/"/g,'&quot;')}" data-um="${escapeHTML(r.um).replace(/"/g,'&quot;')}" /></td>
-                                                                        </tr>`;}).join('')}
-                                        </tbody>
-
-                                        <tfoot>
-                                            <tr>
-                                                <td colspan="5" style="padding:8px;border-top:2px solid #ddd;text-align:right;font-weight:600;"> Total capturado: </td>
-                                                <td class="sticky-right" style="padding:8px;border-top:2px solid #ddd;text-align:right;font-weight:700;"> <span class="sum-oc">0</span> </td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                </div>`;
+                                    `<div class="oc-table-wrapper">
+                                        <table data-oc="${orden}" class="table-sticky-right oc-table" style="width:100%;border-collapse:collapse;margin-top:10px;">
+                                            <thead>
+                                                <tr style="background:#ffc0999e;">
+                                                    <th style="padding:8px;border:1px solid #ddd;text-align:left;">Código</th>
+                                                    <th style="padding:8px;border:1px solid #ddd;text-align:left;">Artículo</th>
+                                                    <th style="padding:8px;border:1px solid #ddd;width:120px;text-align:right;">Pendiente</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${rows.map(r => `
+                                                    <tr>
+                                                        <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.code)}</td>
+                                                        <td style="padding:6px;border:1px solid #eee;">${escapeHTML(r.desc)}</td>
+                                                        <td style="padding:6px;border:1px solid #eee;text-align:right;">${r.cant % 1 === 0 ? r.cant : r.cant.toFixed(2)} ${escapeHTML(r.um)}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>`;
 
                                 const target = document.getElementById(`tabla-${oid}`);
                                 if (target) {
@@ -2089,7 +1552,7 @@
                                     po.lines :
                                     (Array.isArray(po?.lines?.value) ? po.lines.value : []);
 
-                                console.groupCollapsed(`[MAP] OC ${numLimpio}`);
+                                /* console.groupCollapsed(`[MAP] OC ${numLimpio}`);
                                 console.log('DocEntry:', po?.po?.DocEntry, 'DocNum:', po?.po?.DocNum,
                                     'CardCode:', po?.po?.CardCode);
                                 console.table((linesArr || []).map(l => ({
@@ -2101,7 +1564,7 @@
                                     TaxCode: l.TaxCode,
                                     Whs: l.WarehouseCode
                                 })));
-                                console.groupEnd();
+                                console.groupEnd(); */
 
                                 if (!linesArr || !linesArr.length) {
                                     console.error('[MAP] linesArr vacío para OC', numLimpio, po);
@@ -2129,7 +1592,6 @@
                                         inp.dataset.numAtCard = po?.po?.NumAtCard || '';
                                         inp.dataset.cardcode = po?.po?.CardCode || '';
                                         inp.dataset.itemcode = l.ItemCode ?? '';
-                                        //inp.dataset.taxcode = l.TaxCode || '';
                                         inp.dataset.whs = l.WarehouseCode || '';
                                         inp.dataset.uom = l.UoMEntry ?? '';
                                     }

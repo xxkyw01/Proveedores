@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/rol/almacen/grpo.css') }}">
 
     @php
-        $rolId = session('Usuario.IdRol');
-        $sucursalIdUsuario = session('Usuario.SucursalID');
+    $rolId = session('Usuario.IdRol');
+    $sucursalIdUsuario = session('Usuario.SucursalID');
     @endphp
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -67,7 +67,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Detalles</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body" id="modalBodyDetallesRecepcion">
                 </div>
@@ -235,6 +234,37 @@
             body.innerHTML = html;
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
+
+            try {
+                const header = modalEl.querySelector('.modal-header');
+                if (header) {
+                    header.style.position = header.style.position || 'relative';
+                    let scanBtn = header.querySelector('.modal-scan-btn');
+                    if (!scanBtn) {
+                        scanBtn = document.createElement('button');
+                        scanBtn.type = 'button';
+                        scanBtn.className = 'modal-scan-btn';
+                        scanBtn.setAttribute('aria-label', 'Escanear');
+                        scanBtn.title = 'Escanear (lector)';
+                        scanBtn.style.position = 'absolute';
+                        scanBtn.style.top = '10px';
+                        scanBtn.style.right = '10px';
+                        scanBtn.style.zIndex = '1050';
+                        scanBtn.style.border = 'none';
+                        scanBtn.style.background = 'transparent';
+                        scanBtn.style.color = 'orange';
+                        scanBtn.style.fontSize = '30px';
+                        scanBtn.innerHTML = '<i class="fa fa-barcode" aria-hidden="true"></i>';
+                        scanBtn.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            openScanner(false);
+                        });
+                        header.appendChild(scanBtn);
+                    }
+                }
+            } catch (e) {
+                console.warn('No pude insertar el icono de escaneo en la cabecera del modal', e);
+            }
         }
 
         function formatHoraAMPM(hora = '') {
@@ -528,9 +558,13 @@
             ${ES_ADMIN || ES_ALMACEN ? `
                 <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
                     <button type="button" class="btn btn-outline-orange btn-sm" onclick="abrirModalAgregarOC()">
-                        + Agregar OC
+                        + Agregar Orden de compras
                     </button>
-                    <small class="text-muted" style="align-self:center;">Adjunta otra OC a esta cita</small>
+            
+                    <button type="button" class="btn btn-outline-blue btn-sm" onclick="abrirAltaCodigo()">
+                        Alta Codigo de Barras
+                    </button>
+
                 </div>` 
             : ''}
 
@@ -562,7 +596,6 @@
                     <button class="btn-cancel" type="button" onclick="previsualizarGRPO()">Previsualizar</button>
                     ` : ''                
                 }
-            <button class="btn-scanner" type="button"  onclick="openScanner(false)">Escanear</button>
             <button class="btn-confirm" type="button" onclick="confirmarSeleccion()">Confirmar</button>
             <button class="btn-cancel" type="button" data-bs-dismiss="modal" onclick="cerrarDetalles()">Cerrar</button>
             </div>
@@ -709,7 +742,26 @@
             if (!barcode) return;
             const tr = findRowByBarcodeLocal(barcode);
             if (!tr) {
-                return Swal.fire('No encontrado', `Ese barcode no está en la tabla cargada.\n${barcode}`, 'warning');
+                const res = await Swal.fire({
+                    title: 'Código no encontrado',
+                    html: `<div>El código <b>${escapeHTML(barcode)}</b> no está en la OC cargada.</div>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    denyButtonText: 'Dar de alta código',
+                    cancelButtonText: 'Cerrar'
+                });
+
+                if (res.isDenied) {
+                    return abrirAltaCodigo(barcode);
+                }
+
+                if (res.isConfirmed) {
+                    // Abrir captura manual (mismo comportamiento que openScanner(true))
+                    return openScanner(true);
+                }
+
+                return;
             }
             const inp = tr.querySelector('input.inp-recibir');
             if (!inp) return;
@@ -842,7 +894,7 @@
                     input: 'text',
                     inputPlaceholder: 'Ej: ABC123 (o pega QR)',
                     showCancelButton: true,
-                    confirmButtonText: 'Procesar',
+                    //confirmButtonText: 'Procesar',
                     preConfirm: (val) => {
                         const raw = (val || '').trim();
                         if (!raw) Swal.showValidationMessage('Escribe un código');
@@ -2225,6 +2277,74 @@
             win.document.open();
             win.document.write(html);
             win.document.close();
+        }
+
+        // Abrir modal/simple prompt para dar de alta un barcode no reconocido
+        async function abrirAltaCodigo(prefilledBarcode = '') {
+            const barcodeVal = String(prefilledBarcode || '').trim();
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Dar de alta código de barra',
+                html: `
+                    <input id="swal-barcode" class="swal2-input" placeholder="Código de barra" value="${escapeHTML(barcodeVal)}">
+                    <input id="swal-itemcode" class="swal2-input" placeholder="ItemCode (código de artículo SAP)">
+                    <input id="swal-uom" class="swal2-input" placeholder="UOM / Unidad de medida (Ej: CJA, PZA)">
+                    <div style="font-size:12px;color:#666;margin-top:6px;">El registro se guardará como pendiente para soporte.</div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                preConfirm: () => {
+                    const b = document.getElementById('swal-barcode')?.value?.trim() || '';
+                    const it = document.getElementById('swal-itemcode')?.value?.trim() || '';
+                    const u = document.getElementById('swal-uom')?.value?.trim() || '';
+                    if (!b) Swal.showValidationMessage('Falta el código de barra');
+                    if (!it) Swal.showValidationMessage('Falta el código de artículo (ItemCode)');
+                    if (!u) Swal.showValidationMessage('Falta la unidad de medida (UOM)');
+                    return { barcode: b, item_code: it, uom: u };
+                }
+            });
+
+            if (!formValues) return;
+
+            try {
+                const resp = await fetch('/almacen/guardar-codigo-barra', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        barcode: formValues.barcode,
+                        item_code: formValues.item_code,
+                        uom: formValues.uom
+                    })
+                });
+
+                const contentType = (resp.headers.get('content-type') || '').toLowerCase();
+                let j = null;
+                if (contentType.includes('application/json')) {
+                    j = await resp.json();
+                } else {
+                    const text = await resp.text();
+                    throw new Error(text ? text.slice(0, 1000) : `HTTP ${resp.status}`);
+                }
+
+                if (!resp.ok || (j && j.ok === false)) {
+                    throw new Error(j?.msg || j?.message || `HTTP ${resp.status}`);
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Guardado',
+                    text: j.msg || 'Registro guardado como pendiente',
+                    timer: 1600,
+                    showConfirmButton: false
+                });
+            } catch (e) {
+                console.error('guardar codigo', e);
+                Swal.fire('Error', String(e.message || e), 'error');
+            }
         }
     </script>
 @stop
