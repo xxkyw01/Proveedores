@@ -240,7 +240,6 @@ body {
   align-items: center;
 }
 
-/* Cambiar color del día seleccionado */
 .flatpickr-day.selected,
 .flatpickr-day.startRange,
 .flatpickr-day.endRange {
@@ -249,19 +248,16 @@ body {
   color: rgb(0, 0, 0);
 }
 
-/* Hover sobre días */
 .flatpickr-day:hover {
   background: #009cd6 !important;
 }
 
-/* Fondo y bordes del calendario */
 .flatpickr-calendar {
   border: 2px solid #ee7826;
   border-radius: 12px;
   box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Header del mes */
 .flatpickr-months .flatpickr-month {
   background-color: #ee7826;
   color: rgb(2, 2, 2);
@@ -388,7 +384,6 @@ body {
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Efecto de parpadeo para el contenedor del vehículo */
 @keyframes highlightFade {
   0% {
     box-shadow: 0 0 0px 4px rgba(255, 165, 0, 0.6);
@@ -433,7 +428,6 @@ body {
   animation: highlightFade 1.5s ease-in-out;
 }
 
-/*diseño paso 5 : Resumen de Cita de Entrega */
 .titulo-seccion {
   color: #ee7826;
   padding: 10px 15px;
@@ -481,7 +475,6 @@ body {
   }
 }
 
-/* Tabla general */
 .tabla-resumen {
   width: 100%;
   border-collapse: collapse;
@@ -489,7 +482,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* Encabezado de la tabla la de color  pastel */
 .tabla-resumen thead th {
   background-color: #fff1e5;
   color: #ee7826;
@@ -498,7 +490,6 @@ body {
   padding: 12px;
 }
 
-/* Celdas */
 .tabla-resumen td {
   border: 1px solid #f2c8a3;
   padding: 10px;
@@ -506,7 +497,6 @@ body {
   background-color: #fffdfc;
 }
 
-/* Alternar fondo */
 .tabla-resumen tbody tr:nth-child(even) {
   background-color: #fff7f1;
 }
@@ -515,7 +505,6 @@ body {
   display: none;
 }
 
-/*cursor*/
 .step-item {
   cursor: not-allowed;
 }
@@ -546,10 +535,10 @@ body {
   }
 
   .step-item .label {
-    display: none; /* Ocultar los textos debajo de los círculos */
+    display: none; 
   }
 
   .line {
-    display: none; /* Ocultar la línea entre pasos */
+    display: none;
   }
 }

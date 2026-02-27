@@ -17,7 +17,6 @@
                 <i class="fas fa-shipping-fast text-orange"></i> Citas Express Recepción Inmediata
             </h4>
 
-            <!-- FORMULARIO COMPLETO -->
             <form id="form-cita-express">
                 <div class="mb-3">
                     <label for="ciudad" class="form-label">Ciudad</label>
@@ -83,7 +82,7 @@
             </form>
         </div>
 
-    </div> {{-- Cierra container-fluid --}}
+    </div>
 
     <script>
         document.getElementById('ciudad').addEventListener('change', function() {

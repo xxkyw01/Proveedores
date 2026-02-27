@@ -271,7 +271,6 @@ class GestionSupplierController extends Controller
 
             return response()->json($evento);
         } catch (\Throwable $e) {
-            //Log::error('getDetails error: ' . $e->getMessage());
             return response()->json(['error' => 'Error interno al obtener detalles'], 500);
         }
     }
@@ -289,7 +288,6 @@ class GestionSupplierController extends Controller
     public function getArticulosPendientes($orden)
     {
         $articulos = DB::connection('sqlsrv_proveedores')
-            //->select("EXEC sp_Consultar_ArticulosPendientes @NumeroOrdenCompra = ?", [$orden]);
             ->select("EXEC sp_Consultar_ArticulosPendientes_v2 @NumeroOrdenCompra = ?", [(int)$orden]);
 
         return response()->json($articulos);
@@ -366,7 +364,6 @@ class GestionSupplierController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente.']);
         } catch (\Throwable $e) {
-            //Log::error('actualizarEstado error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()], 500);
         }
     }
@@ -601,11 +598,7 @@ class GestionSupplierController extends Controller
     {
         try {
             $docNum = (int) trim($docNum);
-            //Log::info('sapGetPO IN', ['docNum' => $docNum]);
-
             $qHead = "PurchaseOrders?\$filter=DocNum eq $docNum";
-            //Log::info('sapGetPO qHead', ['q' => $qHead]);
-
             $headArr = $this->slToArray($sl->request('GET', $qHead));
 
             if (!isset($headArr['value'][0])) {
@@ -620,7 +613,6 @@ class GestionSupplierController extends Controller
             $docEntry = $po['DocEntry'] ?? null;
 
             if (!$docEntry) {
-                //Log::error('sapGetPO sin DocEntry', ['po' => $po]);
                 return response()->json([
                     'ok'  => false,
                     'msg' => 'La respuesta de SAP no contiene DocEntry',
@@ -629,7 +621,6 @@ class GestionSupplierController extends Controller
             }
 
             $qLines = "PurchaseOrders($docEntry)";
-            //Log::info('sapGetPO qLines', ['q' => $qLines]);
 
             $poFull = $this->slToArray($sl->request('GET', $qLines));
             $lines  = $poFull['DocumentLines'] ?? [];
@@ -641,10 +632,6 @@ class GestionSupplierController extends Controller
             ]);
         } catch (ClientException $e) {
             $body = (string) $e->getResponse()->getBody();
-            /* Log::error('sapGetPO ClientException', [
-                'msg'     => $e->getMessage(),
-                'sapBody' => $body,
-            ]); */
 
             return response()->json([
                 'ok'      => false,
@@ -652,10 +639,6 @@ class GestionSupplierController extends Controller
                 'sapBody' => json_decode($body, true) ?? $body,
             ], 500);
         } catch (\Throwable $e) {
-            /* Log::error('sapGetPO error', [
-                'msg'   => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]); */
 
             return response()->json([
                 'ok'  => false,
@@ -716,8 +699,6 @@ class GestionSupplierController extends Controller
 
         try {
             $qHead = "PurchaseOrders?\$filter=DocNum eq $docNum";
-            //Log::info('crearGRPO qHead', ['q' => $qHead]);
-
             $headArr = $this->slToArray($sl->request('GET', $qHead));
 
             if (!isset($headArr['value'][0])) {
@@ -732,7 +713,6 @@ class GestionSupplierController extends Controller
             $docEntry = $po['DocEntry'] ?? null;
 
             if (!$docEntry) {
-                //Log::error('crearGRPO sin DocEntry', ['po' => $po]);
                 return response()->json([
                     'ok'  => false,
                     'msg' => 'La respuesta de SAP no contiene DocEntry',
@@ -778,8 +758,6 @@ class GestionSupplierController extends Controller
                 'DocumentLines' => $docLines,
             ];
 
-            //Log::info('crearGRPO payload', $payload);
-
             $res  = $sl->request('POST', 'PurchaseDeliveryNotes', ['json' => $payload]);
             $json = $this->slToArray($res);
 
@@ -790,10 +768,6 @@ class GestionSupplierController extends Controller
             ], 200);
         } catch (ClientException $e) {
             $body = (string) $e->getResponse()->getBody();
-            /* Log::error('crearGRPO ClientException', [
-                'msg'     => $e->getMessage(),
-                'sapBody' => $body,
-            ]); */
 
             return response()->json([
                 'ok'      => false,
@@ -801,11 +775,6 @@ class GestionSupplierController extends Controller
                 'sapBody' => json_decode($body, true) ?? $body,
             ], 500);
         } catch (\Throwable $e) {
-            /* Log::error('crearGRPO error', [
-                'msg'   => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]); */
-
             return response()->json([
                 'ok'  => false,
                 'msg' => 'Error interno al crear la GRPO',

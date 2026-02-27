@@ -447,8 +447,6 @@ hr {
   background-color: rgb(238 120 38 / 10%) !important;
 }
 
-/*2.1 sidebbar*/
-
 .sidebar {
   height: 100vh;
   width: 250px;
@@ -560,8 +558,6 @@ hr {
   flex-direction: row;
 }
 
-/*2.2 wrimagecard*/
-
 .wrimagecard {
   margin-top: 0;
   margin-bottom: 0;
@@ -617,8 +613,6 @@ a.wrimagecard:hover,
   transition: color 0.3s ease;
 }
 
-/*2.3 task-list*/
-
 .task-list {
   padding: 0 !important;
 }
@@ -636,8 +630,6 @@ a.wrimagecard:hover,
   background: #ecf0f1;
   transition: all 0.2s ease;
 }
-
-/**/
 
 .vh-4 {
   min-height: 4em;
@@ -662,20 +654,20 @@ a.wrimagecard:hover,
 }
 
 .pagination {
-  --bs-pagination-color: #ed7826; /* Texto naranja para botones inactivos */
-  --bs-pagination-bg: transparent; /* Fondo transparente (opcional) */
-  --bs-pagination-border-color: transparent; /* Sin bordes */
+  --bs-pagination-color: #ed7826; 
+  --bs-pagination-bg: transparent; 
+  --bs-pagination-border-color: transparent; 
 
-  --bs-pagination-hover-color: #ed7826; /* Texto naranja al hacer hover */
-  --bs-pagination-hover-bg: rgba(255, 255, 255, 0.1); /* Fondo muy claro al hover (opcional) */
+  --bs-pagination-hover-color: #ed7826; 
+  --bs-pagination-hover-bg: rgba(255, 255, 255, 0.1); 
   --bs-pagination-hover-border-color: transparent;
 
   --bs-pagination-focus-color: #ed7826;
   --bs-pagination-focus-bg: transparent;
-  --bs-pagination-focus-box-shadow: none; /* Elimina el sombreado azul al hacer focus */
+  --bs-pagination-focus-box-shadow: none; 
 
-  --bs-pagination-active-color: #fff; /* Texto blanco en página activa */
-  --bs-pagination-active-bg: #ed7826; /* Fondo naranja en página activa */
+  --bs-pagination-active-color: #fff; 
+  --bs-pagination-active-bg: #ed7826;
   --bs-pagination-active-border-color: #ed7826;
 }
 
@@ -688,7 +680,6 @@ a.wrimagecard:hover,
 body.swal2-toast-shown .swal2-container {
   width: 100% !important;
   max-width: 100% !important;
-  /*background: url(https://media.tenor.com/xzjlrhYq_lQAAAAj/cat-nyan-cat.gif) left top no-repeat rgba(0, 0, 123, 0.4);*/
   background: rgba(0, 0, 123, 0.4);
   overflow-y: auto;
 }
@@ -842,8 +833,6 @@ body.swal2-toast-shown .swal2-container {
   font-size: 1.6em;
   margin-right: 15px;
 }
-
-/* ======================================================= */
 
 .highcharts-credits {
   display: none !important;
@@ -1075,18 +1064,13 @@ text.highcharts-drilldown-axis-label {
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
   color: #ed7826 !important;
-  /*background-color: rgb(238 120 38 / 10%) !important;*/
 
 }
 
 .nav-link {
   color: #000 !important;
 }
-/*
-.form-control {
-    border: var(--bs-border-width) solid #ec7726 !important;
-}
-*/
+
 .form-control-custom {
   background-color: transparent;
   border: none;
@@ -1177,8 +1161,7 @@ text.highcharts-drilldown-axis-label {
   min-height: calc(0.5em + 0.5em + calc(var(--bs-border-width) * 2)) !important;
 }
 
-/* ===== Scrollbar CSS ===== */
-/* Firefox */
+
 * {
   scrollbar-width: auto;
   scrollbar-color: #ea7625 #f8fafc;
@@ -1308,8 +1291,6 @@ text.highcharts-drilldown-axis-label {
   transition: 0.3s;
 }
 
-
-/* 🔸 Quitar cuadro negro del botón activo */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
     background-color: #ee7826 !important;
     color: white !important;
@@ -1318,7 +1299,6 @@ text.highcharts-drilldown-axis-label {
     border-radius: 0.375rem !important;
 }
 
-/* 🔸 Estilo al hacer hover sobre cualquier botón */
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
     background-color: #ee7826 !important;
     color: white !important;
@@ -1326,7 +1306,6 @@ text.highcharts-drilldown-axis-label {
     box-shadow: none !important;
 }
 
-/* 🔸 Estilo general a los botones para mantener coherencia */
 .dataTables_wrapper .dataTables_paginate .paginate_button {
     border: none !important;
     padding: 6px 12px !important;
@@ -1336,7 +1315,6 @@ text.highcharts-drilldown-axis-label {
     color: #333 !important;
 }
 
-/* 🔸 Desactivar pointer events en botones deshabilitados */
 .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
     background-color: #e9ecef !important;
     color: #adb5bd !important;
@@ -1344,8 +1322,6 @@ text.highcharts-drilldown-axis-label {
     box-shadow: none !important;
 }
 
-/* ===== Logo La concha  ===== */
-/* Tamaño del logo general */
 .logo-header {
   max-height: 50px;
 }
@@ -1356,12 +1332,10 @@ text.highcharts-drilldown-axis-label {
   transition: all 0.2s ease-in-out;
 }
 
-/* ======================================================= */
-
 @media (max-width: 991.98px) {
   .offcanvas-collapse {
     position: fixed;
-    top: 75px; /* Height of navbar */
+    top: 75px; 
     bottom: 0;
     left: 100%;
     width: 100%;
@@ -1378,7 +1352,6 @@ text.highcharts-drilldown-axis-label {
   }
 }
 
-/* Tamaño para móviles */
 @media (max-width: 768px) {
   .logo-header {
     max-height: 35px;
@@ -1410,7 +1383,6 @@ text.highcharts-drilldown-axis-label {
   }
 }
 
-/* Comportamiento en móviles */
 @media (max-width: 991.98px) {
   .layout {
     flex-direction: column;
@@ -1441,10 +1413,6 @@ text.highcharts-drilldown-axis-label {
   }
 }
 
-
-
-
-/* Comportamiento en escritorio */
 @media (min-width: 992px) {
   .sidebar {
     position: fixed;

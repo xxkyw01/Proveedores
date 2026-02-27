@@ -14,13 +14,13 @@ class ProveedorAuthController extends Controller
 {
     private function validateRecaptcha(Request $request): bool
     {
-        $token = $request->input('g-recaptcha-response'); // v2 manda este campo solo
+        $token = $request->input('g-recaptcha-response');
         if (!$token) return false;
 
         $resp = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
             'secret' => config('services.recaptcha.secret_key'),
             'response' => $token,
-            'remoteip' => $request->ip(), // opcional
+            'remoteip' => $request->ip(), 
         ])->json();
 
         return (bool)($resp['success'] ?? false);
@@ -210,10 +210,10 @@ class ProveedorAuthController extends Controller
 
     public function logout(Request $request)
     {
-        //Auth::logout(); // Cierra la sesión de Laravel
-        $request->session()->invalidate(); // Invalida la sesión actual
-        $request->session()->flush(); // Elimina todos los datos de la sesión
-        $request->session()->regenerateToken(); // Regenera el token CSRF para seguridad
+
+        $request->session()->invalidate(); 
+        $request->session()->flush(); 
+        $request->session()->regenerateToken(); 
         return redirect('/')->with([
             'message' => 'Has cerrado sesión exitosamente.',
             'alert-type' => 'success'

@@ -9,7 +9,6 @@ class RolAdmin
 {
     public function handle($request, Closure $next)
     {
-        // LOG TEMPORAL: inspeccionar estado de sesión para depuración de 419
         try {
             Log::debug('RolAdmin middleware - session snapshot', [
                 'session_all' => session()->all(),

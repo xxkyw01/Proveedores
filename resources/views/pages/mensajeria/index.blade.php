@@ -9,7 +9,6 @@
 
     <div class="container">
         <div class="row h-100">
-            <!-- Sidebar -->
             <div class="col-md-4 border-end d-flex flex-column p-0 bg-light">
                 <div class="p-3 border-bottom bg-light">
                     <input type="text" id="busquedaChat" class="form-control bg-secondary" placeholder="Buscar...">
@@ -22,7 +21,6 @@
                 </button>
             </div>
 
-            <!-- Chat Window -->
             <div class="col-md-8 d-flex flex-column p-0 bg-white">
                 <div class="p-3 border-bottom d-flex align-items-center bg-light">
                     <button class="btn btn-outline-secondary me-2 d-none" id="btnVolver" onclick="salirDelChat()">
@@ -49,28 +47,23 @@
         </div>
     </div>
 
-    <!--MODAL -->
     <div class="modal fade" id="modalContactos" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-md">
             <div class="modal-content shadow">
 
-                <!-- HEADER -->
                 <div class="modal-header bg-orange text-white">
                     <h5 class="modal-title"><i class="bi bi-chat-dots-fill me-2"></i>Selecciona un contacto</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- BODY CON SCROLL -->
                 <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
                     <input type="text" id="buscadorContactos" class="form-control mb-3"
                         placeholder="Buscar por nombre...">
 
-                    <!-- Mensaje si no hay coincidencias -->
                     <div id="mensaje-vacio" class="text-center text-muted my-2" style="display: none;">
                         No se encontraron resultados
                     </div>
 
-                    {{-- <h6 class="text-primary mt-3"><i class="bi bi-person-badge-fill me-2"></i>Usuarios Internos</h6> --}}
                     <ul id="lista-usuarios" class="list-group mb-4">
                         @foreach ($contactos->where('tipo', 'U') as $c)
                             <li class="list-group-item contacto d-flex justify-content-between align-items-center"
@@ -81,7 +74,6 @@
                         @endforeach
                     </ul>
 
-                    {{-- <h6 class="text-warning"><i class="bi bi-truck-front-fill me-2"></i>Proveedores</h6> --}}
                     <ul id="lista-proveedores" class="list-group">
                         @foreach ($contactos->where('tipo', 'P') as $c)
                             <li class="list-group-item contacto d-flex justify-content-between align-items-center"
@@ -93,7 +85,6 @@
                     </ul>
                 </div>
 
-                <!-- FOOTER -->
                 <div class="modal-footer d-flex justify-content-between">
                     <span class="text-muted" id="totalContactos">Total: {{ count($contactos) }}
                         contacto{{ count($contactos) !== 1 ? 's' : '' }}</span>
@@ -122,7 +113,6 @@
             contactoSeleccionado = null;
             tipoContacto = null;
 
-            // Ocultar chat y mostrar introducción
             const divMensajes = document.getElementById('mensajes');
             divMensajes.style.display = 'none';
             divMensajes.innerHTML = '';
@@ -240,9 +230,7 @@
                     document.getElementById('contenedorFormulario').style.display =
                         'block';
 
-                    // limpiar los mensajes no leidos cunado abro el chat! 
                     marcarComoLeido(contactoSeleccionado, tipoContacto);
-
                     cargarMensajes();
                     bootstrap.Modal.getInstance(document.getElementById('modalContactos')).hide();
                 });
@@ -286,68 +274,64 @@
         });
 
         cargarChats();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputBusqueda = document.getElementById('buscadorContactos');
+            const totalSpan = document.getElementById('totalContactos');
+            const mensajeVacio = document.getElementById('mensaje-vacio');
+
+            const encabezadoUsuarios = document.querySelector('h6.text-primary');
+            const listaUsuarios = document.getElementById('lista-usuarios');
+
+            const encabezadoProveedores = document.querySelector('h6.text-warning');
+            const listaProveedores = document.getElementById('lista-proveedores');
+
+            inputBusqueda.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                let total = 0;
+                let usuariosVisibles = 0;
+                let proveedoresVisibles = 0;
+
+                document.querySelectorAll('.contacto').forEach(item => {
+                    const nombre = item.getAttribute('data-nombre');
+                    const visible = nombre.includes(query);
+
+                    item.style.display = visible ? '' : 'none';
+
+                    if (visible) {
+                        total++;
+                        if (item.dataset.tipo === 'U') usuariosVisibles++;
+                        if (item.dataset.tipo === 'P') proveedoresVisibles++;
+                    }
+                });
+
+                encabezadoUsuarios.style.display = usuariosVisibles > 0 ? '' : 'none';
+                listaUsuarios.style.display = usuariosVisibles > 0 ? '' : 'none';
+
+                encabezadoProveedores.style.display = proveedoresVisibles > 0 ? '' : 'none';
+                listaProveedores.style.display = proveedoresVisibles > 0 ? '' : 'none';
+
+                mensajeVacio.style.display = total === 0 ? 'block' : 'none';
+                totalSpan.innerText = `Total: ${total} contacto${total !== 1 ? 's' : ''}`;
+            });
+
+            document.querySelectorAll('.contacto').forEach(c => {
+                c.addEventListener('click', function() {
+                    contactoSeleccionado = this.dataset.id;
+                    tipoContacto = this.dataset.tipo;
+                    document.getElementById('nombre-contacto').innerText = this.innerText.trim();
+                    document.getElementById('introMensaje').style.display = 'none';
+                    document.getElementById('mensajes').style.display = 'flex';
+                    document.getElementById('btnVolver').classList.remove('d-none');
+                    document.getElementById('contenedorFormulario').style.display = 'block';
+
+                    marcarComoLeido(contactoSeleccionado, tipoContacto);
+                    cargarMensajes();
+                    bootstrap.Modal.getInstance(document.getElementById('modalContactos')).hide();
+                });
+            });
+        });
     </script>
-
-    <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const inputBusqueda = document.getElementById('buscadorContactos');
-    const totalSpan = document.getElementById('totalContactos');
-    const mensajeVacio = document.getElementById('mensaje-vacio');
-
-    const encabezadoUsuarios = document.querySelector('h6.text-primary');
-    const listaUsuarios = document.getElementById('lista-usuarios');
-
-    const encabezadoProveedores = document.querySelector('h6.text-warning');
-    const listaProveedores = document.getElementById('lista-proveedores');
-
-    inputBusqueda.addEventListener('input', function () {
-        const query = this.value.toLowerCase().trim();
-        let total = 0;
-        let usuariosVisibles = 0;
-        let proveedoresVisibles = 0;
-
-        document.querySelectorAll('.contacto').forEach(item => {
-            const nombre = item.getAttribute('data-nombre');
-            const visible = nombre.includes(query);
-
-            item.style.display = visible ? '' : 'none';
-
-            if (visible) {
-                total++;
-                if (item.dataset.tipo === 'U') usuariosVisibles++;
-                if (item.dataset.tipo === 'P') proveedoresVisibles++;
-            }
-        });
-
-        encabezadoUsuarios.style.display = usuariosVisibles > 0 ? '' : 'none';
-        listaUsuarios.style.display = usuariosVisibles > 0 ? '' : 'none';
-
-        encabezadoProveedores.style.display = proveedoresVisibles > 0 ? '' : 'none';
-        listaProveedores.style.display = proveedoresVisibles > 0 ? '' : 'none';
-
-        mensajeVacio.style.display = total === 0 ? 'block' : 'none';
-        totalSpan.innerText = `Total: ${total} contacto${total !== 1 ? 's' : ''}`;
-    });
-
-    // Activar evento de click para cada contacto
-    document.querySelectorAll('.contacto').forEach(c => {
-        c.addEventListener('click', function () {
-            contactoSeleccionado = this.dataset.id;
-            tipoContacto = this.dataset.tipo;
-            document.getElementById('nombre-contacto').innerText = this.innerText.trim();
-            document.getElementById('introMensaje').style.display = 'none';
-            document.getElementById('mensajes').style.display = 'flex';
-            document.getElementById('btnVolver').classList.remove('d-none');
-            document.getElementById('contenedorFormulario').style.display = 'block';
-
-            // limpiar mensajes no leídos
-            marcarComoLeido(contactoSeleccionado, tipoContacto);
-            cargarMensajes();
-            bootstrap.Modal.getInstance(document.getElementById('modalContactos')).hide();
-        });
-    });
-});
-</script>
 
 
 @endsection

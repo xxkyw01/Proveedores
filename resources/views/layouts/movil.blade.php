@@ -14,10 +14,6 @@
         </div>
     </div>
 </body>
-<!---
-<footer>
-    @include('includes.footer')
-</footer>
----->
+
 
 </html>

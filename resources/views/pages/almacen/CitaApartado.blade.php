@@ -95,8 +95,6 @@
 
     <script>
         const csrf = document.querySelector('meta[name="csrf-token"]').content;
-
-        // Controles
         const $ciudad = document.getElementById('ciudad');
         const $sucursal = document.getElementById('sucursal');
         const $anden = document.getElementById('anden');
@@ -114,22 +112,18 @@
             disable: [d => d.getDay() === 0]
         });
 
-        // helper para alternar habilitado en ambos inputs
         function setFechaDisabled(flag) {
             const real = document.getElementById('fecha');
             real.disabled = flag;
-            // el altInput es el que el usuario ve
             if (fpFecha && fpFecha.altInput) {
                 fpFecha.altInput.disabled = flag;
             }
         }
 
-
-        // Ciudades -> Sucursales
         $ciudad.addEventListener('change', async () => {
             $sucursal.innerHTML = "<option value=''>Seleccione...</option>";
             $sucursal.disabled = true;
-            $transporte.disabled = false; // siempre activo
+            $transporte.disabled = false; 
             setFechaDisabled(true);
             $anden.innerHTML = "<option value=''>Seleccione...</option>";
             $horas.innerHTML = "<div class='text-muted'>Seleccione sucursal/andén, transporte y fecha.</div>";
@@ -156,13 +150,9 @@
             $horas.innerHTML = "<div class='text-muted'>Seleccione sucursal, andén, transporte y fecha.</div>";
         });
 
-
-
-        // Cargar horarios disponibles
         async function cargarDisponibilidad() {
             $horas.innerHTML = "<div class='text-muted'>Consultando disponibilidad...</div>";
 
-            // SIEMPRE por andén
             const payload = {
                 sucursal_id: $sucursal.value,
                 fecha: $fecha.value,
@@ -194,7 +184,6 @@
             $horas.innerHTML = '';
 
             function formatearHora12(hora24) {
-                // Quitar milisegundos si existen
                 hora24 = hora24.split('.')[0];
 
                 const [hora, minuto] = hora24.split(':').map(Number);
@@ -225,8 +214,6 @@
         $transporte.addEventListener('change', cargarDisponibilidad);
         $fecha.addEventListener('change', cargarDisponibilidad);
         $anden.addEventListener('change', cargarDisponibilidad);
-
-        // Guardar
         $btnGuardar.addEventListener('click', async () => {
             const horasSel = [...document.querySelectorAll('.hora-check:checked')].map(x => x.value);
 
@@ -234,7 +221,6 @@
                 return Swal.fire('Campos faltantes', 'Completa ciudad, sucursal, transporte y fecha.',
                     'warning');
             }
-            // SIEMPRE por andén: valida directamente
             if (!$anden.value) {
                 return Swal.fire('Falta andén', 'Selecciona un andén.', 'warning');
             }
@@ -245,7 +231,7 @@
             const body = {
                 sucursal_id: $sucursal.value,
                 fecha: $fecha.value,
-                transporte_id: $transporte.value, // fijo 8 en backend por seguridad
+                transporte_id: $transporte.value, 
                 apartado_tipo: $tipo.value,
                 motivo: $motivo.value,
                 anden_id: $anden.value,

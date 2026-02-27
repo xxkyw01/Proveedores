@@ -6,10 +6,7 @@
     @include('includes.scripts.bootstrap')
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <!-- Enlace a la hoja de estilos -->
     <link rel="stylesheet" href="{{ asset('assets/css/rol/proveedor/historial.css') }}">
-
 
     <x-sidebar />
 
@@ -17,7 +14,6 @@
         <div class="row justify-content-center">
 
             <div class="container">
-                <!-- KPIs -->
                 <div class="card shadow p-3 mb-4" style="border: 2px solid #ee7826; border-radius: 17px;">
                     <div class="row row-cols-2 row-cols-md-5 g-2 text-center">
                         <div class="col">
@@ -74,7 +70,6 @@
                             </div>
                         </div>
 
-                        {{-- Nuevo Estados  --}}
                         <div class="col">
                             <div class="card shadow-sm border-0 p-2"
                                 style="background-color: #fff; border-left: 4px solid #ffc107; border-radius: 12px;">
@@ -119,7 +114,6 @@
             </div>
 
             <div class="container">
-                <!-- Tabla -->
                 <div class="card p-3 shadow" style="border: 2px solid #ee7826; border-radius: 20px;">
                     <h5 class="fw-bold mb-3" style="color: #ee7826;">
                         <i class="fas fa-book-open "></i> Historial de Citas Programadas
@@ -187,12 +181,11 @@
                 </div>
             </div>
 
-        </div> {{-- Cierra row --}}
-    </div> {{-- Cierra container-fluid --}}
+        </div> 
+    </div> 
 
 
     </div>
-    <!-- Modal Detalles -->
     <div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-5 shadow">
@@ -214,7 +207,6 @@
                             <div><strong>Teléfono:</strong> <span id="detalleProveedorTelefono">-</span></div>
                         </div>
 
-                        <!---Detalles de la deerecho del destinatario-->
                         <div class="col-md-6 text-end">
                             <small class="text-uppercase text-muted fw-bold"></small>
                             <div class="text-muted fst-italic"></div>
@@ -257,8 +249,6 @@
                         <pre class="border rounded p-3 bg-light" style="white-space: pre-line;" id="detalleOrdenes">-</pre>
                     </div>
 
-
-                    {{-- Extras: Comentario y Evidencia --}}
                     <div class="row mt-3">
                         <div class="col-md-12">
                             <strong class="text-muted">Comentario de almacén:</strong>
@@ -275,14 +265,11 @@
                         </div>
                     </div>
 
-
-
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Descargar PDF -->
     <div class="modal fade" id="modalDescargarPDF" tabindex="-1" aria-labelledby="modalDescargarPDFLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -321,7 +308,6 @@
         </div>
     </div>
 
-    <!-- Modal Solicitud de Cancelación -->
     <div class="modal fade" id="modalCancelarCita" tabindex="-1" aria-labelledby="modalCancelarCitaLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -354,8 +340,6 @@
         </div>
     </div>
 
-
-
     <script>
         document.getElementById('formDescargarPDF').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -369,7 +353,6 @@
                 return;
             }
 
-            // Aquí mandamos a la ruta que genera el PDF
             const url =
                 `/proveedor/reporte/pdf?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&sucursal=${sucursal}`;
             window.open(url, '_blank');
@@ -379,7 +362,6 @@
 
 
         function mostrarDetalle(reserva) {
-            // --- Datos básicos
             document.getElementById('detalleProveedorNombre').innerText = reserva.proveedor_nombre ?? '-';
             document.getElementById('detalleProveedorRFC').innerText = reserva.RFC_proveedor ?? '-';
             document.getElementById('detalleProveedorCorreo').innerText = reserva.Correo ?? '-';
@@ -388,7 +370,6 @@
             document.getElementById('detalleSucursal').innerText = reserva.sucursal_nombre ?? '-';
             document.getElementById('detalleTransporte').innerText = reserva.transporte_nombre ?? '-';
 
-            // Fecha y hora
             document.getElementById('detalleFecha').innerText = reserva.fecha ?
                 reserva.fecha.split('-').reverse().join('/') :
                 '-';
@@ -401,10 +382,8 @@
                 }) :
                 '-';
 
-            // Órdenes de compra ya formateadas por el backend en "ordenes_detalle"
             document.getElementById('detalleOrdenes').innerText = reserva.ordenes_detalle ?? '-';
 
-            // Estado (badge)
             const estado = (reserva.estado || '').toLowerCase().trim();
             const badge = document.getElementById('detalleEstadoModal');
             badge.innerText = reserva.estado ?? '-';
@@ -422,7 +401,6 @@
                 'bg-light text-dark'
             );
 
-            // ===== Comentario de almacén =====
             const detalleComentario = document.getElementById('detalleComentario');
             const comentarioRow = detalleComentario ? detalleComentario.closest('.row') : null;
             const comentario = (reserva.commit_afterrecep || '').toString().trim();
@@ -430,7 +408,6 @@
             if (detalleComentario) detalleComentario.textContent = comentario || '—';
             if (comentarioRow) comentarioRow.style.display = comentario ? 'block' : 'none';
 
-            // ===== Evidencia adjunta =====
             const wrap = document.getElementById('detalleEvidenciaWrap');
             const link = document.getElementById('detalleEvidenciaLink');
             const meta = document.getElementById('detalleEvidenciaMeta');
@@ -439,7 +416,7 @@
 
             if (wrap && link && meta) {
                 if (path) {
-                    //const url = `${window.location.origin}/storage/${path}`; // requiere storage:link
+
                     const url = `/proveedor/evidencia/${reserva.id}`;
                     document.getElementById('detalleEvidenciaLink').href = url;
                     link.href = url;
@@ -459,7 +436,6 @@
                 }
             }
 
-            // Mostrar modal
             $('#modalDetalles').modal('show');
         }
 
@@ -506,8 +482,6 @@
             });
         });
 
-
-        // Función para abrir el modal de cancelación
         function abrirModalCancelar(id) {
             document.getElementById('cancelarCitaId').value = id;
             $('#modalCancelarCita').modal('show');

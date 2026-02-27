@@ -188,7 +188,7 @@ class CitaController extends Controller
             }
 
             $idSucursal = $sucursalId; 
-            $emailDestinatarios = 'auxdesarrollador.it@laconcha.com.mx,sistemas@laconcha.com.mx'; // 2 correos por default
+            $emailDestinatarios = 'auxdesarrollador.it@laconcha.com.mx,sistemas@laconcha.com.mx'; 
             if ($idSucursal == 1) {
                 $emailDestinatarios = 'mesadecontrol@laconcha.com.mx,auxdesarrollador.it@laconcha.com.mx,sistemas@laconcha.com.mx';
             } elseif ($idSucursal == 4) {
@@ -369,7 +369,6 @@ class CitaController extends Controller
 
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
-            // Log::error('Error al enviar solicitud de actualización: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,

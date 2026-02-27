@@ -189,10 +189,9 @@
         function loadOrdenes() {
             const sucursalId = document.getElementById('sucursal_id')?.value || '{{ $sucursal_id ?? 0 }}';
             const hoy = ymdLocal(new Date());
-            const mañana = sumarDias(new Date(), 1);
-            const pasadoMañana = sumarDias(new Date(), 2);
-
-            const fechas = [hoy, mañana, pasadoMañana];
+            const ayer = sumarDias(new Date(), -1);
+            const manana = sumarDias(new Date(), 1);
+            const fechas = [ayer, hoy, manana];
             const promises = fechas.map(fecha =>
                 fetch(
                     `/almacen/agenda/data?fecha=${encodeURIComponent(fecha)}&sucursal_id=${encodeURIComponent(sucursalId)}`
@@ -942,15 +941,12 @@
                 }
 
                 modalEl.addEventListener('shown.bs.modal', () => {
-                    // Try focusing several times — some mobile browsers need a delay
                     try { input.focus(); } catch {}
                     setTimeout(() => { try { input.focus(); input.click(); input.setSelectionRange(0, 9999); } catch {} }, 50);
                     setTimeout(() => { try { input.focus(); input.click(); input.setSelectionRange(0, 9999); } catch {} }, 250);
 
-                    // If user taps the modal area, ensure input gets focus
                     const onTouch = () => { try { input.focus(); input.click(); } catch {} };
                     modalEl.addEventListener('touchstart', onTouch, { passive: true });
-                    // Remove the touch handler when modal hidden
                     modalEl.addEventListener('hidden.bs.modal', () => {
                         try { modalEl.removeEventListener('touchstart', onTouch); } catch {}
                     }, { once: true });
@@ -959,10 +955,9 @@
                 btn.addEventListener('click', onProcess);
                 input.addEventListener('keydown', onKeydown);
                 input.addEventListener('paste', onPaste);
-                // Auto-process after a short pause of input (helps hardware scanners that don't send Enter)
                 (function attachAutoSubmitModal() {
                     let timer = null;
-                    const T_DELAY = 200; // ms
+                    const T_DELAY = 200; 
                     const clearTimer = () => { if (timer) { clearTimeout(timer); timer = null; } };
                     const onInput = () => {
                         clearTimer();
@@ -973,7 +968,6 @@
                         }, T_DELAY);
                     };
                     input.addEventListener('input', onInput);
-                    // ensure handlers are removed when clearing
                     const oldClear = clearHandlers;
                     clearHandlers = function() {
                         try { input.removeEventListener('input', onInput); } catch {}

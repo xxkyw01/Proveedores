@@ -6,10 +6,7 @@
     @include('includes.scripts.fontAwesome')
     @include('includes.scripts.bootstrap')
 
-    <!-- Enlace a la hoja de estilos -->
     <link rel="stylesheet" href="{{ asset('assets/css/rol/almacen/confirmar_cita.css') }}">
-
-    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
 
     @php
         $rolId = session('Usuario.IdRol');
@@ -20,10 +17,8 @@
 
     <div class="container-fluid con-sidebar">
         <div class="row justify-content-center">
-            <!--multitablas  de pendientes , ayer , semana pasada y mes pasado --->
             <div class="container border rounded shadow-sm p-3"
                 style="background-color: #fff; border-color: #ee7826 !important;">
-                <!-- Tabla principal fija -->
                 <h3 class="mb-3 bg-white p-2 rounded shadow-sm text-center fw-bold" style="color: #ee7826;">Citas Pendientes
                 </h3>
                 <div class="table-responsive-sm">
@@ -40,93 +35,10 @@
                         </thead>
                     </table>
                 </div>
+            </div> 
+        </div>
+    </div>
 
-                <!-- Acordeones para historial -->
-                <div class="accordion mt-5" id="historialAccordion">
-
-                    <!-- Ayer -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingAyer">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseAyer" aria-expanded="false" aria-controls="collapseAyer">
-                                Citas de Ayer
-                            </button>
-                        </h2>
-                        <div id="collapseAyer" class="accordion-collapse collapse" aria-labelledby="headingAyer"
-                            data-bs-parent="#historialAccordion">
-                            <div class="accordion-body">
-                                <table id="tablaAyer" class="table table-sm table-striped bg-white w-100">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Proveedor</th>
-                                            <th>Orden de Compra</th>
-                                            <th>Estatus</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Semana pasada -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingSemana">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseSemana" aria-expanded="false" aria-controls="collapseSemana">
-                                Citas de la Semana Pasada
-                            </button>
-                        </h2>
-                        <div id="collapseSemana" class="accordion-collapse collapse" aria-labelledby="headingSemana"
-                            data-bs-parent="#historialAccordion">
-                            <div class="accordion-body">
-                                <table id="tablaSemana" class="table table-sm table-striped bg-white w-100">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Proveedor</th>
-                                            <th>Orden de Compra</th>
-                                            <th>Estatus</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mes pasado -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingMes">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseMes" aria-expanded="false" aria-controls="collapseMes">
-                                Citas del Mes Pasado
-                            </button>
-                        </h2>
-                        <div id="collapseMes" class="accordion-collapse collapse" aria-labelledby="headingMes"
-                            data-bs-parent="#historialAccordion">
-                            <div class="accordion-body">
-                                <table id="tablaMes" class="table table-sm table-striped bg-white w-100">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Fecha</th>
-                                            <th>Proveedor</th>
-                                            <th>Orden de Compra</th>
-                                            <th>Estatus</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div> {{-- Cierra container --}}
-        </div> {{-- Cierra row --}}
-    </div> {{-- Cierra container-fluid --}}
-
-
-    <!-- Modal Detalle Cita -->
     <div class="modal fade" id="modalDetalleCita" tabindex="-1" aria-labelledby="modalDetalleCitaLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -138,7 +50,6 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <!-- Columna proveedor -->
                         <div class="col-md-6">
                             <p class="fw-bold mb-1">PROVEEDOR</p>
                             <div class="mb-1" id="detalle_proveedor"></div>
@@ -148,7 +59,6 @@
                             <div><strong>Teléfono:</strong> <span id="detalle_telefono"></span></div>
                         </div>
 
-                        <!-- Columna contacto -->
                         <div class="col-md-6">
                             <p class="fw-bold mb-1">CONTACTO</p>
                             <div><strong>Nombre:</strong> <span id="detalle_contacto"></span></div>
@@ -157,12 +67,10 @@
                             <div><strong>Correo:</strong> <span id="detalle_email_contacto"></span></div>
                         </div>
                         <p class="text-center text-muted mt-3 fst-italic">Detalles de la cita.</p>
-                        <!-- Orden de compra: fila completa debajo -->
                         <div class="col-md-12 mt-3">
 
                         </div>
                     </div>
-                    <!-- Detalles de ordne de venta -->
                     <div class="row mt-3">
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Orden(es) de Compra:</label>
@@ -177,12 +85,9 @@
                             <input type="text" class="form-control" id="detalle_estado" readonly>
                         </div>
                     </div>
-                    <!-- Detalles de vehículos -->
                     <div id="detalle_vehiculos" class="mt-4"></div>
-                    <!-- Comentario -->
                     <label class="fw-bold mt-4">Mensaje o comentario que desea mandarle al proveedor:</label>
                     <textarea id="comentario_usuario" class="form-control" rows="2" placeholder="Escribe un mensaje opcional..."></textarea>
-                    <!-- Cambiar estatus -->
                     <label class="fw-bold mt-3">Cambiar Estatus:</label>
                     <select id="estado_nuevo" class="form-select">
                         <option value="Confirmada">Confirmar Cita</option>
@@ -201,7 +106,6 @@
 
     <script>
         $(document).ready(function() {
-            // Tabla de pendientes
             $('#tablaPendientes').DataTable({
                 ajax: '{{ route('almacen.confirmarCitas.pendientes') }}',
                 columns: [{
@@ -284,10 +188,9 @@
             });
 
             $('#collapseayer').on('show.bs.collapse', function() {
-                // Tablas en los acordeones
                 $('#tablaAyer').DataTable({
                     ajax: '{{ route('almacen.confirmarCitas.ayer') }}',
-                    responsive: false, // Desactiva comportamiento "tarjeta"
+                    responsive: false,
                     destroy: true,
                     columns: [{
                             data: 'fecha',
@@ -324,7 +227,6 @@
                         search: " Buscar:",
                         lengthMenu: "Mostrar _MENU_ entradas",
                         info: "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-                        //infoEmpty: "Sin registros",
                         emptyTable: "No hay datos disponibles",
                         paginate: {
                             first: "Primero",
@@ -339,7 +241,7 @@
             $('#collapseSemana').on('show.bs.collapse', function() {
                 $('#tablaSemana').DataTable({
                     ajax: '{{ route('almacen.confirmarCitas.semana') }}',
-                    responsive: false, // Desactiva comportamiento "tarjeta"
+                    responsive: false,
                     destroy: true,
                     columns: [{
                             data: 'fecha',
@@ -376,7 +278,6 @@
                         search: " Buscar:",
                         lengthMenu: "Mostrar _MENU_ entradas",
                         info: "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-                        //infoEmpty: "Sin registros",
                         emptyTable: "No hay datos disponibles",
                         paginate: {
                             first: "Primero",
@@ -391,7 +292,7 @@
             $('#collapseMes').on('show.bs.collapse', function() {
                 $('#tablaMes').DataTable({
                     ajax: '{{ route('almacen.confirmarCitas.mes') }}',
-                    responsive: false, // Desactiva comportamiento "tarjeta"
+                    responsive: false,
                     destroy: true,
                     columns: [{
                             data: 'fecha',
@@ -428,7 +329,6 @@
                         search: " Buscar:",
                         lengthMenu: "Mostrar _MENU_ entradas",
                         info: "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-                        //infoEmpty: "Sin registros",
                         emptyTable: "No hay datos disponibles",
                         paginate: {
                             first: "Primero",
@@ -441,14 +341,11 @@
             });
         });
 
-        // Formato dd/mm/yyyy
         function formatFecha(fechaStr) {
             const [year, month, day] = fechaStr.split('-');
             return `${day}/${month}/${year}`;
         }
 
-
-        //funcion de modal para ver detalles de la cita 
         function abrirModal(id) {
             fetch(`/almacen/confirmarCita/detalle/${id}`)
                 .then(res => res.json())
@@ -509,7 +406,6 @@
                 });
         }
 
-        // Para actualizar el estado y agrgar el comentario para el envio de correo 
         function actualizarEstadoCita() {
             const id = document.getElementById('estado_nuevo').getAttribute('data-id');
             const nuevoEstado = document.getElementById('estado_nuevo').value;

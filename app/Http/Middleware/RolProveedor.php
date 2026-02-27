@@ -10,7 +10,6 @@ class RolProveedor
 {
     public function handle($request, Closure $next)
     {
-        // LOG TEMPORAL: inspeccionar estado de sesión para depuración de 419
         try {
             Log::debug('RolProveedor middleware - session snapshot', [
                 'session_all' => session()->all(),
@@ -19,7 +18,6 @@ class RolProveedor
                 'has_usuario' => session()->has('Usuario'),
             ]);
         } catch (\Throwable $e) {
-            // evitar romper la petición por problemas de logging
         }
 
         if (session()->has('Proveedor')) {

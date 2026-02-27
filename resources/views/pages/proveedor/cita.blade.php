@@ -7,12 +7,9 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Enlace a la hoja de estilos -->
     <link rel="stylesheet" href="{{ asset('assets/css/rol/proveedor/cita.css') }}">
-    <!-- Bootstrap JS Bundle (incluye Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-    <!-- Session Rol -->
     @if (!session()->has('Proveedor') && !(session('Usuario') && in_array(session('Usuario.IdRol'), [1, 3, 5])))
         <script>
             window.location.href = "/";
@@ -25,7 +22,6 @@
     <div class="row justify-content-center">
 
     <div class="container">
-        <!-- Barra de progreso -->
         <div class="wizard-steps mb-4">
             <div class="step-item" id="step-indicator-1">
                 <div class="circle">1</div>
@@ -78,7 +74,6 @@
                     </div>
                 </div>
 
-                <!-- Información del Proveedor -->
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control bg-light" id="labelNombreProveedor"
                         placeholder="Nombre del Proveedor" readonly disabled>
@@ -97,9 +92,7 @@
                     <label for="labelCorreo">Correo Electrónico</label>
                 </div>
 
-                <!-- Subtítulo de Referencia de Contacto -->
                 <h6>Referencia de Contacto</h6>
-
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control bg-light" id="labelNombreContacto"
                         placeholder="Nombre del Contacto" readonly disabled>
@@ -118,15 +111,12 @@
                     <label for="labelCorreoContacto">Correo Electrónico del Contacto</label>
                 </div>
 
-                <!-- Botones en una misma fila -->
                 <div class="d-flex justify-content-between mt-4">
-                    <!-- Botón izquierdo -->
                     <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                         data-bs-target="#modalActualizarDatos">
                         Solicitar actualización de datos <i class="fas fa-edit ms-1"></i>
                     </button>
 
-                    <!-- Botón derecho -->
                     <button type="button" class="btn btn-primary next-step">
                         Siguiente <i class="fas fa-arrow-right"></i>
                     </button>
@@ -134,7 +124,6 @@
 
             </div>
 
-            <!-- PASO 2: Seleccionar Ciudad y Transporte -->
             <div class="step step-2 d-none paso-card">
                 <h4 class="titulo-paso"><i class="fas fa-map-marker-alt"></i> Paso 2: Seleccionar Ubicación y Transporte
                 </h4>
@@ -162,19 +151,15 @@
                 </div>
             </div>
 
-            <!-- PASO 3: Seleccionar Fecha, Andén, Vehículos, Transporte y Horarios -->
             <div class="step step-3 d-none paso-card ">
                 <h4 class="titulo-paso"><i class="fas fa-calendar-alt"></i> Paso 3: Seleccionar disponibilidad</h4>
 
-                <!-- Fecha -->
                 <div class="mb-3">
                     <label for="fecha" class="form-label">Fecha</label>
                     <input type="text" id="fecha" name="fecha" class="form-control custom-input" required>
                 </div>
-                <!-- Contenedor dinámico de vehículos -->
-                <div id="vehiculosContainer"></div>
 
-                <!-- Botón para agregar más vehículos -->
+                <div id="vehiculosContainer"></div>
                 <div class="text-end mb-3">
                     <button type="button" class="btn btn-outline-success" id="btnAgregarVehiculo"
                         style="display: none;" onclick="agregarFormularioVehiculo()">
@@ -182,7 +167,6 @@
                     </button>
                 </div>
 
-                <!-- Footer del contenedor  -->
                 <div class="d-flex justify-content-between mt-4">
                     <button type="button" class="btn btn-secondary w-45 prev-step"><i class="fas fa-arrow-left"></i>
                         Atrás</button>
@@ -192,10 +176,8 @@
 
             </div>
 
-            <!-- PASO 4: Datos de Orden de Compra -->
             <div class="step step-4 d-none paso-card">
                 <h4 class="titulo-paso"><i class="fas fa-user"></i> Paso 4: Datos de Orden de Compra</h4>
-
                 <div class="mb-3">
                     <label class="form-label">Órdenes de Compra Abiertas:</label>
                     <div class="custom-multiselect">
@@ -206,15 +188,11 @@
                         </button>
                         <ul class="dropdown-menu w-100" id="ordenCompraList"
                             style="max-height: 200px; overflow-y: auto;">
-
-                            <!-- Opciones carga dinamicamente -->
                         </ul>
                     </div>
                     <input type="hidden" name="ordenCompra[]" id="ordenCompraInput">
                 </div>
-
                 <div id="foliosContainer" class="mt-3">
-                    <!-- Aquí se agregan dinámicamente los campos de folio por OC -->
                 </div>
 
                 <div class="d-flex justify-content-between mt-4">
@@ -223,10 +201,8 @@
                     <button type="button" class="btn btn-primary w-45 next-step">Siguiente <i
                             class="fas fa-arrow-right"></i></button>
                 </div>
-
             </div>
 
-            <!-- PASO 5: Confirmación -->
             <div class="step step-5 d-none paso-card">
 
                 <div class="orden-doc border p-4 shadow bg-white mt-4 rounded resumen-nuevo">
@@ -235,7 +211,6 @@
                         <p class="text-muted">Documento generado automáticamente</p>
                     </div>
 
-                    <!-- Sección: Datos Generales -->
                     <div class="row g-3 resumen-section">
                         <div class="col-6"><strong>Proveedor:</strong> <span id="resumen_idUser"></span></div>
                         <div class="col-6"><strong>Ciudad:</strong> <span id="resumen_ciudad"></span></div>
@@ -247,7 +222,6 @@
                         <div class="col-12"><strong>Órdenes de Compra:</strong> <span id="resumen_ordenes"></span></div>
                     </div>
 
-                    <!-- Vehículos -->
                     <div class="titulo-seccion">Vehículos Agendados</div>
                     <table class="tabla-resumen">
                         <thead>
@@ -262,7 +236,7 @@
                         </thead>
 
                         <tbody id="tablaVehiculosResumen">
-                            <!-- Se llena desde JS -->
+
                         </tbody>
                     </table>
 
@@ -276,7 +250,6 @@
                             </tr>
                         </thead>
                         <tbody id="tablaFoliosResumen">
-                            <!-- Aquí agregas por JS el folio -->
                         </tbody>
                     </table>
                 </div>
@@ -284,20 +257,14 @@
                 <div class="d-flex justify-content-between mt-4">
                     <button type="button" class="btn btn-secondary w-45 prev-step"><i class="fas fa-arrow-left"></i>
                         Atrás</button>
-                    <!-- <button onclick="window.print()" class="btn btn-outline-dark"><i class="fas fa-print"></i> Imprimir PDF</button> --->
                     <button type="button" class="btn btn-success w-45" id="btnGuardarCita">Programar Cita</button>
                 </div>
             </div>
         </form>
     </div>
+        </div> 
+    </div> 
 
-
-    
-        </div> {{-- Cierra row --}}
-    </div> {{-- Cierra container-fluid --}}
-
-
-    <!-- Modal Solicitar Actualización -->
     <div class="modal fade" id="modalActualizarDatos" tabindex="-1" aria-labelledby="modalActualizarDatosLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
@@ -351,15 +318,10 @@
             const totalSteps = 5;
             const steps = document.querySelectorAll(".step");
 
-            // Permitir hacer clic en los pasos anteriores para navegar rápidamente
             document.querySelectorAll(".step-item").forEach((item, index) => {
                 item.addEventListener("click", function() {
                     const pasoClickeado = index + 1;
-
-                    // No hacer nada si estás en el mismo paso
                     if (pasoClickeado === currentStep) return;
-
-                    // Solo permitir avanzar si ya completaste el paso 5
                     if (pasoClickeado > currentStep && currentStep < totalSteps) return;
 
                     currentStep = pasoClickeado;
@@ -368,8 +330,6 @@
                 });
             });
 
-
-            // Hacer Formulario de "Registro" con múltiples pasos aissitente de pasos 
             function actualizarWizard(step) {
                 for (let i = 1; i <= totalSteps; i++) {
                     const stepElement = document.getElementById(`step-indicator-${i}`);
@@ -405,7 +365,6 @@
                 actualizarWizard(step);
             }
 
-            // Siguiente paso con validaciones
             document.querySelectorAll(".next-step").forEach(button => {
                 button.addEventListener("click", function() {
                     if (!validarCamposPaso(currentStep)) return;
@@ -423,7 +382,6 @@
                 });
             });
 
-            // Paso anterior
             document.querySelectorAll(".prev-step").forEach(button => {
                 button.addEventListener("click", function() {
                     if (currentStep > 1) {
@@ -433,7 +391,6 @@
                 });
             });
 
-            // Cargar sucursales por ciudad
             document.getElementById("ciudad").addEventListener("change", function() {
                 fetch(`/proveedor/obtener-sucursales/${this.value}`)
                     .then(res => res.json())
@@ -447,23 +404,19 @@
                     });
             });
 
-            // Fecha mínima
             document.getElementById("fecha").setAttribute("min", new Date().toISOString().split("T")[0]);
 
             showStep(currentStep);
             actualizarWizard(currentStep);
         });
 
-        //funcion donde se debe de considerar anden o hora (no puede existir si el proveedor elimino lagun vehiculo  datos fantasmas(old))
         function validarDuplicadosHorarioYAnden() {
             const combinaciones = new Set();
             let conflictos = [];
             let repetido = false;
 
-            // Limpiar clases de error previas
             document.querySelectorAll(".anden, .hora").forEach(el => el.classList.remove("is-invalid"));
 
-            // Buscar todos los bloques de vehículo
             const bloques = document.querySelectorAll(".vehiculo-block");
 
             bloques.forEach((bloque, index) => {
@@ -472,7 +425,6 @@
                 const anden = document.getElementById(`anden_${i}`);
                 const hora = document.getElementById(`hora_${i}`);
 
-                // Validar si existen los elementos
                 if (!anden || !hora) return;
 
                 const clave = `${anden.value}-${hora.value}`;
@@ -485,7 +437,6 @@
                 }
             });
 
-            // Si hay conflicto, marcar y mostrar alerta
             if (repetido) {
                 conflictos.forEach(i => {
                     const anden = document.getElementById(`anden_${i}`);
@@ -512,9 +463,7 @@
             let esValido = true;
 
             inputs.forEach(input => {
-                // Saltar si está oculto o si es un input de folio
                 if (input.offsetParent === null || input.name?.startsWith("folio_factura_")) return;
-
                 if (!input.value.trim()) {
                     input.classList.add("is-invalid");
                     esValido = false;
@@ -538,7 +487,6 @@
 
     <script>
         const tipoUsuario = "{{ AuthHelper::tipoUsuario() }}";
-        // -- Agregar evento al botón de buscar solo si existe
         const botonBuscarProveedor = document.getElementById("buscarProveedor");
         if (botonBuscarProveedor) {
             botonBuscarProveedor.addEventListener("click", buscarProveedor);
@@ -551,13 +499,11 @@
             }
         }
 
-        // -- Agregar evento de input en el campo idUser
         let timerBuscarProveedor;
         document.getElementById("idUser").addEventListener("input", function() {
             clearTimeout(timerBuscarProveedor);
 
             const codigo = this.value.trim();
-
             if (codigo.length >= 6) {
                 timerBuscarProveedor = setTimeout(() => {
                     buscarProveedor();
@@ -565,7 +511,6 @@
             }
         });
 
-        // -- Al cargar la página automáticamente buscar proveedor si ya tiene ID cargado
         document.addEventListener("DOMContentLoaded", function() {
             const idUserInput = document.getElementById("idUser");
 
@@ -574,7 +519,6 @@
             }
         });
 
-        // -- FUNCION PRINCIPAL buscarProveedor
         function buscarProveedor() {
             const codigoProveedor = document.getElementById("idUser").value.trim();
 
@@ -607,7 +551,6 @@
                         actualizarCampo("labelCelularContacto", data.Celular_Contacto || "No registrado");
                         actualizarCampo("labelCorreoContacto", data.Correo_Contacto || "No registrado");
 
-                        // Desplazar suavemente hacia los datos cargados
                         document.getElementById("labelNombreProveedor").scrollIntoView({
                             behavior: 'smooth',
                             block: 'start'
@@ -619,17 +562,13 @@
                     Swal.fire("Error al consultar el proveedor", "", "error");
                 });
         }
-    </script>
 
-    <!--Carga automaticamente los ordenes de compras abiertos-->
-    <script>
         document.addEventListener("DOMContentLoaded", function() {
             let ordenCompraInput = document.getElementById("ordenCompraInput");
             let ordenCompraList = document.getElementById("ordenCompraList");
             let selectedOrdenesContainer = document.getElementById("selectedOrdenes");
             let resumenOrdenes = document.getElementById("resumen_ordenes");
 
-            // Cargar órdenes de compra al seleccionar un proveedor y un input para teclar el folio 
             function cargarOrdenes(codigoProveedor) {
                 const sucursalId = document.getElementById("sucursal").value;
 
@@ -738,21 +677,12 @@
             document.getElementById("idUser").addEventListener("change", verificarYcargarOrdenes);
             document.getElementById("sucursal").addEventListener("change", verificarYcargarOrdenes);
         });
-    </script>
 
-    <script>
         const PRECIO_POR_CAJA = {!! json_encode($precioCaja) !!};
-    </script>
-
-    <script>
-        //nueva funcion para contendor agregar vehiculo 
         let contadorVehiculos = 1;
-
-        // Agrega formulario dinámico para cada vehículo
         function agregarFormularioVehiculo() {
             const container = document.getElementById("vehiculosContainer");
             const indiceActual = contadorVehiculos;
-
             const div = document.createElement("div");
             div.classList.add("vehiculo-block", "mb-4", "vehiculo-slide-in");
             div.setAttribute("data-id", indiceActual);
@@ -845,7 +775,6 @@
                 });
             }
 
-            // seleccionar maniobra se consulte por el precio x caja dependeidneod del proveedor 
             document.querySelectorAll(`input[name="lleva_macheteros_${indiceActual}"]`).forEach(radio => {
                 radio.addEventListener("change", function() {
                     const campoSi = document.getElementById(`campo_macheteros_si_${indiceActual}`);
@@ -858,9 +787,7 @@
                         campoSi.classList.add("d-none");
                         campoNo.classList.remove("d-none");
 
-                        // Obtener el código del proveedor
                         const codigoProveedor = document.getElementById("idUser").value.trim();
-
                         if (!codigoProveedor) return;
 
                         fetch(`/proveedor/precio-caja/${codigoProveedor}`)
@@ -881,7 +808,6 @@
                                     document.getElementById(`monto_label_${indiceActual}`).innerText =
                                         `Monto estimado: $${monto}`;
 
-                                    // el cálculo se actualiza si el usuario escribe las cajas 
                                     cajasInput.addEventListener("input", function() {
                                         const cajas = parseInt(this.value) || 0;
                                         const precioActual = parseFloat(document.getElementById(
@@ -916,10 +842,9 @@
             cargarAndenes(indiceActual);
             contadorVehiculos++;
             document.getElementById("btnAgregarVehiculo").style.display = "none";
-
         }
 
-        // Eliminar vehículo individualmente con validación de mínimo 1
+
         document.addEventListener("click", function(e) {
             if (e.target.classList.contains("btnEliminarVehiculo") || e.target.closest(".btnEliminarVehiculo")) {
                 const totalVehiculos = document.querySelectorAll(".vehiculo-block").length;
@@ -949,7 +874,6 @@
                 const andenValido = anden && anden.value.trim() !== "";
                 const horaValida = hora && hora.value.trim() !== "";
 
-                // Habilita el botón si todo está completo
                 if (transporteValido && andenValido && horaValida) {
                     btnAgregar.disabled = false;
                     btnAgregar.style.display = 'inline-block';
@@ -959,7 +883,6 @@
                 }
             }
 
-            // Validar al cambiar los selects
             if (transporte) transporte.addEventListener("change", validarCampos);
             if (anden) anden.addEventListener("change", validarCampos);
             if (hora) hora.addEventListener("change", validarCampos);
@@ -980,12 +903,11 @@
         }
 
         const transporteDuracionMinutos = {
-            2: 30, // Camioneta
-            3: 150, // Tráiler
-            5: 90 // Rabón
+            2: 30, 
+            3: 150, 
+            5: 90 
         };
 
-        // Reordena títulos y atributos
         function reordenarTitulosVehiculos() {
             const bloques = document.querySelectorAll(".vehiculo-block");
             let nuevoIndice = 1;
@@ -1018,7 +940,6 @@
             contadorVehiculos = nuevoIndice;
         }
 
-        //Validacion macheteros 
         function validarCamposMacheteros() {
             let valido = true;
 
@@ -1026,7 +947,6 @@
                 const index = block.getAttribute("data-id");
                 const macheteroSi = document.getElementById(`lleva_macheteros_si_${index}`);
                 const macheteroNo = document.getElementById(`lleva_macheteros_no_${index}`);
-
                 const campoCantidad = document.getElementById(`descripcion_${index}`);
                 const campoCajas = document.getElementById(`cajas_${index}`);
                 const campoMonto = document.getElementById(`monto_maniobra_${index}`);
@@ -1051,7 +971,6 @@
                         valido = false;
                     }
 
-                    // Calcular el monto automáticamente
                     const monto = (cajas * PRECIO_POR_CAJA).toFixed(2);
                     campoMonto.value = monto;
                 }
@@ -1069,7 +988,6 @@
             return valido;
         }
 
-        //Verificar que cada vehiculo tenga un horario seleecionado(no vacio) 
         function validarHorariosSeleccionadosDisponibles() {
             let validos = true;
 
@@ -1093,7 +1011,6 @@
             return validos;
         }
 
-        // Cargar andenes desde backend
         function cargarAndenes(index) {
             const sucursalId = document.getElementById("sucursal").value;
             if (!sucursalId) return;
@@ -1109,7 +1026,6 @@
                 });
         }
 
-        //Obligar al usuario seleccionar almenos una orden de compra.
         function validarOrdenesCompraSeleccionadas() {
             const ordenes = JSON.parse(document.getElementById("ordenCompraInput").value || "[]");
             const contenedor = document.getElementById("contenedorOrdenesCompra");
@@ -1122,7 +1038,6 @@
                     confirmButtonColor: '#ee7826'
                 });
 
-                // Solo intenta modificar clases si el contenedor existe
                 if (contenedor) {
                     contenedor.classList.add("border", "border-danger", "rounded");
                 }
@@ -1134,8 +1049,6 @@
             }
             return true;
         }
-
-
 
         function asignarEventosCambioTransporteYAnden(index) {
             const transporte = document.getElementById(`transporte_${index}`);
@@ -1226,9 +1139,7 @@
     <script>
         flatpickr("#fecha", {
             dateFormat: "Y-m-d",
-            // establece fecha después de 2 días de hoy
             minDate: new Date().fp_incr(2), 
-            //maxDate: new Date().fp_incr(7),
             locale: {
                 firstDayOfWeek: 0,
                 weekdays: {
@@ -1249,9 +1160,7 @@
                 }
             ]
         });
-    </script>
 
-    <script>
         document.getElementById("fecha").addEventListener("change", function() {
             let fechaSeleccionada = this.value;
             let sucursalId = document.getElementById("sucursal").value;
@@ -1268,20 +1177,16 @@
             }
 
             document.getElementById("vehiculosContainer").innerHTML =
-                ""; //  Eliminar todos los formularios de vehículos
-            contadorVehiculos = 1; //  Reiniciar contador
-            agregarFormularioVehiculo(); //  Agregar uno nuevo por defecto
-            verificarFormularioVehiculoCompleto(1); //  Validar automáticamente el primer formulario
+                ""; 
+            contadorVehiculos = 1;
+            agregarFormularioVehiculo();
+            verificarFormularioVehiculoCompleto(1);
         });
-    </script>
-
-    <script>
-        // Cargar serie de OC al seleccionar sucursal
+    
         let serieOrdenCompra = "";
         document.getElementById("sucursal").addEventListener("change", function() {
             let sucursalId = this.value;
 
-            // Cargar la serie OC (ej: ZO, ZC...)
             fetch(`/proveedor/serie-oc/${sucursalId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -1289,10 +1194,7 @@
                     console.log("Serie OC de esta sucursal:", serieOrdenCompra);
                 });
         });
-    </script>
-
-    <script>
-        // Guardar cita
+ 
         function convertirHoraFormatoSQL(hora12) {
             const [horaMin, meridiano] = hora12.trim().split(' ');
             let [hora, minutos] = horaMin.split(':');
@@ -1317,7 +1219,6 @@
             const numVehiculos = document.querySelectorAll(".vehiculo-block").length;
             let vehiculos = [];
 
-            //  PRE-CHEQUEO: limpiar valores de hora que ya no existen
             for (let i = 1; i <= numVehiculos; i++) {
                 const horaSelect = document.getElementById(`hora_${i}`);
                 const horaVal = horaSelect.value;
@@ -1351,14 +1252,10 @@
                 fecha: document.getElementById("fecha").value,
                 idUser: document.getElementById("idUser").value,
                 proveedor_id: document.getElementById("idUser").value,
-                //orden_compra: JSON.parse(document.getElementById("ordenCompraInput").value || "[]"),
                 orden_compra: selectedOrdenes,
                 folios_factura: foliosFactura,
                 vehiculos: vehiculos
             };
-
-            // Mostrar datos en consola para depuración
-            console.log("🚛 Datos a enviar:", data);
 
             fetch('/proveedor/citas', {
                     method: "POST",
@@ -1382,23 +1279,16 @@
                     Swal.fire("Error", "No se pudo guardar la cita", "error");
                 });
         });
-    </script>
 
-    <script>
         function llenarResumenCompleto() {
-            console.log("Resumen completado");
-
-            // 1 Datos Generales
             document.getElementById("resumen_idUser").textContent = document.getElementById("idUser").value || "N/A";
-            // Ciudad
             let ciudadSelect = document.getElementById("ciudad");
             document.getElementById("resumen_ciudad").textContent = ciudadSelect.options[ciudadSelect.selectedIndex]
                 ?.text || "N/A";
-            // Sucursal
             let sucursalSelect = document.getElementById("sucursal");
             document.getElementById("resumen_sucursal").textContent = sucursalSelect.options[sucursalSelect.selectedIndex]
                 ?.text || "N/A";
-            // Fecha
+                
             const fechaCruda = document.getElementById("fecha").value;
             if (fechaCruda) {
                 const fechaObj = new Date(fechaCruda + "T00:00:00");
@@ -1413,11 +1303,9 @@
                 document.getElementById("resumen_fecha").textContent = "N/A";
             }
 
-            // Celular y Correo
             document.getElementById("resumen_celular").textContent = document.getElementById("labelCelular").value || "N/A";
             document.getElementById("resumen_correo").textContent = document.getElementById("labelCorreo").value || "N/A";
 
-            // Vehículos
             const tablaResumen = document.getElementById("tablaVehiculosResumen");
             tablaResumen.innerHTML = "";
             const numVehiculos = document.querySelectorAll(".vehiculo-block").length;
@@ -1428,13 +1316,9 @@
                 const horaSelect = document.getElementById(`hora_${i}`);
                 const macheteroSi = document.getElementById(`lleva_macheteros_si_${i}`);
                 const macheteroValue = document.querySelector(`input[name="lleva_macheteros_${i}"]:checked`)?.value;
-
-
-                //si hay macheteros 
                 const macheteroText = macheteroSi?.checked ?
                     (document.getElementById(`descripcion_${i}`)?.value || "Sin dato") : "No aplica";
 
-                // Monto total 
                 let montoText = "No aplica";
                 if (macheteroValue === "0") {
                     const cajas = parseInt(document.getElementById(`cajas_${i}`)?.value) || 0;
@@ -1445,10 +1329,8 @@
                     montoText = `$${monto}`;
                 }
 
-
                 const andenText = andenSelect?.options[andenSelect.selectedIndex]?.text || "N/A";
                 const transporteText = transporteSelect?.options[transporteSelect.selectedIndex]?.text || "N/A";
-
                 const horaRaw = horaSelect?.value || "N/A";
                 let horaFormateada = horaRaw;
                 if (horaRaw.includes(":")) {
@@ -1470,7 +1352,7 @@
                 </tr>
             `;
             }
-            // Tabla de ordenes con folio
+
             const resumenFolios = document.getElementById("tablaFoliosResumen");
             resumenFolios.innerHTML = "";
             selectedOrdenes.forEach((orden, index) => {
@@ -1485,10 +1367,7 @@
             `;
             });
         }
-    </script>
 
-    <script>
-        //Script para activar inputs y enviar alerta
         document.querySelectorAll('.campo-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const input = document.getElementById(`input_${this.value}`);
@@ -1521,9 +1400,7 @@
             correo_contacto: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         };
 
-        // Luego, la función ya no necesita redefinirlo
         function validarCampo(campo, valor) {
-
             return regexValidaciones[campo]?.test(valor) ?? true;
         }
 
@@ -1582,7 +1459,6 @@
         }
 
         function enviarSolicitudActualizacion() {
-            // VALIDACIÓN antes de enviar solicitud de cambio de datos 
             if (!validarCamposActualizacionModal()) return;
             const camposSeleccionados = [];
             document.querySelectorAll('.campo-checkbox:checked').forEach(cb => {
@@ -1599,7 +1475,6 @@
             }
 
             const codigo = document.getElementById("idUser").value;
-            // Impostor 
             fetch("/proveedor/enviar-solicitud", {
                     method: "POST",
                     headers: {
@@ -1622,11 +1497,9 @@
                         Swal.fire("Error", "Hubo un problema al enviar la solicitud.", "error");
                     }
 
-                    // Cerrar modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('modalActualizarDatos'));
                     modal.hide();
 
-                    // Resetear formulario
                     document.getElementById("formSolicitudActualizacion").reset();
                     document.querySelectorAll('.campo-input').forEach(i => i.classList.add('d-none'));
                 })

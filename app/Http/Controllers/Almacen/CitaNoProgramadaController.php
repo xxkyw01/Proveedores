@@ -60,8 +60,6 @@ class CitaNoProgramadaController extends Controller
                 $serieOC
             ]);
 
-            //Log::info("Código proveedor: {$codigoProveedor}, Entidad ID: {$entidadId}, Serie: {$serieOC}");
-
             return response()->json($ordenes);
         } catch (\Exception $e) {
             Log::error('Error al obtener órdenes de compra: ' . $e->getMessage());
@@ -152,8 +150,6 @@ class CitaNoProgramadaController extends Controller
                 'Nombre_Proveedor'    => $proveedor[0]->Nombre_Proveedor ?? 'No disponible en el SAP',
             ]);
         } catch (\Exception $e) {
-            
-        //Log::error('Error en obtenerDatosProveedor: ' . $e->getMessage());
             return response()->json(['error' => 'Error interno del servidor'], 500);
         }
     }

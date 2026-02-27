@@ -3,7 +3,6 @@
 @section('content')
  <x-sidebar/> 
 
-    <!-- Enlace a la hoja de estilos -->
     <link rel="stylesheet" href="{{ asset('assets/css/rol/almacen/tablero.css') }}">
     @php
         $rolId = session('Usuario.IdRol');

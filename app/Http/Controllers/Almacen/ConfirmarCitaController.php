@@ -22,9 +22,6 @@ class ConfirmarCitaController extends Controller
         if (!in_array($rolId, [1, 3, 4, 5])) {
             $sucursal_id = $sucursalUsuario;
         }
-        //Log::info("Sucursal por sesión: " . $sucursalUsuario);
-        //Log::info("Sucursal usada: " . ($sucursal_id ?? 'Todas'));
-
         $sucursales = Sucursal::all();
 
         return view('pages.almacen.confirmarCita', [
@@ -74,7 +71,6 @@ class ConfirmarCitaController extends Controller
         }
         return DataTables::of($data)->toJson();
     }
-
 
     public function obtenerMes()
     {

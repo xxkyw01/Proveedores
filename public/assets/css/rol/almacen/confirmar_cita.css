@@ -104,7 +104,6 @@
     word-wrap: break-word !important;
   }
 
-  /* Limita el ancho de las columnas largas */
   #tablaAyer td:nth-child(2),
   #tablaSemana td:nth-child(2),
   #tablaMes td:nth-child(2) {

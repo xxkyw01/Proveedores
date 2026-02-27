@@ -21,9 +21,3 @@
 @endphp
 
 @includeIf($view)
-
-{{-- Debugging info  pd: no produccion
-<pre>
-    {{ json_encode(['rolId'=> $rolId, 'esProveedor'=>$esProveedor, 'vista'=>$view], JSON_PRETTY_PRINT) }}
-</pre
---}}

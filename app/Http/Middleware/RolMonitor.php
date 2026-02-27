@@ -9,7 +9,6 @@ class RolMonitor
 {
     public function handle($request, Closure $next)
     {
-        // LOG TEMPORAL: inspeccionar estado de sesión para depuración de 419
         try {
             Log::debug('RolMonitor middleware - session snapshot', [
                 'session_all' => session()->all(),

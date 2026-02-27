@@ -47,7 +47,6 @@
             </div>
 
             <div class="row">
-                <!-- Ayer -->
                 <div class="col columna-dia" data-index="0" id="col-ayer">
                     <div class="container mt-4">
                         <div class="row date-header text-center">
@@ -59,7 +58,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Hoy -->
                 <div class="col columna-dia" data-index="1" id="col-hoy">
                     <div class="container mt-4">
                         <div class="row date-header text-center">
@@ -71,8 +69,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Mañana -->
                 <div class="col columna-dia" data-index="2" id="col-manana">
                     <div class="container mt-4">
                         <div class="row date-header text-center">
@@ -122,7 +118,7 @@
         window._agendaCache = window._agendaCache || {
             inFlight: new Set(),
             data: new Map(),
-            ttl: 30 * 1000 // 30s
+            ttl: 30 * 1000 
         };
 
         window._agendaDebug = window._agendaDebug || {
@@ -147,8 +143,6 @@
         }
         const ROL_ID = {{ (int) $rolId }};
         const ES_ADMIN = [5].includes(ROL_ID);
-        //const ES_ALMACEN = [2, 5].includes(ROL_ID);
-
 
         function isWeekend(d) {
             const day = d.getDay();

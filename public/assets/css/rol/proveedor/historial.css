@@ -16,23 +16,21 @@
   color: #d95d0b;
 }
 
-/* Página activa (ej: "1") - Naranja con texto blanco */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: #ee7826 !important; /* Fondo naranja */
-    color: white !important; /* Texto blanco */
+    background: #ee7826 !important; 
+    color: white !important; 
     border: none !important;
 }
 
-/* Todos los demás botones (inactivos, "Anterior/Siguiente") - Solo texto naranja */
 .dataTables_wrapper .dataTables_paginate .paginate_button:not(.current) {
-    color: #ee7826 !important; /* Texto naranja */
-    background: transparent !important; /* Sin fondo */
+    color: #ee7826 !important;
+    background: transparent !important; 
     border: none !important;
 }
 
-/* Hover (opcional: si quieres que al pasar el cursor se vea un fondo suave) */
+
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: rgba(238, 120, 38, 0.1) !important; /* Naranja muy transparente */
+    background: rgba(238, 120, 38, 0.1) !important; 
 }
 
 @media only screen and (max-width: 768px) {

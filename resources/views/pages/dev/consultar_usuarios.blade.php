@@ -109,9 +109,8 @@
                     </tbody>
                 </table>
             </div>
-
-        </div> {{-- Cierra row --}}
-    </div> {{-- Cierra container-fluid --}}
+        </div> 
+    </div> 
 
 
 

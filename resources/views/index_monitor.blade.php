@@ -80,14 +80,13 @@
 
     <script>
         // CONFIG
-        const AUTO_REFRESH_TIME = 5 * 60 * 1000; // 5 min
-        const HOY_REFRESH_MS     = 30 * 1000;     // 30s (solo HOY)
-        const DAY_CHANGE_CHECK_MS= 60 * 1000;     // 1 min
+        const AUTO_REFRESH_TIME = 5 * 60 * 1000; 
+        const HOY_REFRESH_MS     = 30 * 1000;     
+        const DAY_CHANGE_CHECK_MS= 60 * 1000;     
 
         let fechasVisibles = [];
         let lastDateKey = null;
 
-        // Helpers fecha (LOCAL)
         function isWeekend(d) {
             const day = d.getDay();
             return day === 0 || day === 6;
@@ -130,11 +129,9 @@
             return days;
         }
 
-        // UI responsive (monitor)
         function ajustarColumnasPorDispositivo() {
             const ancho = window.innerWidth;
 
-            // ocultar todo
             document.querySelectorAll('.columna-dia').forEach(col => col.style.display = 'none');
 
             if (ancho >= 992) {
@@ -151,11 +148,10 @@
 
         window.addEventListener('resize', ajustarColumnasPorDispositivo);
 
-        // Tiempo -> minutos (robusto)
         function timeToMinutes(raw = '') {
             const s = String(raw ?? '').trim();
             if (!s) return null;
- 
+
             const m = s.match(/(\d{1,2}):(\d{2})(?:[:.]\d+)?\s*(am|pm)?/i);
             if (!m) return null;
 
@@ -172,7 +168,6 @@
             return hh * 60 + mm;
         }
 
-        // Render encabezados + carga datos
         function renderHeadersAndLoad() {
             ajustarColumnasPorDispositivo();
 
@@ -191,8 +186,6 @@
             }
         }
 
-        // FILTRO HOY: solo futuras de prensente + dejar 30 minutos de margen 
-
         function filtrarCitasPasadasHoy(data, fechaKey) {
             const hoyKey = toKeyLocal(new Date());
             if (fechaKey !== hoyKey) return data;
@@ -208,7 +201,6 @@
             });
         }
 
-        // Cargar data por fecha
         function loadAgendaDataForDate(date, index) {
             const formattedDate = toKey(date);
 
@@ -228,7 +220,6 @@
                     if (!timeline) return;
                     timeline.innerHTML = '';
 
-                    // ordenar por hora
                     data.sort((a, b) => {
                         const ma = timeToMinutes(a?.hora);
                         const mb = timeToMinutes(b?.hora);
@@ -238,12 +229,10 @@
                         return ma - mb;
                     });
 
-                    // HOY: filtrar pasadas
                     if (index === 0) {
                         const originales = [...data];
                         const filtradas = filtrarCitasPasadasHoy(data, formattedDate);
 
-                        // debug opcional (puedes quitarlo luego)
                         console.log('HOY col:', formattedDate, 'HOY real:', toKeyLocal(new Date()));
                         console.log('TOTAL hoy:', originales.length, 'FUTURAS hoy:', filtradas.length);
 
@@ -268,7 +257,6 @@
                         return;
                     }
 
-                    // Otros días normal
                     if (!data.length) {
                         timeline.innerHTML = `<div class="text-center opacity-75 mt-4">Sin citas</div>`;
                         return;
@@ -281,7 +269,6 @@
                 .catch(err => console.error('Error agenda:', err));
         }
 
-        // UI Card
         function buildCard(item) {
             return `
                 <div class="timeline-item">
@@ -314,7 +301,6 @@
             `;
         }
 
-        // Refresh / recarga por cambio de día
         function refrescarAgendaActual() {
             for (let i = 0; i < fechasVisibles.length; i++) {
                 loadAgendaDataForDate(fechasVisibles[i], i);
@@ -327,7 +313,6 @@
             lastDateKey = nowKey;
         }
 
-        // Utilidades existentes
         function formatOrdenCompra(data) {
             try {
                 if (data == null) return '<span class="badge-orden">Otros</span>';
@@ -393,23 +378,17 @@
                 .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // Init
         document.addEventListener('DOMContentLoaded', () => {
             lastDateKey = toKeyLocal(new Date());
             fechasVisibles = getNextBusinessDays(new Date(), 3);
 
             renderHeadersAndLoad();
-
-            // refresh general
             setInterval(refrescarAgendaActual, AUTO_REFRESH_TIME);
-
-            // refresh HOY para ir descartando pasadas
             setInterval(() => {
                 if (!fechasVisibles?.length) return;
                 loadAgendaDataForDate(fechasVisibles[0], 0);
             }, HOY_REFRESH_MS);
 
-            // cambio de día
             setInterval(checkDayChangeAndReload, DAY_CHANGE_CHECK_MS);
         });
     </script>

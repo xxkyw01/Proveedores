@@ -14,7 +14,6 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
-/* Mobile: layout compacto pero sin comprimir contenido */
 @media (max-width: 767px) {
   .timeline-item {
     padding: 0 0 8px 0;
@@ -26,7 +25,7 @@ body {
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   }
-  /* Mostrar contenido apilado en móvil para evitar que se oculte */
+
   .timeline-card .timeline-card-body {
     display: block;
     padding: 6px 0;
@@ -55,7 +54,6 @@ body {
     font-size: 0.95rem;
   }
 
-  /* Forzar color y lectura en móviles (evitar tarjetas "en blanco") */
   .timeline-card,
   .timeline-card * {
     color: #222 !important;
@@ -64,7 +62,6 @@ body {
     min-height: 52px;
   }
 
-  /* Ocultar elementos secundarios para mantener tarjeta compacta sin recortar */
   .orden-compra,
   .status-badge,
   .evento-badge,
@@ -72,7 +69,7 @@ body {
   .iconos-oc {
     display: none !important;
   }
-  /* ocultar transporte y lugar en la vista compacta */
+
   .transport,
   .place {
     display: none !important;
@@ -85,7 +82,6 @@ body {
     justify-content: flex-end;
   }
 
-  /* Forzar que el contenedor detalle-proveedor (y sus hijos) se muestre pese a reglas globales */
   .timeline-card .timeline-card-body > .detalle-proveedor {
     display: block !important;
   }
@@ -97,7 +93,6 @@ body {
     display: block !important;
     color: #444 !important;
   }
-  /* Asegurar que el texto no sea transparente ni oculto */
   .timeline-card .timeline-card-body > .detalle-proveedor * {
     color: inherit !important;
     visibility: visible !important;
@@ -389,7 +384,6 @@ body {
 .timeline-card {
   background: white;
   box-shadow: 10px 3px 4px 6px rgba(0, 0, 0, 0.08);
-  /* reduced border to avoid visual collision with marker */
   border-left: 4px solid #ee7826;
   border-radius: 12px;
   padding: var(--card-pad-vertical) var(--card-pad-horizontal) !important;
@@ -398,9 +392,8 @@ body {
   display: flex;
   flex-direction: column;
   font-size: var(--fs-sm);
-  /* make card fill remaining space of the row consistently */
   flex: 1 1 auto;
-  min-width: 0; /* allow wrapping inside flex container */
+  min-width: 0;
   width: auto;
   gap: 6px;
   z-index: 1;
@@ -416,7 +409,6 @@ body {
   font-size: clamp(14px, 1.6vw, 20px);
 }
 
-/* MOBILE: collapsed cards (show only first 2 children of body) */
 @media (max-width: 767px) {
   .timeline-card {
     cursor: pointer;
@@ -438,7 +430,6 @@ body {
   }
 }
 
-/* ESTADOS */
 .status-badge {
   padding: 3px 6px;
   border-radius: 6px;
@@ -480,7 +471,6 @@ body {
   color: white;
 }
 
-/* EVENTOS */
 .evento-badge {
   padding: 3px 6px;
   border-radius: 6px;
@@ -504,7 +494,6 @@ body {
   color: white;
 }
 
-/* BOTÓN DETALLES */
 .btn-detalles {
   position: absolute;
   bottom: 15px;
@@ -527,7 +516,6 @@ body {
   margin-left: 6px;
 }
 
-/* SELECTOR SUCURSAL */
 .selector-sucursal {
   border: 2px solid #ee7826;
   box-shadow: 0 9px 40px rgba(0, 0, 0, 0.08);
@@ -535,13 +523,11 @@ body {
   background: #fff;
 }
 
-/* FORMS */
 .form-select {
   background: #ffffff;
   border: none;
 }
 
-/* ORDEN DE COMPRA */
 .badge-orden {
   background-color: #3d3d3d;
   color: white;
@@ -554,7 +540,6 @@ body {
   font-size: var(--fs-sm);
 }
 
-/* STICKY RIGHT COLUMN */
 .table-sticky-right th.sticky-right,
 .table-sticky-right td.sticky-right {
   position: sticky;
@@ -599,7 +584,7 @@ body {
   }
 
   .nav-agenda-row {
-    max-width: 360px; /* un poco más angosto en cel */
+    max-width: 360px; 
   }
 
   .selector-sucursal {
@@ -627,9 +612,6 @@ body {
   -moz-appearance: textfield;
 }
 
-/* ===== RESPONSI v2 ====== */
-
-/* MÓVIL: optimizaciones y simplificación */
 @media (max-width: 430px) {
   :root {
     --touch-padding: 10px;
@@ -662,13 +644,12 @@ body {
     width: var(--timeline-line-width);
   }
   .timeline-card {
-    /* padding: 12px; */
-    padding: var(--card-pad-vertical) var(--card-pad-horizontal) !important; /* antes 20px */
+    padding: var(--card-pad-vertical) var(--card-pad-horizontal) !important; 
     font-size: var(--fs-sm);
     border-radius: 10px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
   }
-  /* Ajustes: mostrar solo proveedor + hora en una línea; ocultar iconos secundarios */
+
   .timeline-card .timeline-card-body {
     display: flex;
     align-items: center;
@@ -762,7 +743,6 @@ body {
   }
 }
 
-/* TABLET */
 @media (min-width: 768px) and (max-width: 991px) {
   .date-header {
     top: 60px;
@@ -803,7 +783,6 @@ body {
   }
 }
 
-/* ESCRITORIO */
 @media (min-width: 992px) {
   .timeline {
     max-width: 900px;
@@ -860,7 +839,6 @@ body {
   gap: 6px;
 }
 
-/* force text to wrap and avoid overflow */
 .timeline-card,
 .timeline-card * {
   word-wrap: break-word;
@@ -876,27 +854,24 @@ body {
   word-break: break-word;
 }
 
-/* ====== MODAL DETALLES OC – RESPONSIVE ====== */
 
-/* contenedor con scroll horizontal */
 .oc-table-wrapper {
   width: 100%;
   overflow-x: auto;
 }
 
-/* que la tabla tenga un ancho mínimo para no romper palabras */
+
 .oc-table {
-  min-width: 520px; /* ajusta si lo quieres más chico/grande */
+  min-width: 520px; 
 }
 
-/* encabezados: no los dejes partir letra por letra */
+
 #modalDetalles table[data-oc] th {
   white-space: nowrap;
 }
 
-/* versión móvil */
+
 @media (max-width: 576px) {
-  /* el modal que prácticamente ocupe el ancho del cel */
   #modalDetalles .modal-dialog {
     margin: 0.5rem;
     max-width: 100%;
@@ -906,13 +881,11 @@ body {
     border-radius: 0.75rem;
   }
 
-  /* header del acordeón más compacto */
   #modalDetalles .accordion-button {
     font-size: var(--fs-sm);
     padding: 0.4rem 0.75rem;
   }
 
-  /* input group de "No.Ref.del acreedor" más chiquito */
   #modalDetalles .input-group-text {
     font-size: var(--fs-sm);
     padding: var(--select-pad-vertical) var(--select-pad-horizontal);
@@ -922,14 +895,12 @@ body {
     padding: var(--select-pad-vertical) var(--select-pad-horizontal);
   }
 
-  /* celdas de tabla más compactas */
   #modalDetalles table[data-oc] th,
   #modalDetalles table[data-oc] td {
     padding: 4px 6px;
     font-size: var(--fs-sm);
   }
 
-  /* input de recepción que no se salga */
   #modalDetalles .inp-recibir {
     max-width: 80px;
     font-size: var(--fs-sm);

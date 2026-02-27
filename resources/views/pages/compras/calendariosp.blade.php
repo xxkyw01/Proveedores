@@ -11,10 +11,8 @@
 
     <div class="container-fluid mt-3 con-sidebar">
         <div class="d-flex flex-column flex-md-row gap-3 align-items-start">
-            {{--  Panel lateral --}}
             <div class="flex-shrink-0" style="width: 350px;">
                 <div class="card p-3 pt-2 shadow-sm">
-                    {{-- Sucursal --}}
                     <label for="sucursal_id" class="fw-bold text-orange mb-1">Sucursal</label>
                     <select name="sucursal_id" id="sucursal_id" class="form-select custom-select mb-3">
                         <option value="">-- Selecciona --</option>
@@ -22,8 +20,6 @@
                             <option value="{{ $s->id }}">{{ $s->nombre }}</option>
                         @endforeach
                     </select>
-
-                    {{-- Fecha --}}
                     <label for="calendarioFlatpickr" class="fw-bold text-orange mb-1">
                         <i class="fa fa-calendar text-orange"></i> Selecciona una Fecha
                     </label>
@@ -31,7 +27,6 @@
                 </div>
             </div>
 
-            {{-- Tabla de Calendario --}}
             <div class="flex-grow-1 w-100">
                 <div id="contenedor-tabla-disponibilidad">
                     <div class="alert alert-info text-center">
@@ -42,7 +37,6 @@
         </div>
     </div>
 
-    {{-- Script --}}
     <script>
         let fechaSeleccionada = null;
 
@@ -88,7 +82,6 @@
                 }
             });
 
-            // Set today's date as default
             fechaSeleccionada = new Date().toISOString().slice(0, 10);
 
             document.getElementById('sucursal_id').addEventListener('change', function() {
@@ -99,7 +92,6 @@
         });
     </script>
 
-    {{-- Tabla AJAX --}}
     @if (request()->ajax() && isset($tablaDisponibilidad))
         @if (count($tablaDisponibilidad) > 0)
             <div class="card shadow-sm">

@@ -116,8 +116,7 @@
     line-height: 1;
     margin: 0;
   }
-
-  /* Hide edit button by default; show only when card has .reveal-edit */
+  
   .btn-edit-cita {
     opacity: 0;
     transform: translateX(8px);

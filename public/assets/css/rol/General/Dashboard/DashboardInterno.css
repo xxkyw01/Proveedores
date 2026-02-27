@@ -1,7 +1,7 @@
 :root {
-  --brand: #ff6b00; /* naranja */
-  --ink: #1e293b; /* slate-800 */
-  --muted: #6b7280; /* gray-500 */
+  --brand: #ff6b00; 
+  --ink: #1e293b; 
+  --muted: #6b7280; 
   --card: #ffffff;
   --bg: #f8fafc;
 }
@@ -15,8 +15,8 @@ body {
   border: 2px solid #ee7826;
   border-radius: 16px;
   background: #fff;
-  padding: 16px 20px; /* más espacio interno */
-  margin-top: 12px; /* separación con el título (≈ medio cm) */
+  padding: 16px 20px; 
+  margin-top: 12px; 
 }
 
 .kpi-title {
@@ -31,7 +31,6 @@ body {
   font-size: 1.6rem;
 }
 
-/* Botones tipo “pill” */
 .btn-pill {
   border-radius: 999px;
   padding: 0.35rem 0.8rem;
@@ -45,7 +44,6 @@ body {
   background: var(--brand);
 }
 
-/* Cards para gráficas */
 .hc-card {
   border-radius: 16px;
   background: var(--card);
@@ -62,7 +60,6 @@ body {
   font-size: 0.82rem;
 }
 
-/* Estados */
 .empty {
   display: flex;
   align-items: center;
@@ -74,40 +71,35 @@ body {
   background: #fafafa;
 }
 
-/* Tabla */
 .table thead th {
   font-weight: 700;
 }
 
-
-/* Forzar borde naranja aunque exista .border-0 de Bootstrap */
 .card.border-0 { 
   border: 2px solid var(--brand) !important;
 }
 
-/* Sombra más marcada abajo/derecha */
 .card,
 .hc-card,
 .kpi-card {
   background: var(--card);
-  border: 2px solid var(--brand);              /* naranja */
+  border: 2px solid var(--brand);          
   border-radius: 16px;
-  box-shadow: 6px 8px 14px rgba(0,0,0,.10),    /* abajo/derecha */
+  box-shadow: 6px 8px 14px rgba(0,0,0,.10), 
               0 2px 4px rgba(0,0,0,.04);
 }
 
-/* Un pelín más de aire dentro de las cards con charts */
 .card.p-3, .hc-card { padding: 1rem 1rem; }
 
 
 .page-wrapper {
-  padding-left: 2rem;   /* ~32px */
-  padding-right: 2rem;  /* ~32px */
+  padding-left: 2rem;   
+  padding-right: 2rem;  
 }
 
 @media (min-width: 1400px) {
   .page-wrapper {
-    padding-left: 4rem;  /* ~64px en pantallas grandes */
+    padding-left: 4rem; 
     padding-right: 4rem;
   }
 }

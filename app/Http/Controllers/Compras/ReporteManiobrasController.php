@@ -32,8 +32,6 @@ class ReporteManiobrasController extends Controller
             $fechaInicio = $request->input('fechaInicio', Carbon::now()->startOfMonth()->toDateString());
             $fechaFin    = $request->input('fechaFin', Carbon::now()->toDateString());
 
-            //Log::info("📤 Exportando reporte desde $fechaInicio hasta $fechaFin");
-
             $datos = DB::connection('sqlsrv_proveedores')->select("EXEC sp_reporte_maniobras_compras ?, ?", [
                 $fechaInicio,
                 $fechaFin
@@ -42,7 +40,6 @@ class ReporteManiobrasController extends Controller
             if (empty($datos)) {
                 return redirect()->back()->with('error', 'No hay datos disponibles para exportar.');
             }
-
 
             $response = new StreamedResponse(function () use ($datos) {
 
@@ -85,7 +82,6 @@ class ReporteManiobrasController extends Controller
 
             return $response;
         } catch (\Throwable $e) {
-            //Log::error('❌ Error al exportar reporte maniobras: ' . $e->getMessage());
             abort(500, 'Error al generar el reporte.');
         }
     }

@@ -110,20 +110,12 @@ class CitaExpressController extends Controller
                     $rutaAdjunto
                 ));
 
-
-
-            //Log::info('Resultado SP', ['resultado' => $resultado]);
-
             return response()->json([
                 'success' => true,
                 'data'    => $resultado,
                 'message' => 'Cita express registrada correctamente'
             ]);
         } catch (\Exception $e) {
-            /*    Log::error('Error al registrar cita express: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
- */
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un problema al guardar la cita',
@@ -131,8 +123,6 @@ class CitaExpressController extends Controller
             ], 500);
         }
     }
-
-
 
     public function obtenerSucursales($id)
     {
@@ -144,7 +134,6 @@ class CitaExpressController extends Controller
 
         return response()->json($sucursales);
     }
-
 
     public function lista()
     {

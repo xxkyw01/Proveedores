@@ -2,7 +2,6 @@
 <html class="no-js h-100" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <meta http-equiv="Cache-Control" content="no-store" />
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-{{-- <script src="https://www.google.com/recaptcha/api.js"></script> --}}
 @include('includes.scripts.SweetAlert2')
 
 <head>
@@ -106,18 +105,6 @@
                                         </div>
                                     </div>
 
-                                    <!----
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="record" id="form-record" {{ $Checked }}>
-                                        <label class="form-check-label" for="form-record">Recordarme</label>
-                                    </div>--->
-
-                                    {{-- <div class="d-grid gap-2">
-                                        <button type="submit" class="g-recaptcha btn btn-outline-orange"
-                                            data-sitekey="6Lc0RBElAAAAAPF_CoI37q6Y2QpbBvAMjceYLfoK" data-callback='onSubmit' data-action='submit'>
-                                            INGRESO <i class="fas fa-sign-in-alt"></i>
-                                        </button> --}}
-
                                     <div class="d-grid gap-2">
                                         <button class="g-recaptcha btn btn-primary"
                                             data-sitekey="{{ config('services.recaptcha.site_key') }}"
@@ -201,33 +188,4 @@
 
     });
 </script>
-{{-- document.addEventListener("DOMContentLoaded", () => {
-const divLogin = document.getElementById('divLogin');
-const divLoged = document.getElementById('divLoged');
 
-const user = "{{ $User }}";
-const pass = "{{ $Pass }}";
-const check = "{{ $Checked }}";
-
-if (user || pass || check) {
-divLoged.style.display = 'block';
-divLogin.style.display = 'none';
-} else {
-divLoged.style.display = 'none';
-divLogin.style.display = 'block';
-}
-
-document.getElementById("myLink").addEventListener("click", function(e) {
-e.preventDefault();
-document.getElementById('form-user').value = '';
-document.getElementById('form-pass').value = '';
-
-document.getElementById('form-record').checked = false;
-/* const chk = document.getElementById('form-record');
-if (chk) chk.checked = false; */
-
-divLoged.style.display = 'none';
-divLogin.style.display = 'block';
-});
-});
- --}}

@@ -8,9 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <x-sidebar />
 
-    <!-- Enlace a la hoja de estilos -->
     <link rel="stylesheet" href="{{ asset('assets/css/rol/almacen/cita-no-programada.css') }}">
-    <!-- Bootstrap JS Bundle (incluye Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
     </script>
 
@@ -37,7 +35,6 @@
                         @endif
                     </div>
                 </div>
-                <!-- Información del Proveedor -->
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control bg-light" id="labelNombreProveedor"
                         placeholder="Nombre del Proveedor" readonly disabled>
@@ -64,15 +61,11 @@
                 </div>
 
                 <h4 class="titulo-paso"><i class="fas fa-calendar-alt"></i> Seleccionar La fecha y hora</h4>
-                <!-- Fecha -->
                 <div class="mb-3">
                     <label for="fecha" class="form-label">Fecha</label>
                     <input type="text" id="fecha" name="fecha" class="form-control custom-input" required>
                 </div>
-                <!-- Contenedor dinámico de vehículos -->
                 <div id="vehiculosContainer"></div>
-
-                <!-- Botón para agregar más vehículos -->
                 <div class="text-end mb-3">
                     <button type="button" class="btn btn-outline-success" id="btnAgregarVehiculo" style="display: none;"
                         onclick="agregarFormularioVehiculo()">
@@ -91,8 +84,6 @@
                     </button>
 
                     <ul class="dropdown-menu w-100" id="ordenCompraList" style="max-height: 200px; overflow-y: auto;">
-
-                        <!-- Opciones carga dinamicamente -->
                     </ul>
                 </div>
 
@@ -107,13 +98,10 @@
                     <input type="file" class="form-control" name="evidencias[]" id="evidencias" multiple
                         accept="image/*,application/pdf">
                 </div>
-
-                <!-- <button onclick="window.print()" class="btn btn-outline-dark"><i class="fas fa-print"></i> Imprimir PDF</button> --->
                 <button type="button" class="btn btn-orange w-45" id="btnGuardarCita">Capturar Cita</button>
             </form>
-
-        </div> {{-- Cierra row --}}
-    </div> {{-- Cierra container-fluid --}}
+        </div>
+    </div>
 
     <script>
         let currentStep = 1;
@@ -121,16 +109,10 @@
         document.addEventListener("DOMContentLoaded", function() {
             const totalSteps = 5;
             const steps = document.querySelectorAll(".step");
-
-            // Permitir hacer clic en los pasos anteriores para navegar rápidamente
             document.querySelectorAll(".step-item").forEach((item, index) => {
                 item.addEventListener("click", function() {
                     const pasoClickeado = index + 1;
-
-                    // No hacer nada si estás en el mismo paso
                     if (pasoClickeado === currentStep) return;
-
-                    // Solo permitir avanzar si ya completaste el paso 5
                     if (pasoClickeado > currentStep && currentStep < totalSteps) return;
 
                     currentStep = pasoClickeado;
@@ -139,8 +121,6 @@
                 });
             });
 
-
-            // Hacer Formulario de "Registro" con múltiples pasos aissitente de pasos 
             function actualizarWizard(step) {
                 for (let i = 1; i <= totalSteps; i++) {
                     const stepElement = document.getElementById(`step-indicator-${i}`);
@@ -176,7 +156,6 @@
                 actualizarWizard(step);
             }
 
-            // Cargar sucursales por ciudad
             document.getElementById("ciudad").addEventListener("change", function() {
                 fetch(`/proveedor/obtener-sucursales/${this.value}`)
                     .then(res => res.json())
@@ -190,23 +169,19 @@
                     });
             });
 
-            // Fecha mínima
             document.getElementById("fecha").setAttribute("min", new Date().toISOString().split("T")[0]);
 
             showStep(currentStep);
             actualizarWizard(currentStep);
         });
 
-        //funcion donde se debe de considerar anden o hora (no puede existir si el proveedor elimino lagun vehiculo  datos fantasmas(old))
         function validarDuplicadosHorarioYAnden() {
             const combinaciones = new Set();
             let conflictos = [];
             let repetido = false;
 
-            // Limpiar clases de error previas
             document.querySelectorAll(".anden, .hora").forEach(el => el.classList.remove("is-invalid"));
 
-            // Buscar todos los bloques de vehículo
             const bloques = document.querySelectorAll(".vehiculo-block");
 
             bloques.forEach((bloque, index) => {
@@ -215,7 +190,6 @@
                 const anden = document.getElementById(`anden_${i}`);
                 const hora = document.getElementById(`hora_${i}`);
 
-                // Validar si existen los elementos
                 if (!anden || !hora) return;
 
                 const clave = `${anden.value}-${hora.value}`;
@@ -228,7 +202,6 @@
                 }
             });
 
-            // Si hay conflicto, marcar y mostrar alerta
             if (repetido) {
                 conflictos.forEach(i => {
                     const anden = document.getElementById(`anden_${i}`);
@@ -255,7 +228,6 @@
             let esValido = true;
 
             inputs.forEach(input => {
-                // Saltar si está oculto o si es un input de folio
                 if (input.offsetParent === null || input.name?.startsWith("folio_factura_")) return;
 
                 if (!input.value.trim()) {
@@ -281,7 +253,6 @@
 
     <script>
         const tipoUsuario = "{{ AuthHelper::tipoUsuario() }}";
-        // -- Agregar evento al botón de buscar solo si existe
         const botonBuscarProveedor = document.getElementById("buscarProveedor");
         if (botonBuscarProveedor) {
             botonBuscarProveedor.addEventListener("click", buscarProveedor);
@@ -294,7 +265,6 @@
             }
         }
 
-        // -- Agregar evento de input en el campo idUser
         let timerBuscarProveedor;
         document.getElementById("idUser").addEventListener("input", function() {
             clearTimeout(timerBuscarProveedor);
@@ -308,7 +278,6 @@
             }
         });
 
-        // -- Al cargar la página automáticamente buscar proveedor si ya tiene ID cargado
         document.addEventListener("DOMContentLoaded", function() {
             const idUserInput = document.getElementById("idUser");
 
@@ -317,7 +286,6 @@
             }
         });
 
-        // -- FUNCION PRINCIPAL buscarProveedor
         function buscarProveedor() {
             const codigoProveedor = document.getElementById("idUser").value.trim();
 
@@ -340,8 +308,6 @@
 
                     } else {
                         actualizarCampo("labelNombreProveedor", data.Nombre_Proveedor || "No disponible");
-
-                        // Desplazar suavemente hacia los datos cargados
                         document.getElementById("labelNombreProveedor").scrollIntoView({
                             behavior: 'smooth',
                             block: 'start'
@@ -357,10 +323,8 @@
 
 
     <script>
-        //nueva funcion para contendor agregar vehiculo 
         let contadorVehiculos = 1;
 
-        // Agrega formulario dinámico para cada vehículo
         function agregarFormularioVehiculo() {
             const container = document.getElementById("vehiculosContainer");
             const indiceActual = contadorVehiculos;
@@ -416,7 +380,6 @@
 
         }
 
-        // Eliminar vehículo individualmente con validación de mínimo 1
         document.addEventListener("click", function(e) {
             if (e.target.classList.contains("btnEliminarVehiculo") || e.target.closest(".btnEliminarVehiculo")) {
                 const totalVehiculos = document.querySelectorAll(".vehiculo-block").length;
@@ -446,7 +409,6 @@
                 const andenValido = anden && anden.value.trim() !== "";
                 const horaValida = hora && hora.value.trim() !== "";
 
-                // Habilita el botón si todo está completo
                 if (transporteValido && andenValido && horaValida) {
                     btnAgregar.disabled = false;
                     btnAgregar.style.display = 'inline-block';
@@ -456,7 +418,6 @@
                 }
             }
 
-            // Validar al cambiar los selects
             if (transporte) transporte.addEventListener("change", validarCampos);
             if (anden) anden.addEventListener("change", validarCampos);
             if (hora) hora.addEventListener("change", validarCampos);
@@ -477,13 +438,12 @@
         }
 
         window.transporteDuracionMinutos = {
-            2: 30, // Camioneta
-            3: 150, // Tráiler
-            5: 90, // Rabón
-            8: 60 // Apartado interno (ajusta si debe ser 30/45/60)
+            2: 30,
+            3: 150,
+            5: 90,
+            8: 60
         };
 
-        // Reordena títulos y atributos
         function reordenarTitulosVehiculos() {
             const bloques = document.querySelectorAll(".vehiculo-block");
             let nuevoIndice = 1;
@@ -516,7 +476,6 @@
             contadorVehiculos = nuevoIndice;
         }
 
-        //Verificar que cada vehiculo tenga un horario seleecionado(no vacio) 
         function validarHorariosSeleccionadosDisponibles() {
             let validos = true;
 
@@ -540,7 +499,6 @@
             return validos;
         }
 
-        // Cargar andenes desde backend
         function cargarAndenes(index) {
             const sucursalId = document.getElementById("sucursal").value;
             if (!sucursalId) return;
@@ -556,7 +514,6 @@
                 });
         }
 
-        //Obligar al usuario seleccionar almenos una orden de compra.
         function validarOrdenesCompraSeleccionadas() {
             const ordenes = JSON.parse(document.getElementById("ordenCompraInput").value || "[]");
             const contenedor = document.getElementById("contenedorOrdenesCompra");
@@ -569,7 +526,6 @@
                     confirmButtonColor: '#ee7826'
                 });
 
-                // Solo intenta modificar clases si el contenedor existe
                 if (contenedor) {
                     contenedor.classList.add("border", "border-danger", "rounded");
                 }
@@ -613,8 +569,6 @@
       <label class="btn btn-outline-secondary" for="${id}">${label}</label>
     `);
             });
-
-            // comportamiento radio-like: solo 1 seleccionado por vehículo
             wrap.querySelectorAll('.hora-check').forEach(chk => {
                 chk.addEventListener('change', (e) => {
                     const me = e.target;
@@ -624,7 +578,7 @@
                         todos.forEach(x => {
                             if (x !== me) x.checked = false;
                         });
-                        hidden.value = me.value; // guarda la hora 24h
+                        hidden.value = me.value;
                     } else {
                         hidden.value = '';
                     }
@@ -633,7 +587,7 @@
         }
 
         function convertirMinutos(horaStr) {
-            const base = (horaStr || '').split('.')[0]; // quita .000000
+            const base = (horaStr || '').split('.')[0];
             const [h, m] = base.split(':').map(Number);
             return h * 60 + (m || 0);
         }
@@ -658,7 +612,7 @@
                     if (id === index) return;
 
                     const andenOtro = document.getElementById(`anden_${id}`)?.value;
-                    const horaOtro = document.getElementById(`hora_${id}`)?.value; // 24h
+                    const horaOtro = document.getElementById(`hora_${id}`)?.value;
                     const transOtro = document.getElementById(`transporte_${id}`)?.value;
 
                     if (!andenOtro || !horaOtro || !transOtro) return;
@@ -674,7 +628,7 @@
                     const estado = item.estado || item.Estado || 'Disponible';
                     if (estado !== 'Disponible') return false;
 
-                    const hora24 = item.horario || item.Hora; // "HH:MM(:SS)"
+                    const hora24 = item.horario || item.Hora;
                     const iniB = convertirMinutos(hora24);
                     const finB = iniB + miDuracionMin;
 
@@ -729,28 +683,20 @@
                 }
             }
 
-            // Disparadores
             transporte.addEventListener('change', cargarHorarios);
             anden.addEventListener('change', cargarHorarios);
 
-            // Si ya hay fecha seleccionada cuando se crea el bloque, intenta cargar
             if (document.getElementById('fecha')?.value) {
                 cargarHorarios();
             }
         }
-    </script>
-
-    <!--Carga automaticamente los ordenes de compras abiertos-->
-    <script>
         document.addEventListener("DOMContentLoaded", function() {
             const ordenCompraInput = document.getElementById("ordenCompraInput");
             const ordenCompraList = document.getElementById("ordenCompraList");
             const selectedOrdenesContainer = document.getElementById("selectedOrdenes");
             const dropdownOrdenes = document.getElementById("dropdownOrdenes");
-            // OJO: puede que no exista; protegemos su uso
             const resumenOrdenes = document.getElementById("resumen_ordenes");
 
-            // *** IMPORTANTE: declarar el arreglo ***
             let selectedOrdenes = [];
 
             function setBotonTexto() {
@@ -761,7 +707,6 @@
             }
 
             function actualizarSeleccion() {
-                // chips
                 selectedOrdenesContainer.innerHTML = "";
                 selectedOrdenes.forEach(oc => {
                     const tag = document.createElement("span");
@@ -770,10 +715,8 @@
                     selectedOrdenesContainer.appendChild(tag);
                 });
 
-                // input hidden para enviar al backend
                 ordenCompraInput.value = JSON.stringify(selectedOrdenes);
 
-                // texto del botón y (si existe) resumen
                 setBotonTexto();
                 if (resumenOrdenes) {
                     resumenOrdenes.textContent = selectedOrdenes.length ?
@@ -781,7 +724,6 @@
                         "No seleccionadas";
                 }
 
-                // borrar con la x
                 selectedOrdenesContainer.querySelectorAll(".remove-tag").forEach(btn => {
                     btn.addEventListener("click", () => {
                         const id = btn.getAttribute("data-id");
@@ -850,11 +792,9 @@
                 if (codigoProveedor && sucursalId) cargarOrdenes(codigoProveedor);
             }
 
-            // eventos que disparan la carga
             document.getElementById("idUser").addEventListener("change", verificarYcargarOrdenes);
             document.getElementById("sucursal").addEventListener("change", verificarYcargarOrdenes);
 
-            // estado inicial del botón
             setBotonTexto();
         });
     </script>
@@ -881,7 +821,6 @@
             },
             disable: [
                 function(date) {
-                    // Deshabilitar domingos
                     return (date.getDay() === 0);
                 }
             ]
@@ -905,15 +844,11 @@
             }
 
             document.getElementById("vehiculosContainer").innerHTML =
-                ""; 
-            contadorVehiculos = 1; //  Reiniciar contador
-            agregarFormularioVehiculo(); //  Agregar uno nuevo por defecto
-            verificarFormularioVehiculoCompleto(1); //  Validar automáticamente el primer formulario
+                "";
+            contadorVehiculos = 1;
+            agregarFormularioVehiculo();
+            verificarFormularioVehiculoCompleto(1);
         });
-    </script>
-
-    <script>
-        // Guardar cita
 
         function aHoraSQLDesde24(h) {
             const base = (h || '').split('.')[0];
@@ -927,13 +862,13 @@
             let vehiculos = [];
 
             for (let i = 1; i <= numVehiculos; i++) {
-                const hidden = document.getElementById(`hora_${i}`); 
-                const wrap = document.getElementById(`horas_${i}`); 
+                const hidden = document.getElementById(`hora_${i}`);
+                const wrap = document.getElementById(`horas_${i}`);
                 const horaVal = hidden?.value || "";
 
                 if (horaVal && wrap) {
                     const exists = !!wrap.querySelector(`.hora-check[value="${horaVal}"]`);
-                    if (!exists) hidden.value = ""; 
+                    if (!exists) hidden.value = "";
                 }
             }
 
@@ -957,9 +892,7 @@
             formData.append("fecha", document.getElementById("fecha").value);
             formData.append("idUser", document.getElementById("idUser").value);
             formData.append("proveedor_id", document.getElementById("idUser").value);
-            formData.append("motivo_evento", document.getElementById("motivo_evento")
-                .value); // asegúrate que este input existe
-
+            formData.append("motivo_evento", document.getElementById("motivo_evento").value);
             vehiculos.forEach((vehiculo, index) => {
                 formData.append(`vehiculos[${index}][anden_id]`, vehiculo.anden_id);
                 formData.append(`vehiculos[${index}][transporte_id]`, vehiculo.transporte_id);

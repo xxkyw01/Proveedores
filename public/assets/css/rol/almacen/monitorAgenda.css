@@ -1,7 +1,3 @@
-/* =========================
-   MONITOR AGENDA - CLEAN
-========================= */
-
 body {
     overflow-y: auto;
     scrollbar-width: none;
@@ -17,7 +13,6 @@ body {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   }
   
-  /* Scroll interno */
   .agenda-scroll {
     -webkit-overflow-scrolling: touch;
     overflow-y: auto;
@@ -30,13 +25,11 @@ body {
     width: 0;
     background: transparent;
   }
-  
-  /* columnas */
+
   .columna-dia {
     position: relative;
   }
-  
-  /* CABECERA fechas sticky */
+
   .date-header {
     position: sticky;
     top: 65px;
@@ -70,7 +63,6 @@ body {
     line-height: 1.1;
   }
   
-  /* SELECTOR SUCURSAL */
   .selector-sucursal {
     border: 2px solid #ee7826;
     box-shadow: 0 9px 40px rgba(0, 0, 0, 0.08);
@@ -82,7 +74,6 @@ body {
     border: none;
   }
   
-  /* ORDEN DE COMPRA */
   .orden-compra {
     display: flex;
     align-items: center;
@@ -99,7 +90,6 @@ body {
     margin: 2px 4px 6px 0;
   }
   
-  /* BADGES */
   .status-badge,
   .evento-badge {
     padding: 3px 6px;
@@ -158,7 +148,6 @@ body {
     color: #fff;
   }
   
-  /* CARD BASE */
   .timeline-card {
     background: #fff;
     box-shadow: 10px 3px 4px 6px rgba(0, 0, 0, 0.08);
@@ -179,9 +168,6 @@ body {
     gap: 6px;
   }
   
-  /* =========================
-     MAÑANA - TIMELINE
-  ========================= */
   .timeline {
     max-width: 900px;
     margin: 10px auto;
@@ -226,9 +212,6 @@ body {
     z-index: 1;
   }
   
-  /* =========================
-    HOY SPLIT (1/3 + 2/3)
-  ========================= */
   .hoy-split {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -246,14 +229,12 @@ body {
   }
   
   .hoy-focus {
-    /*min-height: 160px;*/
     display: flex;
-    justify-content: center; /* centra horizontal */
-    align-items: center; /* centra vertical */
+    justify-content: center; 
+    align-items: center;
     min-height: 260px;
   }
   
-  /* mini cards lista */
   .mini-item {
     background: rgba(255, 255, 255, 0.92);
     border-left: 6px solid #ee7826;
@@ -282,7 +263,6 @@ body {
     word-break: break-word;
   }
   
-  /* tarjeta grande */
   .focus-card {
     min-height: 220px;
   }
@@ -312,7 +292,6 @@ body {
     border: 1px dashed #ee7826;
   }
   
-  /* animación de cambio */
   .fade-in {
     animation: fadeIn 0.25s ease;
   }
@@ -327,7 +306,6 @@ body {
     }
   }
   
-  /* Responsive */
   @media (max-width: 768px) {
     .hoy-split {
       grid-template-columns: 1fr;
@@ -370,7 +348,6 @@ body {
       padding: 3px 6px !important;
     }
   
-    /* en móvil solo mostrar hoy */
     .columna-dia {
       display: none !important;
     }
@@ -379,17 +356,13 @@ body {
     }
   }
   
-  /* =========================
-     HOY FOCUS - CARD PRINCIPAL
-  ========================= */
   .hoy-focus {
     display: flex;
-    justify-content: center; /* centra horizontal */
-    align-items: center; /* centra vertical */
+    justify-content: center;
+    align-items: center;
     min-height: 260px;
   }
   
-  /* la tarjeta grande */
   .focus-card {
     width: min(820px, 100%);
     border-radius: 18px;
@@ -400,7 +373,6 @@ body {
     transform: translateZ(0);
   }
   
-  /* efecto “glow” sutil */
   .focus-card::before {
     content: "";
     position: absolute;
@@ -414,7 +386,6 @@ body {
     pointer-events: none;
   }
   
-  /* header top */
   .focus-top {
     display: flex;
     justify-content: space-between;
@@ -440,7 +411,6 @@ body {
     justify-content: flex-end;
   }
   
-  /* proveedor grande y centrado */
   .focus-body {
     position: relative;
     z-index: 1;
@@ -454,7 +424,6 @@ body {
     font-size: clamp(18px, 1.6vw, 28px);
   }
   
-  /* “chips” de datos (hora, anden, transporte, lugar) */
   .focus-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -485,7 +454,6 @@ body {
     text-align: right;
   }
   
-  /* nota bonita */
   .focus-note {
     margin-top: 12px;
     padding: 12px 14px;
@@ -494,7 +462,6 @@ body {
     border: 1px dashed #ee7826;
   }
   
-  /* animación de entrada */
   .fade-in {
     animation: focusIn 0.4s ease;
   }
@@ -511,7 +478,6 @@ body {
     }
   }
   
-  /* animación “salida” corta para cambio */
   .fade-out {
     animation: focusOut 0.18s ease;
   }
@@ -525,8 +491,7 @@ body {
       transform: translateY(-6px) scale(0.99);
     }
   }
-  
-  /* Responsive */
+
   @media (max-width: 992px) {
     .focus-card {
       width: 100%;

@@ -9,12 +9,11 @@
     <header>
         @include('includes.header')
     </header>
-    {{-- Contenedor principal --}}
+
     <div class="wrapper mt-5 mb-5">
         @yield('content')
     </div>
 
-    {{-- <footer>@include('includes.footer')</footer> --}}
     @stack('scripts')
 </body>
 </html>
