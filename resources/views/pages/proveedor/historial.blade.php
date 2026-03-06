@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="{{ asset('assets/css/rol/proveedor/historial.css') }}">
 
     <x-sidebar />
-
     <div class="container-fluid con-sidebar">
         <div class="row justify-content-center">
 
@@ -17,8 +16,8 @@
                 <div class="card shadow p-3 mb-4" style="border: 2px solid #ee7826; border-radius: 17px;">
                     <div class="row row-cols-2 row-cols-md-5 g-2 text-center">
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #ee7826; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="todos" role="button"
+                                tabindex="0" style=" border-left: 4px solid #ee7826; border-radius: 12px;">
                                 <i class="fas fa-calendar-alt fa-lg text-warning mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Total Citas
                                 </h6>
@@ -26,8 +25,8 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #f19a0f; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="pendientes" role="button"
+                                tabindex="0" style="border-left: 4px solid #f19a0f; border-radius: 12px;">
                                 <i class="fas fa-clock fa-lg text-warning mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Pendientes
                                 </h6>
@@ -35,8 +34,8 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #28a745; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="confirmadas" role="button"
+                                tabindex="0" style="border-left: 4px solid #28a745; border-radius: 12px;">
                                 <i class="fas fa-check-circle fa-lg text-success mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Confirmadas
                                 </h6>
@@ -44,8 +43,8 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #e74c3c; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="canceladas" role="button"
+                                tabindex="0" style="border-left: 4px solid #e74c3c; border-radius: 12px;">
                                 <i class="fas fa-times-circle fa-lg text-danger mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Canceladas
                                 </h6>
@@ -53,16 +52,16 @@
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #0d6efd; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="asistio" role="button"
+                                tabindex="0" style="border-left: 4px solid #0d6efd; border-radius: 12px;">
                                 <i class="fas fa-user-check fa-lg text-primary mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Asistió</h6>
                                 <h5 class="fw-bold text-dark mb-0">{{ $citasAsistio ?? 0 }}</h5>
                             </div>
                         </div>
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #6c757d; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="no-asistio" role="button"
+                                tabindex="0" style="border-left: 4px solid #6c757d; border-radius: 12px;">
                                 <i class="fas fa-user-times fa-lg text-dark mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">No Asistió
                                 </h6>
@@ -71,8 +70,8 @@
                         </div>
 
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #ffc107; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="en-proceso" role="button"
+                                tabindex="0" style="border-left: 4px solid #ffc107; border-radius: 12px;">
                                 <i class="fas fa-spinner fa-lg text-dark mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">En Proceso
                                 </h6>
@@ -81,8 +80,8 @@
                         </div>
 
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #6c757d; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="recepcion-tardia"
+                                role="button" tabindex="0" style="border-left: 4px solid #6c757d; border-radius: 12px;">
                                 <i class="fas fa-hourglass-start fa-lg text-orange mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Recepción
                                     tardía</h6>
@@ -91,8 +90,8 @@
                         </div>
 
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #dc3545; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="cancelada-por-proveedor"
+                                role="button" tabindex="0" style="border-left: 4px solid #dc3545; border-radius: 12px;">
                                 <i class="fas fa-user-times fa-lg text-danger mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Cancelada por
                                     proveedor</h6>
@@ -101,10 +100,12 @@
                         </div>
 
                         <div class="col">
-                            <div class="card shadow-sm border-0 p-2"
-                                style="background-color: #fff; border-left: 4px solid #17a2b8; border-radius: 12px;">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="no-programado"
+                                role="button" tabindex="0"
+                                style="border-left: 4px solid #17a2b8; border-radius: 12px;">
                                 <i class="fas fa-info-circle fa-lg text-info mb-1"></i>
-                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">No Programado
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">No
+                                    Programado
                                 </h6>
                                 <h5 class="fw-bold text-dark mb-0">{{ $citasNoProgramado ?? 0 }}</h5>
                             </div>
@@ -134,9 +135,26 @@
                             <tbody>
                                 @foreach ($reservaciones as $reserva)
                                     <tr>
-                                        <td>{{ \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y') }}
+                                        @php
+                                            try {
+                                                $orderDt = \Carbon\Carbon::parse(
+                                                    $reserva->fecha . ' ' . ($reserva->hora ?? '00:00:00'),
+                                                )->format('Y-m-d H:i:s');
+                                            } catch (\Exception $e) {
+                                                $orderDt = '';
+                                            }
+                                            $displayDate = $reserva->fecha
+                                                ? \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y')
+                                                : '-';
+
+                                            $displayTime = $reserva->hora
+                                                ? \Carbon\Carbon::parse($reserva->hora)->format('h:i A')
+                                                : '-';
+
+                                        @endphp
+                                        <td data-order="{{ $orderDt }}">{{ $displayDate }}
                                             <br>
-                                            {{ \Carbon\Carbon::parse($reserva->hora)->format('h:i A') }}
+                                            {{ $displayTime }}
                                         </td>
                                         <td>{{ $reserva->proveedor_nombre }}</td>
                                         <td>{!! nl2br(e($reserva->ordenes_detalle ?? '-')) !!}</td>
@@ -157,7 +175,8 @@
                                                     default => 'bg-light text-dark',
                                                 };
                                             @endphp
-                                            <span class="badge {{ $badgeClass }}">{{ ucfirst($reserva->estado) }}</span>
+                                            <span
+                                                class="badge {{ $badgeClass }}">{{ ucfirst($reserva->estado) }}</span>
                                         </td>
                                         <td>
                                             <button class="btn btn-sm btn-outline-primary" data-toggle="tooltip"
@@ -181,9 +200,8 @@
                 </div>
             </div>
 
-        </div> 
-    </div> 
-
+        </div>
+    </div>
 
     </div>
     <div class="modal fade" id="modalDetalles" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
@@ -247,23 +265,37 @@
                     <div class="mb-3">
                         <strong class="text-muted">Órdenes de Compra con Folio:</strong>
                         <pre class="border rounded p-3 bg-light" style="white-space: pre-line;" id="detalleOrdenes">-</pre>
-                    </div>
 
-                    <div class="row mt-3">
-                        <div class="col-md-12">
-                            <strong class="text-muted">Comentario de almacén:</strong>
-                            <div id="detalleComentario" class="border rounded p-2 bg-light">-</div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <strong class="text-muted">Comentario de almacén:</strong>
+                                <div id="detalleComentario" class="border rounded p-2 bg-light">-</div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-12" id="detalleEvidenciaWrap" style="display:none;">
+                                <strong class="text-muted d-block mb-1">Evidencia adjunta:</strong>
+                                <a id="detalleEvidenciaLink" class="btn btn-sm btn-outline-primary" target="_blank">Ver
+                                    evidencia</a>
+                                <small id="detalleEvidenciaMeta" class="text-muted ms-2"></small>
+                            </div>
+                        </div>
+
+                        <div id="detalleTimeline" class="timeline-wrap" style="display:block;">
+                            <small class="text-muted">Historial de estados</small>
+                            <div class="timeline" aria-hidden="false"></div>
+                        </div>
+                        <div id="detalleGraph" class="graph-wrap mt-3" style="display:block;">
+                            <small class="text-uppercase text-muted fw-bold">Relación OC → Entradas</small>
+                            <div id="graphSvgContainer" style="width:100%; overflow:auto;">
+                                <svg id="graphSvg" xmlns="http://www.w3.org/2000/svg" width="100%"
+                                    height="220"></svg>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row mt-2">
-                        <div class="col-md-12" id="detalleEvidenciaWrap" style="display:none;">
-                            <strong class="text-muted d-block mb-1">Evidencia adjunta:</strong>
-                            <a id="detalleEvidenciaLink" class="btn btn-sm btn-outline-primary" target="_blank">Ver
-                                evidencia</a>
-                            <small id="detalleEvidenciaMeta" class="text-muted ms-2"></small>
-                        </div>
-                    </div>
+
 
                 </div>
             </div>
@@ -360,7 +392,6 @@
             $('#modalDescargarPDF').modal('hide');
         });
 
-
         function mostrarDetalle(reserva) {
             document.getElementById('detalleProveedorNombre').innerText = reserva.proveedor_nombre ?? '-';
             document.getElementById('detalleProveedorRFC').innerText = reserva.RFC_proveedor ?? '-';
@@ -384,6 +415,120 @@
 
             document.getElementById('detalleOrdenes').innerText = reserva.ordenes_detalle ?? '-';
 
+            (function buildTimeline() {
+                var container = document.querySelector('#detalleTimeline .timeline');
+                if (!container) return;
+                container.innerHTML = '';
+
+                function fmtDate(val) {
+                    if (!val) return '';
+                    try {
+                        var d = new Date(val);
+                        if (isNaN(d.getTime())) return '';
+                        var dd = String(d.getDate()).padStart(2, '0');
+                        var mm = String(d.getMonth() + 1).padStart(2, '0');
+                        var yyyy = d.getFullYear();
+                        var hh = String(d.getHours()).padStart(2, '0');
+                        var min = String(d.getMinutes()).padStart(2, '0');
+                        return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
+                    } catch (e) {
+                        return '';
+                    }
+                }
+
+                var steps = [{
+                        key: 'created_at',
+                        label: 'Creada'
+                    },
+                    {
+                        key: 'estado_confirmado',
+                        label: 'Confirmada'
+                    },
+                    {
+                        key: 'estado_proceso',
+                        label: 'En proceso'
+                    },
+                    {
+                        key: 'estado_asistio',
+                        label: 'Asistió'
+                    },
+                    {
+                        key: 'estado_no_asistio',
+                        label: 'No asistió'
+                    },
+                    {
+                        key: 'estado_cancelado',
+                        label: 'Cancelada'
+                    },
+                    {
+                        key: 'estado_cancelada_sp',
+                        label: 'Cancelada SP'
+                    },
+                    {
+                        key: 'estado_tardia',
+                        label: 'Recepción tardía'
+                    },
+                    {
+                        key: 'estado_timeout',
+                        label: 'Timeout'
+                    }
+                ];
+
+                var visible = steps.map(function(step) {
+                    var val = reserva[step.key];
+                    var dateTxt = '';
+                    var active = false;
+
+                    if (val === null || val === undefined || val === '') {
+                        active = false;
+                    } else if (typeof val === 'string') {
+                        dateTxt = fmtDate(val);
+                        if (dateTxt) active = true;
+                        else if (val === '1' || val.toLowerCase() === 'true') active = true;
+                    } else if (typeof val === 'number' || typeof val === 'boolean') {
+                        active = Boolean(val);
+                    } else {
+                        active = true;
+                    }
+
+                    if (active && !dateTxt) dateTxt = fmtDate(reserva.updated_at) || fmtDate(reserva
+                        .created_at) || '';
+
+                    return active ? {
+                        key: step.key,
+                        label: step.label,
+                        date: dateTxt
+                    } : null;
+                }).filter(Boolean);
+
+                visible.forEach(function(step, idx) {
+                    var item = document.createElement('div');
+                    item.className = 'timeline-item active';
+
+                    var dot = document.createElement('div');
+                    dot.className = 'timeline-dot';
+                    item.appendChild(dot);
+
+                    var label = document.createElement('div');
+                    label.className = 'timeline-label';
+                    label.textContent = step.label;
+                    item.appendChild(label);
+
+                    var date = document.createElement('div');
+                    date.className = 'timeline-date';
+                    date.textContent = step.date || '-';
+                    item.appendChild(date);
+
+                    container.appendChild(item);
+
+                    if (idx < visible.length - 1) {
+                        var conn = document.createElement('div');
+                        conn.className = 'timeline-connector active';
+                        container.appendChild(conn);
+                    }
+                });
+            })();
+
             const estado = (reserva.estado || '').toLowerCase().trim();
             const badge = document.getElementById('detalleEstadoModal');
             badge.innerText = reserva.estado ?? '-';
@@ -392,8 +537,7 @@
                 estado === 'confirmada' ? 'badge-confirmado' :
                 estado === 'asistió' ? 'bg-success' :
                 estado === 'no asistió' ? 'bg-dark' :
-                estado === 'cancelada' || estado === 'cancelado' ?
-                'bg-danger' :
+                estado === 'cancelada' || estado === 'cancelado' ? 'bg-danger' :
                 estado === 'en proceso' ? 'bg-warning' :
                 estado === 'recepción tardía' ? 'bg-dark' :
                 estado === 'cancelada por proveedor' ? 'bg-danger' :
@@ -436,13 +580,18 @@
                 }
             }
 
+            // Cargar relaciones OC -> Entradas (gráfico)
+            if (reserva && reserva.id) {
+                cargarOCRelacionadas(reserva.id);
+            }
+
             $('#modalDetalles').modal('show');
         }
 
 
 
         $(document).ready(function() {
-            $('#tablaReservas').DataTable({
+            var table = $('#tablaReservas').DataTable({
                 language: {
                     url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
                 },
@@ -480,6 +629,43 @@
                     });
                 }
             });
+
+            // Mapa de status: key = data-status en el card, value = patrón regex a buscar en la columna Estado
+            var statusMap = {
+                'pendientes': 'pendiente',
+                'confirmadas': 'confirmada',
+                'canceladas': 'cancelada|cancelado',
+                'asistio': 'asistió|asistio',
+                'no-asistio': 'no asistió|no asistio',
+                'en-proceso': 'en proceso',
+                'recepcion-tardia': 'recepción tardía|recepcion tardia',
+                'cancelada-por-proveedor': 'cancelada por proveedor',
+                'no-programado': 'no programado'
+            };
+
+            // Handler para los cards que filtran
+            $('.filter-card').on('click keypress', function(e) {
+                if (e.type === 'keypress' && e.key !== 'Enter' && e.key !== ' ') return;
+                var key = $(this).data('status');
+
+                // 'todos' limpia el filtro
+                if (!key || key === 'todos') {
+                    $('.filter-card').removeClass('active');
+                    table.column(4).search('').draw();
+                    return;
+                }
+
+                var pattern = statusMap[key] || key;
+
+                if ($(this).hasClass('active')) {
+                    $(this).removeClass('active');
+                    table.column(4).search('').draw();
+                } else {
+                    $('.filter-card').removeClass('active');
+                    $(this).addClass('active');
+                    table.column(4).search('^(' + pattern + ')$', true, false, true).draw();
+                }
+            });
         });
 
         function abrirModalCancelar(id) {
@@ -515,6 +701,192 @@
                 })
                 .catch(err => Swal.fire('Error', 'Error de servidor.', 'error'));
         });
+
+        /* --- Gráfico OC -> Entradas: funciones auxiliares --- */
+        function cargarOCRelacionadas(reservaId) {
+            const svg = document.getElementById('graphSvg');
+            if (svg) svg.innerHTML = '';
+
+            fetch(`/proveedor/reserva/${reservaId}/ocs`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log('ocRelacionadas response:', data);
+                    const ocs = data.ocs || [];
+                    renderGraph(ocs);
+                })
+                .catch(err => {
+                    console.error('Error cargando OCs relativas:', err);
+                });
+        }
+
+        function renderGraph(ocs) {
+            const svg = document.getElementById('graphSvg');
+            if (!svg) return;
+
+            const padding = 20;
+            const leftX = 120;
+            const rightX = 420;
+            const rowH = 68;
+
+            if (!ocs.length) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', 20);
+                text.setAttribute('y', 30);
+                text.setAttribute('fill', '#666');
+                text.textContent = 'No se encontraron Órdenes de Compra vinculadas';
+                svg.appendChild(text);
+                return;
+            }
+
+            svg.setAttribute('height', Math.max(220, ocs.length * rowH + padding));
+
+            ocs.forEach(function(oc, idx) {
+                const y = padding + idx * rowH;
+
+                // Nodo OC (izquierda)
+                const gOc = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                gOc.setAttribute('class', 'node oc');
+                gOc.setAttribute('data-docnum', oc.docnum || '');
+                gOc.setAttribute('cursor', 'pointer');
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', leftX - 100);
+                rect.setAttribute('y', y);
+                rect.setAttribute('rx', 8);
+                rect.setAttribute('ry', 8);
+                rect.setAttribute('width', 200);
+                rect.setAttribute('height', 48);
+                rect.setAttribute('fill', '#f8f9fa');
+                rect.setAttribute('stroke', '#007bff');
+                rect.setAttribute('stroke-width', 1);
+
+                const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t1.setAttribute('x', leftX - 90);
+                t1.setAttribute('y', y + 18);
+                t1.setAttribute('fill', '#000');
+                t1.setAttribute('style', 'font-weight:700; font-size:12px');
+                t1.textContent = oc.docnum || '-';
+
+                const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                t2.setAttribute('x', leftX - 90);
+                t2.setAttribute('y', y + 36);
+                t2.setAttribute('fill', '#555');
+                t2.setAttribute('style', 'font-size:11px');
+                t2.textContent = oc.fecha ? (oc.fecha + ' • ' + (oc.total || '')) : (oc.total || '');
+
+                gOc.appendChild(rect);
+                gOc.appendChild(t1);
+                gOc.appendChild(t2);
+
+                gOc.addEventListener('click', function() {
+                    openOcModal(oc, 'oc');
+                });
+
+                svg.appendChild(gOc);
+
+                // Entradas (si hay) a la derecha
+                const entradas = oc.entradas || [];
+                if (entradas.length) {
+                    entradas.forEach(function(en, j) {
+                        const ey = y + j * 40;
+                        const gEn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        gEn.setAttribute('class', 'node entrada');
+                        gEn.setAttribute('cursor', 'pointer');
+
+                        const rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect2.setAttribute('x', rightX - 40);
+                        rect2.setAttribute('y', ey);
+                        rect2.setAttribute('rx', 6);
+                        rect2.setAttribute('ry', 6);
+                        rect2.setAttribute('width', 220);
+                        rect2.setAttribute('height', 40);
+                        rect2.setAttribute('fill', '#fff8e1');
+                        rect2.setAttribute('stroke', '#ffc107');
+                        rect2.setAttribute('stroke-width', 1);
+
+                        const et1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        et1.setAttribute('x', rightX - 30);
+                        et1.setAttribute('y', ey + 18);
+                        et1.setAttribute('fill', '#000');
+                        et1.setAttribute('style', 'font-weight:600; font-size:12px');
+                        et1.textContent = en.docnum || '-';
+
+                        const et2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        et2.setAttribute('x', rightX - 30);
+                        et2.setAttribute('y', ey + 34);
+                        et2.setAttribute('fill', '#444');
+                        et2.setAttribute('style', 'font-size:11px');
+                        et2.textContent = en.ref_proveedor ? (en.ref_proveedor + ' • ' + (en.total || '')) :
+                            (en.total || '');
+
+                        gEn.appendChild(rect2);
+                        gEn.appendChild(et1);
+                        gEn.appendChild(et2);
+
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', leftX + 10);
+                        line.setAttribute('y1', y + 24);
+                        line.setAttribute('x2', rightX - 50);
+                        line.setAttribute('y2', ey + 20);
+                        line.setAttribute('stroke', '#6c757d');
+                        line.setAttribute('stroke-width', 1.2);
+                        line.setAttribute('marker-end', 'url(#arrow)');
+
+                        svg.appendChild(line);
+
+                        gEn.addEventListener('click', function() {
+                            openOcModal(en, 'entrada');
+                        });
+
+                        svg.appendChild(gEn);
+                    });
+                }
+            });
+
+            if (!svg.querySelector('defs')) {
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.setAttribute('id', 'arrow');
+                marker.setAttribute('markerWidth', '8');
+                marker.setAttribute('markerHeight', '8');
+                marker.setAttribute('refX', '6');
+                marker.setAttribute('refY', '3');
+                marker.setAttribute('orient', 'auto');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M0,0 L6,3 L0,6 Z');
+                path.setAttribute('fill', '#6c757d');
+                marker.appendChild(path);
+                defs.appendChild(marker);
+                svg.insertBefore(defs, svg.firstChild);
+            }
+        }
+
+        function openOcModal(item, tipo) {
+            let title = tipo === 'oc' ? 'Orden de Compra' : 'Entrada de mercancía';
+            let cuerpo = '';
+            cuerpo += '<div><strong>Documento:</strong> ' + (item.docnum || '-') + '</div>';
+            cuerpo += '<div><strong>Fecha:</strong> ' + (item.fecha || '-') + '</div>';
+            if (tipo === 'oc') {
+                cuerpo += '<div><strong>Almacén:</strong> ' + (item.almacen || '-') + '</div>';
+                cuerpo += '<div><strong>Total:</strong> ' + (item.total || '-') + '</div>';
+            } else {
+                cuerpo += '<div><strong>No. ref. proveedor:</strong> ' + (item.ref_proveedor || '-') + '</div>';
+                cuerpo += '<div><strong>Total:</strong> $ ' + (item.total || '-') + '</div>';
+            }
+
+            const modalBody = document.querySelector('#modalDetalles .modal-body');
+            if (modalBody) {
+                const container = document.createElement('div');
+                container.className = 'mt-3 p-3 border rounded bg-white';
+                container.innerHTML = '<h6 class="fw-bold">' + title + '</h6>' + cuerpo;
+                Swal.fire({
+                    title: title,
+                    html: container.innerHTML,
+                    width: 600,
+                    icon: 'info'
+                });
+            }
+        }
     </script>
 
 @endsection

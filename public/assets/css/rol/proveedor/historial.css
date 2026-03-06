@@ -17,20 +17,19 @@
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: #ee7826 !important; 
-    color: white !important; 
-    border: none !important;
+  background: #ee7826 !important;
+  color: white !important;
+  border: none !important;
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button:not(.current) {
-    color: #ee7826 !important;
-    background: transparent !important; 
-    border: none !important;
+  color: #ee7826 !important;
+  background: transparent !important;
+  border: none !important;
 }
 
-
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: rgba(238, 120, 38, 0.1) !important; 
+  background: rgba(238, 120, 38, 0.1) !important;
 }
 
 @media only screen and (max-width: 768px) {
@@ -52,4 +51,75 @@
     top: 10px;
     right: 10px;
   }
+}
+
+.filter-card {
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+.filter-card:hover {
+  transform: translateY(-2px);
+}
+.filter-card.active {
+  box-shadow: 0 0 0 3px rgba(238, 120, 38, 0.18);
+  border-left-width: 6px;
+  background-color: rgba(238, 120, 38, 0.12);
+}
+.filter-card.active .fw-bold,
+.filter-card.active .fw-semibold,
+.filter-card.active h5 {
+  color: #4b2b00;
+}
+
+.timeline-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.timeline {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+.timeline-item {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 110px;
+}
+.timeline-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e9ecef;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+.timeline-item.active .timeline-dot {
+  background: #ee7826;
+  border-color: rgba(238, 120, 38, 0.9);
+}
+.timeline-label {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: #6c757d;
+}
+.timeline-date {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #495057;
+}
+.timeline-connector {
+  height: 6px;
+  background: #e9ecef;
+  flex: 1;
+  margin-top: 10px;
+  border-radius: 3px;
+}
+.timeline-connector.active {
+  background: #ee7826;
 }

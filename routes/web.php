@@ -64,6 +64,8 @@ Route::middleware(['almacen', 'prevent-back-history'])->prefix('almacen')->group
     Route::get('/dashboard', fn() => view('index_almacen'))->name('almacen.dashboard');
     Route::get('/menu', [ProveedorMenuController::class, 'menu'])->name('almacen.menu');
     Route::get('/AgendaProveedor', [GestionSupplierController::class, 'index'])->name('proveedor.AgendaProveedor');
+    Route::get('/codebar', [GestionSupplierController::class, 'codebar'])->name('almacen.codebar');
+    Route::get('/buscar-articulos', [GestionSupplierController::class, 'buscarArticulos']);
     Route::get('/agenda', [GestionSupplierController::class, 'index'])->name('agenda.index');
     Route::get('/agenda/data', [GestionSupplierController::class, 'getAgendaData'])->name('agenda.data');
     Route::get('/agenda/detalles/{id}', [GestionSupplierController::class, 'getDetails'])->name('agenda.detalles');
@@ -103,6 +105,8 @@ Route::middleware(['almacen', 'prevent-back-history'])->prefix('almacen')->group
     Route::get('/datos/{codigo}', [CitaNoProgramadaController::class, 'obtenerDatosProveedor']);
     Route::get('/obtener-andenes/{id}', [CitaNoProgramadaController::class, 'obtenerAndenes']);
     Route::get('/serie-oc/{sucursal_id}', [CitaNoProgramadaController::class, 'obtenerSerieOC']);
+
+
 
     Route::post('/citas', [CitaNoProgramadaController::class, 'store'])->name('almacen.citas.store');
     Route::post('/citas/disponibilidad', [CitaNoProgramadaController::class, 'getDisponibilidad'])->name('evento.citas.disponibilidad');
@@ -192,3 +196,6 @@ Route::get('/404', function () {
 Route::get('/500', function () {
     return response()->view('errors.500', [], 500);
 })->name('500');
+
+// Endpoint: obtener OCs relacionadas a una reservación (frontend: historial.blade)
+Route::get('/proveedor/reserva/{id}/ocs', [\App\Http\Controllers\Proveedor\ReservacionController::class, 'ocRelacionadas']);

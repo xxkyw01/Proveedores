@@ -15,6 +15,8 @@ use App\Models\Proveedor\Transporte;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use App\Http\Controllers\Almacen\GestionSupplierController;
+use App\Services\SAPServiceLayer;
 
 
 class ReservacionController extends Controller
@@ -135,10 +137,22 @@ class ReservacionController extends Controller
                 ->select('EXEC [dbo].[sp_consultar_reservaciones_todas] @fechaInicio = ?', [$fecha]);
         }
 
-        $ids = collect($reservaciones)->pluck('id')->filter()->values()->all();
+        // Extraer ids robustamente (el SP puede devolver 'id', 'Id' o 'ID')
+        $ids = collect($reservaciones)->map(function ($r) {
+            if (is_array($r)) $r = (object)$r;
+            return $r->id ?? $r->Id ?? $r->ID ?? null;
+        })->filter()->map(fn($v) => (int) $v)->unique()->values()->all();
         $colsCandidatas = ['commit_afterrecep', 'evidencia_path', 'evidencia_nombre', 'evidencia_mime', 'evidencia_size'];
         $colsActivas    = $this->columnasDisponibles('reservaciones', $colsCandidatas);
         $colsCancel     = $this->columnasDisponibles('reservacion_cancelada', array_merge(['reservacion_id'], $colsCandidatas));
+
+        // Columnas relacionadas a estados/fechas que pueden existir en la tabla reservaciones
+        $colsEstadoCandidatas = [
+            'created_at', 'updated_at',
+            'estado_completado','estado_cancelado','estado_asistio','estado_no_asistio',
+            'estado_confirmado','estado_proceso','estado_tardia','estado_timeout','estado_cancelada_sp'
+        ];
+        $colsEstados = $this->columnasDisponibles('reservaciones', $colsEstadoCandidatas);
 
         $metaActivas = [];
         if (!empty($ids) && !empty($colsActivas)) {
@@ -158,6 +172,35 @@ class ReservacionController extends Controller
                     ];
                 })
                 ->toArray();
+        }
+
+        $metaEstados = [];
+        if (!empty($ids) && !empty($colsEstados)) {
+            $metaEstados = DB::connection('sqlsrv_proveedores')
+                ->table('reservaciones')
+                ->whereIn('id', $ids)
+                ->select(array_merge(['id'], $colsEstados))
+                ->get()
+                ->keyBy('id')
+                ->map(function ($r) use ($colsEstados) {
+                    $out = [];
+                    foreach ($colsEstados as $c) {
+                        if (property_exists($r, $c)) $out[$c] = $r->$c;
+                    }
+                    return $out;
+                })
+                ->toArray();
+        }
+
+        // Merge metaEstados into metaActivas so adjuntarMetaAReserva los incluya
+        if (!empty($metaEstados)) {
+            foreach ($metaEstados as $id => $vals) {
+                if (isset($metaActivas[$id])) {
+                    $metaActivas[$id] = array_merge($metaActivas[$id], $vals);
+                } else {
+                    $metaActivas[$id] = $vals;
+                }
+            }
         }
 
         $metaCanceladas = [];
@@ -235,5 +278,205 @@ class ReservacionController extends Controller
             $row->evidencia_nombre ?? basename($path),
             ['Content-Type' => $row->evidencia_mime ?? 'application/octet-stream']
         );
+    }
+
+    /**
+     * Devuelve las Órdenes de Compra relacionadas a una reservación y sus entradas (si se encuentran).
+     * Respuesta JSON: { ocs: [ { id, docnum, fecha, almacen, total, entradas: [ { docnum, fecha, ref_proveedor, total } ] } ] }
+     */
+    public function ocRelacionadas(Request $request, $id)
+    {
+        try {
+            $id = (int) $id;
+
+            // Intentar obtener la reservación desde el SP (igual que en GestionSupplierController::getDetails)
+            $data = DB::connection('sqlsrv_proveedores')->select("EXEC sp_consultar_reservaciones_todas");
+            $evento = collect($data)->firstWhere('id', $id);
+
+            $ordenes = collect();
+            if ($evento) {
+                if (isset($evento->orden_compra) && $evento->orden_compra !== null) {
+                    if (is_array($evento->orden_compra)) {
+                        $ordenes = collect($evento->orden_compra);
+                    } elseif (is_string($evento->orden_compra)) {
+                        $tmp = json_decode($evento->orden_compra, true);
+                        if (is_array($tmp)) {
+                            $ordenes = collect($tmp);
+                        } else {
+                            $ordenes = collect(explode(',', $evento->orden_compra));
+                        }
+                    } else {
+                        $ordenes = collect([(string) $evento->orden_compra]);
+                    }
+                }
+            }
+
+            // Si no hay ordenes en el SP, buscar en la tabla reservacion_orden_compra
+            if ($ordenes->isEmpty()) {
+                $fromTable = DB::connection('sqlsrv_proveedores')
+                    ->table('reservacion_orden_compra')
+                    ->where('reservacion_id', $id)
+                    ->pluck('orden_compra')
+                    ->map(fn($v) => trim((string)$v))
+                    ->filter()
+                    ->values();
+
+                $ordenes = collect($fromTable);
+            }
+
+            $ocs = $ordenes->map(function ($o) {
+                $num = trim((string)$o);
+
+                // Intentar enriquecer con datos desde SAP (encabezado PO)
+                $fecha = null;
+                $almacen = null;
+                $total = null;
+                try {
+                    // Primero intentamos usando el helper existente (sapGetPO)
+                    $resp = app()->call([GestionSupplierController::class, 'sapGetPO'], [
+                        'docNum' => $num,
+                        'sl'     => app(SAPServiceLayer::class)
+                    ]);
+
+                    if ($resp instanceof \Illuminate\Http\JsonResponse) {
+                        $arr = $resp->getData(true);
+                    } else {
+                        $body = is_string($resp) ? $resp : (method_exists($resp, 'getContent') ? $resp->getContent() : json_encode($resp));
+                        $arr = json_decode($body, true) ?? [];
+                    }
+
+                    if (isset($arr['ok']) && $arr['ok']) {
+                        $po = $arr['po'] ?? [];
+                        $lines = $arr['lines'] ?? [];
+                        $fecha = $po['DocDate'] ?? ($po['DocDateString'] ?? null);
+                        $total = $po['DocTotal'] ?? $po['DocTotalFC'] ?? null;
+                        $docEntry = $po['DocEntry'] ?? null;
+                        if (!empty($lines) && isset($lines[0]['WarehouseCode'])) {
+                            $almacen = $lines[0]['WarehouseCode'];
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('ocRelacionadas sapGetPO error: ' . $e->getMessage());
+                }
+
+                // Si no obtuvimos datos con sapGetPO, intentar consulta directa al Service Layer
+                if (empty($fecha) && empty($total)) {
+                    try {
+                        $sl = app(SAPServiceLayer::class);
+                        $qHead = "PurchaseOrders?\$filter=DocNum eq $num";
+                        $headRaw = $sl->request('GET', $qHead);
+                        $headArr = json_decode(is_string($headRaw) ? $headRaw : (string)$headRaw->getBody(), true) ?? [];
+                        $po = $headArr['value'][0] ?? null;
+                        if ($po) {
+                            $fecha = $po['DocDate'] ?? ($po['DocDateString'] ?? null);
+                            $total = $po['DocTotal'] ?? $po['DocTotalFC'] ?? null;
+                            $docEntry = $po['DocEntry'] ?? null;
+                            if ($docEntry) {
+                                $qFull = "PurchaseOrders($docEntry)";
+                                $fullRaw = $sl->request('GET', $qFull);
+                                $fullArr = json_decode(is_string($fullRaw) ? $fullRaw : (string)$fullRaw->getBody(), true) ?? [];
+                                $lines = $fullArr['DocumentLines'] ?? [];
+                                if (!empty($lines) && isset($lines[0]['WarehouseCode'])) {
+                                    $almacen = $lines[0]['WarehouseCode'];
+                                }
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('ocRelacionadas SL direct error: ' . $e->getMessage());
+                    }
+                }
+
+                // Obtener Entradas (GRPO) relacionadas por DocEntry
+                $entradasOut = [];
+                if (!empty($docEntry)) {
+                    try {
+                        $sl = app(SAPServiceLayer::class);
+                        $q = "PurchaseDeliveryNotes?\$filter=DocumentLines/any(d: d/BaseEntry eq $docEntry and d/BaseType eq 22)";
+                        $res = $sl->request('GET', $q);
+                        $json = json_decode(is_string($res) ? $res : (string)$res->getBody(), true) ?? [];
+                        $vals = $json['value'] ?? [];
+
+                        // Si no encontró con BaseType, intentar sin esa condición
+                        if (empty($vals)) {
+                            $q2 = "PurchaseDeliveryNotes?\$filter=DocumentLines/any(d: d/BaseEntry eq $docEntry)";
+                            $res2 = $sl->request('GET', $q2);
+                            $json2 = json_decode(is_string($res2) ? $res2 : (string)$res2->getBody(), true) ?? [];
+                            $vals = $json2['value'] ?? [];
+                        }
+
+                        $entradasOut = collect($vals)->map(function($pdn) {
+                            return [
+                                'docnum' => $pdn['DocNum'] ?? null,
+                                'docentry' => $pdn['DocEntry'] ?? null,
+                                'fecha' => $pdn['DocDate'] ?? null,
+                                'ref_proveedor' => $pdn['NumAtCard'] ?? null,
+                                'total' => $pdn['DocTotal'] ?? null,
+                            ];
+                        })->values()->all();
+                        Log::info('ocRelacionadas GRPO query', ['docEntry' => $docEntry, 'found' => count($entradasOut)]);
+
+                        if (empty($entradasOut)) {
+                            try {
+                                Log::info("ocRelacionadas GRPO fallback: no vals for docEntry={$docEntry}, trying bulk fetch expand lines");
+                                $resAll = $sl->request('GET', "PurchaseDeliveryNotes?") ;
+                                try {
+                                    $resAll = $sl->request('GET', "PurchaseDeliveryNotes?");
+                                } catch (\Throwable $inner) {
+                                    Log::warning('ocRelacionadas GRPO fallback request error: ' . $inner->getMessage());
+                                }
+                                try {
+                                    $resAll = $sl->request('GET', 'PurchaseDeliveryNotes?$top=500&$expand=DocumentLines');
+                                } catch (\Throwable $inner) {
+                                    Log::warning('ocRelacionadas GRPO fallback expand error: ' . $inner->getMessage());
+                                }
+                                $allArr = json_decode(is_string($resAll) ? $resAll : (string)$resAll->getBody(), true) ?? [];
+                                $allVals = $allArr['value'] ?? [];
+                                $matches = [];
+                                foreach ($allVals as $pdn) {
+                                    $lines = $pdn['DocumentLines'] ?? [];
+                                    foreach ($lines as $ln) {
+                                        $base = $ln['BaseEntry'] ?? ($ln['BaseEntry'] ?? null);
+                                        if ($base !== null && ((string)$base) === ((string)$docEntry)) {
+                                            $matches[] = $pdn;
+                                            break;
+                                        }
+                                    }
+                                }
+                                Log::info('ocRelacionadas GRPO fallback scanned', ['total_pdn' => count($allVals), 'matches' => count($matches)]);
+                                if (!empty($matches)) {
+                                    $entradasOut = collect($matches)->map(function($pdn) {
+                                        return [
+                                            'docnum' => $pdn['DocNum'] ?? null,
+                                            'docentry' => $pdn['DocEntry'] ?? null,
+                                            'fecha' => $pdn['DocDate'] ?? null,
+                                            'ref_proveedor' => $pdn['NumAtCard'] ?? null,
+                                            'total' => $pdn['DocTotal'] ?? null,
+                                        ];
+                                    })->values()->all();
+                                }
+                            } catch (\Throwable $e) {
+                                Log::warning('ocRelacionadas GRPO fallback error: ' . $e->getMessage());
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('ocRelacionadas GRPO query error: ' . $e->getMessage());
+                    }
+                }
+
+                return [
+                    'docnum' => $num,
+                    'docentry' => $docEntry ?? null,
+                    'fecha' => $fecha,
+                    'almacen' => $almacen,
+                    'total' => $total,
+                    'entradas' => $entradasOut
+                ];
+            })->values()->all();
+
+            return response()->json(['ocs' => $ocs]);
+        } catch (\Throwable $e) {
+            Log::warning('ocRelacionadas error: ' . $e->getMessage());
+            return response()->json(['ocs' => []], 500);
+        }
     }
 }

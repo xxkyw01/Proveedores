@@ -1,0 +1,78 @@
+:root{
+  --cb-bg: #ffffff;
+  --cb-border: rgba(0,0,0,0.08);
+  --cb-muted: #6b7280;
+  --cb-text: #0f172a;
+  --cb-item-hover: #f8fafc;
+  --cb-radius: 8px;
+}
+
+#barcodePreview{
+  background: var(--cb-bg);
+}
+#barcodeGraphic{
+  font-size: 18px;
+  color: #333;
+}
+
+@media (max-width: 768px){
+  #barcodePreview{ padding: 12px; }
+  #barcodeGraphic{ height: 46px; font-size: 16px; }
+}
+
+/* Selector amigable */
+.search-select-wrapper{ position: relative; }
+.search-select-wrapper input{ border-bottom-right-radius:0; border-bottom-left-radius:0; }
+
+#searchResults{
+  position: static;
+  background: var(--cb-bg);
+  border: 1px solid var(--cb-border);
+  border-top: 0;
+  border-bottom-left-radius: var(--cb-radius);
+  border-bottom-right-radius: var(--cb-radius);
+  max-height: 320px;
+  overflow: auto;
+  padding: 4px 6px;
+  display: none;
+  box-shadow: none;
+  margin-top: 0;
+}
+#searchResults.show{ display: block; }
+
+.search-item{
+  display:block;
+  padding:8px 10px;
+  cursor:pointer;
+  border-radius:6px;
+  margin:4px 0;
+  color:var(--cb-text);
+  font-size:14px;
+  line-height:1.2;
+}
+.search-item small{ color:var(--cb-muted); display:block; font-size:12px; }
+.search-item:hover, .search-item.active{ background:var(--cb-item-hover); }
+
+/* Responsive sizes */
+@media (max-width: 991px){
+  .search-item{ font-size:13px; padding:8px 10px }
+  .search-item small{ font-size:11px }
+}
+@media (max-width: 575px){
+  .search-item{ font-size:12px; padding:6px 8px }
+  .search-item small{ font-size:10px }
+  #searchResults{ max-height:220px }
+}
+
+/* Focus states for accessibility */
+.search-select-wrapper input:focus{ box-shadow: 0 0 0 3px rgba(59,130,246,0.06); outline: none; }
+
+/* Small utility for the details table */
+#selectedItemTable td{ vertical-align: middle }
+
+/* Barcode preview styling moved from inline */
+.barcode-value{ font-family: monospace; font-size: 20px; font-weight:700; }
+.barcode-graphic{ background:#f7f7f7; border-radius:6px; min-height:48px; display:flex; align-items:center; justify-content:center; font-family:monospace; padding:8px }
+
+/* Selected item container */
+.selected-item-info{ min-height:120px; border:1px dashed #e9ecef; border-radius:6px; background:#fbfbfb }

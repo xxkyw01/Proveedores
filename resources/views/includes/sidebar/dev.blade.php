@@ -87,6 +87,11 @@
                                 <i class="fas fa-file-invoice  nav-icon"></i><span class="nav-text">Recibo de Mercancía</span>
                             </a>
 
+                            <a class="nav-link {{ request()->is('almacen/codebar') ? 'active' : '' }}"
+                                href="{{ url('almacen/codebar') }}">
+                                <i class="fas fa-barcode nav-icon"></i><span class="nav-text">Código de Barra</span>
+                            </a>
+
                         </div>
                     </div>
                 </div>

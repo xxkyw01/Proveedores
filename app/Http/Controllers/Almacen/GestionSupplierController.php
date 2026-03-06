@@ -49,6 +49,25 @@ class GestionSupplierController extends Controller
         ]);
     }
 
+
+    public function codebar(Request $request)
+    {
+        $rolId = session('Usuario.IdRol');
+        $sucursalUsuario = session('Usuario.SucursalID');
+
+        if (in_array($rolId, [1, 3, 4, 5, 6, 7])) {
+            $sucursal_id = $request->get('sucursal_id') ?? 1;
+        } else {
+            $sucursal_id = $sucursalUsuario;
+        }
+        $sucursales = Sucursal::all();
+        
+        return view('pages.almacen.codebar', [
+            'sucursal_id' => $sucursal_id,
+            'sucursales' => $sucursales
+        ]);
+    }
+
     public function reciboMercancia(Request $request)
     {
         $rolId = session('Usuario.IdRol');
@@ -187,7 +206,7 @@ class GestionSupplierController extends Controller
             ->value('nombre');
     }
 
-    
+
     public function guardarCodigoBarra(Request $request)
     {
         $request->validate([
@@ -215,6 +234,49 @@ class GestionSupplierController extends Controller
             Log::error('guardarCodigoBarra error: ' . $e->getMessage(), ['barcode' => $barcode, 'item_code' => $itemCode, 'uom' => $uom]);
             $msg = config('app.debug') ? $e->getMessage() : 'Error al guardar el código de barras';
             return response()->json(['ok' => false, 'msg' => $msg], 500);
+        }
+    }
+
+    /**
+     * Buscar artículos en SAP (OITM) por código o nombre.
+     * Endpoint: GET /almacen/buscar-articulos?q=...
+     */
+    public function buscarArticulos(Request $request, SAPServiceLayer $sl)
+    {
+        $q = trim((string) $request->input('q', ''));
+        if ($q === '' || mb_strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        try {
+            // Construir filtro OData: buscar en ItemCode o ItemName
+            $filter = "contains(ItemCode,'" . str_replace("'", "''", $q) . "') or contains(ItemName,'" . str_replace("'", "''", $q) . "')";
+            $url = "Items?
+                \$filter=" . urlencode($filter) . "&\$top=50";
+
+            $res = $sl->request('GET', $url);
+            $arr = $this->slToArray($res);
+            $items = $arr['value'] ?? [];
+
+            $list = array_map(function ($it) {
+                return [
+                    'ItemCode'  => $it['ItemCode'] ?? $it['Codigo'] ?? '',
+                    'ItemName'  => $it['ItemName'] ?? $it['Nombre'] ?? '',
+                    'UoM'       => $it['InventoryUoM'] ?? $it['SalesUnit'] ?? $it['UoM'] ?? '',
+                    'ItemGroup' => $it['ItemsGroupCode'] ?? $it['ItemsGroupName'] ?? ($it['ItemGroup'] ?? ''),
+                    // incluir datos crudos por si el frontend los necesita
+                    'raw'       => $it,
+                ];
+            }, $items);
+
+            return response()->json($list, 200);
+        } catch (ClientException $e) {
+            $body = (string) $e->getResponse()->getBody();
+            Log::error('buscarArticulos SAP ClientException', ['q' => $q, 'body' => $body]);
+            return response()->json([], 200);
+        } catch (\Throwable $e) {
+            Log::error('buscarArticulos error: ' . $e->getMessage(), ['q' => $q]);
+            return response()->json([], 200);
         }
     }
 
@@ -307,7 +369,7 @@ class GestionSupplierController extends Controller
             "EXEC dbo.sp_PO_ResolverBarcode @NumeroOrdenCompra = ?, @Barcode = ?",
             [$docNum, $barcode]
         );
-        
+
         if (!$row) {
             return response()->json(['ok' => 0, 'msg' => 'Sin respuesta del SP'], 200);
         }

@@ -157,6 +157,19 @@
                 </a>
             </div>
             </div>
+            
+            <div class="col-lg-4 col-md-6 col-6 mb-3">
+            <div class="wrimagecard wrimagecard-topimage">
+                <a href="{{ url('/almacen/codebar') }}">
+                    <div class="wrimagecard-topimage_header bg-tr-orange text-center">
+                        <i class="fas fa-barcode font-large-2 text-orange"></i>
+                    </div>
+                    <div class="wrimagecard-topimage_title">
+                        <p class="fs-1 fw-bold m-0">Codigo de Barras</p>
+                    </div>
+                </a>
+            </div>
+            </div>
 
         </div> 
     </div> 

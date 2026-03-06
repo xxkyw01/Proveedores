@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Documentación - Gestión de Códigos de Barras</title>
+<style>
+body{font-family: Arial, sans-serif;line-height:1.45;color:#222;margin:28px}
+h1{font-size:20px;margin-bottom:6px}
+h2{font-size:16px;margin-top:18px;margin-bottom:6px}
+section{margin-bottom:12px}
+ul{margin:6px 0 6px 20px}
+code{background:#f4f4f4;padding:2px 4px;border-radius:4px}
+.table{border-collapse:collapse;width:100%}
+</style>
+</head>
+<body>
+<h1>Documentación del ciclo de vida: Gestión de Códigos de Barras</h1>
+<p>Como responsable de la implementación de la funcionalidad de gestión de códigos de barras, detallo a continuación el ciclo de vida del software que desarrollé: objetivos, comportamiento, decisiones técnicas, criterios de aceptación, pruebas y recomendaciones para mantenimiento y mejora continua.</p>
+
+<section>
+<h2>1. Propósito y alcance</h2>
+<ul>
+<li><strong>Propósito:</strong> Permitir capturar códigos de barras (escaneo o pegado) y asociarlos a artículos del sistema SAP para apoyar inventario y trazabilidad.</li>
+<li><strong>Alcance:</strong> Interfaz móvil para captura y vista previa de código, búsqueda asíncrona de artículos, selección y visualización de detalles, persistencia de la relación código↔artículo vía API, manejo de errores y retroalimentación al usuario. No incluye generación física de códigos, sincronización masiva ni cambios en el catálogo SAP.</li>
+</ul>
+</section>
+
+<section>
+<h2>2. Actores y responsabilidades</h2>
+<ul>
+<li><strong>Yo (desarrollador/responsable funcional):</strong> diseño, implementación front-end, normalización de respuestas, pruebas funcionales y documentación.</li>
+<li><strong>Equipo backend:</strong> exponer endpoints REST (GET /almacen/buscar-articulos, POST /almacen/guardar-codigo-barra), validación, persistencia y auditoría.</li>
+<li><strong>QA / Tester:</strong> ejecutar casos de prueba y validar respuestas ante escenarios esperados y de error.</li>
+<li><strong>Operaciones/DevOps:</strong> desplegar cambios y gestionar CI/CD y monitoreo.</li>
+</ul>
+</section>
+
+<section>
+<h2>3. Fases del ciclo de vida aplicadas</h2>
+
+<h3>A. Requerimientos</h3>
+<ul>
+<li>Requisitos funcionales: captura manual/por escáner, pegar desde portapapeles, búsqueda por nombre o código, vista previa, selección y persistencia.</li>
+<li>Requisitos no funcionales: respuesta rápida (objetivo <500ms), tolerancia a distintas estructuras JSON, UX optimizada para móviles y manejo seguro de CSRF.</li>
+<li>Criterios de aceptación: poder guardar una asociación válida desde la UI, recibir confirmación visual y visualizar la información del artículo asociada.</li>
+</ul>
+
+<h3>B. Diseño</h3>
+<ul>
+<li>Interfaz: campo principal para código (<code>barcodeInput</code>), botón de pegar (<code>btnPaste</code>), vista previa (<code>barcodeValue</code>, <code>barcodeGraphic</code>), búsqueda (<code>searchItemInput</code>), panel de resultados (<code>searchResults</code>), área de detalles (<code>selectedItemInfo</code>) y acciones (<code>btnGuardarAltaCodigo</code>, <code>btnLimpiar</code>).</li>
+<li>Arquitectura: lógica en front-end con <code>fetch</code> para peticiones REST; normalización de datos en cliente para robustez ante distintas respuestas.</li>
+<li>Seguridad: token CSRF leído desde la meta y enviado en la cabecera <code>X-CSRF-TOKEN</code>.</li>
+</ul>
+
+<h3>C. Implementación</h3>
+<ul>
+<li>JavaScript modular en la vista: debounce en búsqueda, renderizado de resultados, inicialización opcional de DataTables para la tabla de detalle.</li>
+<li>Normalización de campos: mapeo a <code>ItemCode</code>, <code>ItemName</code>, <code>UoM</code>, <code>ItemGroup</code>.</li>
+<li>UX: spinner para búsquedas, deshabilitado de botones durante operaciones y mensajes con SweetAlert2.</li>
+</ul>
+
+<h3>D. Pruebas</h3>
+<ul>
+<li>Pruebas funcionales manuales (ver sección de pruebas).</li>
+<li>Validación de flujos: entrada de código, búsqueda, selección, guardado y manejo de errores.</li>
+<li>Recomendación: añadir pruebas automatizadas de integración con respuestas mockeadas para validar normalización y flujos.</li>
+
+<h3>E. Despliegue</h3>
+<ul>
+<li>Desplegar en rama de staging para pruebas de aceptación; coordinar con backend para disponibilidad de endpoints.</li>
+<li>Verificar activos estáticos y versiones de librerías (DataTables, SweetAlert2).</li>
+<li>Comprobar que el servidor acepta la cabecera <code>X-CSRF-TOKEN</code>.</li>
+</ul>
+
+<h3>F. Mantenimiento</h3>
+<ul>
+<li>Monitoreo de errores en consola y logs del backend.</li>
+<li>Registrar auditoría por cada guardado (usuario y timestamp) — responsabilidad backend.</li>
+<li>Planificar mejoras en roadmap (ver sección de mejoras futuras).</li>
+</ul>
+</section>
+
+<section>
+<h2>4. Casos de uso y criterios de aceptación</h2>
+<ul>
+<li><strong>CU1:</strong> Capturar código desde escáner o portapapeles y ver la vista previa. <em>Criterio:</em> <code>barcodeValue</code> y <code>barcodeGraphic</code> se actualizan inmediatamente.</li>
+<li><strong>CU2:</strong> Buscar artículo por texto y seleccionar resultado. <em>Criterio:</em> <code>selectedItemInfo</code> muestra <code>ItemCode</code>, <code>ItemName</code>, <code>UoM</code> y <code>ItemGroup</code>.</li>
+<li><strong>CU3:</strong> Guardar asociación. <em>Criterio:</em> se realiza <code>POST /almacen/guardar-codigo-barra</code> con payload válido y se muestra confirmación; en error, se presenta alerta con el mensaje del servidor.</li>
+<li><strong>CU4:</strong> Limpiar formulario. <em>Criterio:</em> todos los campos vuelven al estado inicial.</li>
+</ul>
+</section>
+
+<section>
+<h2>5. Plan de pruebas detallado</h2>
+<ul>
+<li><strong>Entradas válidas:</strong>
+  <ul>
+  <li>Pegar un código con <code>btnPaste</code> y verificar actualización de vista previa.</li>
+  <li>Buscar con ≥2 caracteres y validar que <code>/almacen/buscar-articulos</code> devuelve resultados.</li>
+  <li>Seleccionar un resultado y guardar; confirmar mensaje de éxito.</li>
+  </ul>
+</li>
+<li><strong>Entradas inválidas / errores:</strong>
+  <ul>
+  <li>Intentar guardar sin código → alerta de advertencia.</li>
+  <li>Intentar guardar sin artículo → alerta de advertencia.</li>
+  <li>Simular error 500 en <code>POST</code> → verificar alerta de error y habilitado del botón.</li>
+  <li>Respuesta JSON mal formada en <code>GET</code> → validar manejo seguro y logging en consola.</li>
+  </ul>
+</li>
+<li><strong>Pruebas de estrés (recomendado):</strong> búsquedas repetidas para medir latencia; si alta, ajustar backend (paginación, índices).</li>
+</ul>
+</section>
+
+<section>
+<h2>6. Decisiones técnicas y justificación</h2>
+<ul>
+<li>Normalización en cliente para tolerancia a variaciones de API entre entornos.</li>
+<li>Uso de <code>fetch</code> y operaciones asíncronas para UI reactiva y manejo sencillo de cabeceras CSRF.</li>
+<li>Placeholder gráfico para el código de barras (prioricé MVP). Recomiendo integrar <em>JsBarcode</em> en una fase posterior.</li>
+<li>Dependencias seleccionadas: SweetAlert2 (mensajería) y DataTables (presentación tabular opcional).</li>
+</ul>
+</section>
+
+<section>
+<h2>7. Seguridad y cumplimiento</h2>
+<ul>
+<li>CSRF: token incluido en cabecera; servidor debe validar.</li>
+<li>Validación y sanitización: obligatoria en servidor; cliente solo facilita captura.</li>
+<li>Auditoría: registrar usuario y fecha/hora por asociación.</li>
+<li>Privilegios: backend debe restringir creación/edición a roles autorizados.</li>
+</ul>
+</section>
+
+<section>
+<h2>8. Métricas y monitoreo</h2>
+<ul>
+<li>Métricas recomendadas: tiempo medio de búsqueda, tasa de error en <code>POST</code>, número de códigos creados por día, latencia del endpoint de búsqueda.</li>
+<li>Alertas operativas: incremento de errores 5xx, aumento de latencia o fallos de parseo JSON.</li>
+</ul>
+</section>
+
+<section>
+<h2>9. Riesgos y mitigaciones</h2>
+<ul>
+<li><strong>Respuestas inconsistentes del backend</strong> → Normalización + pruebas contractuales.</li>
+<li><strong>Guardado accidental de códigos erróneos</strong> → Confirmación adicional y validación en servidor.</li>
+<li><strong>Usabilidad móvil insuficiente</strong> → Pruebas en dispositivos reales y ajustes CSS/responsive.</li>
+</ul>
+</section>
+
+<section>
+<h2>10. Mejoras futuras (roadmap)</h2>
+<ul>
+<li>Generación gráfica de códigos de barras (JsBarcode).</li>
+<li>Edición/eliminación de códigos desde la misma vista.</li>
+<li>Gestión masiva (import/export) y sincronización con SAP.</li>
+<li>Pruebas E2E automatizadas (Cypress/Selenium) que cubran búsqueda y guardado.</li>
+<li>Panel de auditoría y administración para seguimiento de cambios.</li>
+</ul>
+</section>
+
+<section>
+<h2>11. Entregables y artefactos</h2>
+<ul>
+<li>Código fuente de la vista y scripts asociados.</li>
+<li>Documento de requerimientos y criterios de aceptación (este archivo).</li>
+<li>Plan de pruebas manuales y casos de prueba.</li>
+<li>Checklist de despliegue para QA.</li>
+</ul>
+</section>
+
+<section>
+<h2>Conclusión</h2>
+<p>He implementado una solución pragmática que cubre el flujo MVP: captura, búsqueda, selección y guardado de códigos de barras asociados a artículos SAP. La solución incluye validaciones cliente, retroalimentación clara y tolerancia a variaciones en la API. Recomiendo realizar la validación en staging con el equipo backend, cerrar la aceptación tras las pruebas manuales y planificar las mejoras propuestas (generación gráfica y pruebas automatizadas) para aumentar robustez y usabilidad.</p>
+</section>
+
+</body>
+</html>
