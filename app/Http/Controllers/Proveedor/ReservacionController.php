@@ -118,7 +118,7 @@ class ReservacionController extends Controller
             foreach ($metaCanceladas[$id] as $k => $v) $row->$k = $v;
             return $row;
         }
-        foreach (['commit_afterrecep', 'evidencia_path', 'evidencia_nombre', 'evidencia_mime', 'evidencia_size'] as $k) {
+        foreach (['commit_afterrecep', 'evidencia_path', 'evidencia_nombre', 'evidencia_mime', 'evidencia_size', 'tipo_evento'] as $k) {
             if (!property_exists($row, $k)) $row->$k = null;
         }
         return $row;
@@ -150,7 +150,8 @@ class ReservacionController extends Controller
         $colsEstadoCandidatas = [
             'created_at', 'updated_at',
             'estado_completado','estado_cancelado','estado_asistio','estado_no_asistio',
-            'estado_confirmado','estado_proceso','estado_tardia','estado_timeout','estado_cancelada_sp'
+            'estado_confirmado','estado_proceso','estado_tardia','estado_timeout','estado_cancelada_sp',
+            'tipo_evento'
         ];
         $colsEstados = $this->columnasDisponibles('reservaciones', $colsEstadoCandidatas);
 
@@ -236,9 +237,16 @@ class ReservacionController extends Controller
         $citasAsistio     = $reservaciones->where('estado', 'Asistió')->count();
         $citasNoAsistio   = $reservaciones->where('estado', 'No asistió')->count();
         $citasEnProceso   = $reservaciones->where('estado', 'En proceso')->count();
-        $citasRecepcionTardia = $reservaciones->where('estado', 'Recepción tardía')->count();
+        $citasRecepcionTardia = $reservaciones->whereIn('estado', ['Asistio Fuera de Horario'])->count();
         $citasCanceladasPorProveedor = $reservaciones->where('estado', 'Cancelada por proveedor')->count();
         $citasNoProgramado = $reservaciones->filter(fn($i) => strtolower(trim($i->estado)) === 'no programado')->count();
+
+        // Contadores por tipo_evento (normalizando texto)
+        $normalize = fn($v) => strtolower(trim((string)($v ?? '')));
+        $eventoProgramada = $reservaciones->filter(fn($r) => $normalize($r->tipo_evento) === 'programada')->count();
+        $eventoNoProgramada = $reservaciones->filter(fn($r) => in_array($normalize($r->tipo_evento), ['no programada', 'no-programada', 'noprogramada'], true))->count();
+        $eventoExpres = $reservaciones->filter(fn($r) => in_array($normalize($r->tipo_evento), ['expres', 'exprés', 'paquetería express'], true))->count();
+        $eventoApartado = $reservaciones->filter(fn($r) => $normalize($r->tipo_evento) === 'apartado')->count();
 
         return view('pages.proveedor.historial', compact(
             'totalCitas',
@@ -251,6 +259,10 @@ class ReservacionController extends Controller
             'citasRecepcionTardia',
             'citasCanceladasPorProveedor',
             'citasNoProgramado',
+            'eventoProgramada',
+            'eventoNoProgramada',
+            'eventoExpres',
+            'eventoApartado',
             'reservaciones',
             'sucursales'
         ));

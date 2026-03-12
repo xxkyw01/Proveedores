@@ -588,6 +588,7 @@ class ComposerStaticInitbe7585266307e816b030d1d168533195
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\CleanOldLogs' => __DIR__ . '/../..' . '/app/Console/Commands/CleanOldLogs.php',
         'App\\Console\\Commands\\EncriptarProveedores' => __DIR__ . '/../..' . '/app/Console/Commands/EncriptarProveedores.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
@@ -600,6 +601,7 @@ class ComposerStaticInitbe7585266307e816b030d1d168533195
         'App\\Http\\Controllers\\Almacen\\GestionSupplierController' => __DIR__ . '/../..' . '/app/Http/Controllers/Almacen/GestionSupplierController.php',
         'App\\Http\\Controllers\\Almacen\\TableroController' => __DIR__ . '/../..' . '/app/Http/Controllers/Almacen/TableroController.php',
         'App\\Http\\Controllers\\Auth\\ProveedorAuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/ProveedorAuthController.php',
+        'App\\Http\\Controllers\\BarcodeProxyController' => __DIR__ . '/../..' . '/app/Http/Controllers/BarcodeProxyController.php',
         'App\\Http\\Controllers\\ChatController' => __DIR__ . '/../..' . '/app/Http/Controllers/ChatController.php',
         'App\\Http\\Controllers\\Compras\\CalendarioSPController' => __DIR__ . '/../..' . '/app/Http/Controllers/Compras/CalendarioSPController.php',
         'App\\Http\\Controllers\\Compras\\ReporteManiobrasController' => __DIR__ . '/../..' . '/app/Http/Controllers/Compras/ReporteManiobrasController.php',

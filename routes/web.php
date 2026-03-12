@@ -8,6 +8,7 @@ use App\Http\Controllers\Proveedor\ReservacionController;
 use App\Http\Controllers\Proveedor\CitaController;
 
 use App\Http\Controllers\Almacen\GestionSupplierController;
+use App\Http\Controllers\BarcodeProxyController;
 use App\Http\Controllers\Almacen\TableroController;
 use App\Http\Controllers\Almacen\ConfirmarCitaController;
 use App\Http\Controllers\Almacen\CitaExpressController;
@@ -20,9 +21,6 @@ use App\Http\Controllers\Compras\ReporteManiobrasController;
 use App\Http\Controllers\Compras\CalendarioSPController;
 
 use App\Http\Controllers\ChatController;
-use App\Http\Controllers\Almacen\SapRecepcionController;
-use App\Services\SAPServiceLayer;
-
 
 Route::get('/', function () {
     return view('auth.login');
@@ -120,6 +118,8 @@ Route::middleware(['almacen', 'prevent-back-history'])->prefix('almacen')->group
     Route::post('/recepcion/grpo', [GestionSupplierController::class, 'crearGRPO'])->name('almacen.grpo.crear');
     Route::post('/recepcion/scan-barcode', [GestionSupplierController::class, 'scanBarcode'])->name('almacen.recepcion.scan');
     Route::post('/guardar-codigo-barra', [GestionSupplierController::class, 'guardarCodigoBarra']);
+    // Proxy lookup route for product information by barcode (uses server-side cache and optional API key)
+    Route::get('/lookup-product', [BarcodeProxyController::class, 'lookup']);
 
 
     //4.10 SAP Consulta de Ordenes de Compra

@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\CleanOldLogs' => $baseDir . '/app/Console/Commands/CleanOldLogs.php',
     'App\\Console\\Commands\\EncriptarProveedores' => $baseDir . '/app/Console/Commands/EncriptarProveedores.php',
     'App\\Console\\Kernel' => $baseDir . '/app/Console/Kernel.php',
     'App\\Exceptions\\Handler' => $baseDir . '/app/Exceptions/Handler.php',
@@ -18,6 +19,7 @@ return array(
     'App\\Http\\Controllers\\Almacen\\GestionSupplierController' => $baseDir . '/app/Http/Controllers/Almacen/GestionSupplierController.php',
     'App\\Http\\Controllers\\Almacen\\TableroController' => $baseDir . '/app/Http/Controllers/Almacen/TableroController.php',
     'App\\Http\\Controllers\\Auth\\ProveedorAuthController' => $baseDir . '/app/Http/Controllers/Auth/ProveedorAuthController.php',
+    'App\\Http\\Controllers\\BarcodeProxyController' => $baseDir . '/app/Http/Controllers/BarcodeProxyController.php',
     'App\\Http\\Controllers\\ChatController' => $baseDir . '/app/Http/Controllers/ChatController.php',
     'App\\Http\\Controllers\\Compras\\CalendarioSPController' => $baseDir . '/app/Http/Controllers/Compras/CalendarioSPController.php',
     'App\\Http\\Controllers\\Compras\\ReporteManiobrasController' => $baseDir . '/app/Http/Controllers/Compras/ReporteManiobrasController.php',

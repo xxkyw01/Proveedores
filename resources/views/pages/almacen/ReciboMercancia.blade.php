@@ -1289,14 +1289,15 @@
                 </div>
                 <table id="tablaArticulos" class="tabla-articulos display d-none table-auto">
                     <thead class="d-none d-md-table-header-group">
-                    <tr>
-                        <th class="th-center th-48">✓</th>
-                        <th class="th-left">Código - Artículo</th>
-                        <th class="th-center th-nowrap">Cantidad + UM</th>
-                        <th class="th-center th-nowrap">Recepción</th>
-                        <th class="th-center th-90">OC</th>
-                    </tr>
-                    </thead>
+                        <tr>
+                            <th class="th-center th-48">✓</th>
+                            <th class="th-left">Código - Artículo</th>
+                            <th class="th-center th-nowrap">WarehouseCode</th>
+                            <th class="th-center th-nowrap">Cantidad + UM</th>
+                            <th class="th-center th-nowrap">Recepción</th>
+                            <th class="th-center th-90">OC</th>
+                        </tr>
+                        </thead>
                     <tbody>
                 `;
 
@@ -1307,6 +1308,7 @@
                     const um = escapeHTML(a.UnidadMedida || a.Unidad || a.UM || a.U_Medida || a.Unidad_Medida ||
                         '');
                     const oc = escapeHTML(String(a.__oc || ''));
+                    const whsVal = escapeHTML(String(a.WarehouseCode || a.Warehouse || a.Almacen || ''));
                     const cantDisplay = cant % 1 === 0 ? cant : cant.toFixed(2);
 
                     const barcode = escapeHTML(String(a.BarcodePrincipal || a.Barcode || a.CodigoBarras || '')
@@ -1326,11 +1328,16 @@
                     </td>
 
                     <td class="td-center td-nowrap">
+                        <div class="codigo-strong">${whsVal || '-'}</div>
+                        <div class="text-muted small meta-um">&nbsp;</div>
+                    </td>
+
+                    <td class="td-center td-nowrap">
                         <div class="codigo-strong">${cantDisplay}</div>
                         <div class="text-muted small meta-um">${um || '-'}</div>
                     </td>
                     <td class="td-center td-nowrap">
-                        <input type="number" min="0" step="1" class="inp-recibir" data-pendiente="${cant}" data-oc="${oc}" data-um="${um}" placeholder="0" />
+                        <input type="number" min="0" step="1" class="inp-recibir" data-pendiente="${cant}" data-oc="${oc}" data-um="${um}" data-whs="${whsVal}" placeholder="0" />
                     </td>
                     <td class="td-center td-oc">${oc}</td>
                     </tr>
@@ -1490,10 +1497,10 @@
                     }
                 ],
                 rowGroup: {
-                    dataSrc: [4]
+                    dataSrc: [5]
                 },
                 columnDefs: [{
-                    targets: [4],
+                    targets: [5],
                     visible: false
                 }],
                 searching: true,
@@ -1624,6 +1631,7 @@
                         <tr>
                             <th class="th-center th-48">✓</th>
                             <th class="th-left">Código - Artículo</th>
+                            <th class="th-center th-nowrap">WarehouseCode</th>
                             <th class="th-center th-nowrap">Cantidad + UM</th>
                             <th class="th-center th-nowrap">Recepción</th>
                         </tr>
@@ -1635,6 +1643,7 @@
                 const code = escapeHTML(a.CodigoArticulo || '');
                 const desc = escapeHTML(a.DescripcionArticulo || '');
                 const um = escapeHTML(a.UnidadMedida || a.Unidad || a.UM || a.U_Medida || a.Unidad_Medida || '');
+                const whs = escapeHTML(String(a.WarehouseCode || a.Warehouse || a.Almacen || ''));
                 const cantDisplay = cant % 1 === 0 ? cant : cant.toFixed(2);
                 const idx = i + 1;
                 table += `<tr data-idx="${idx}" data-codigo="${code.toLowerCase()}" data-nombre="${desc.toLowerCase()}">
@@ -1646,11 +1655,15 @@
                     <div class="desc-muted">${desc}</div>
                 </td>
                 <td style="text-align:center;padding:8px;white-space:nowrap;">
+                    <div style="font-weight:700;">${whs || '-'}</div>
+                    <div style="font-size:0.85em;color:#999;">&nbsp;</div>
+                </td>
+                <td style="text-align:center;padding:8px;white-space:nowrap;">
                     <div style="font-weight:700;">${cantDisplay}</div>
                     <div style="font-size:0.85em;color:#999;">${um || '-'}</div>
                 </td>
                 <td style="text-align:center;white-space:nowrap;">
-                    <input type="number" min="0" step="1" class="inp-recibir" data-pendiente="${cant}" data-um="${um}" placeholder="0" style="width:90px;padding:6px;" />
+                    <input type="number" min="0" step="1" class="inp-recibir" data-pendiente="${cant}" data-um="${um}" data-whs="${whs}" placeholder="0" style="width:90px;padding:6px;" />
                 </td>
             </tr>`;
             });
@@ -1766,7 +1779,7 @@
             const filtro = valor.toLowerCase();
             const filas = document.querySelectorAll('#tablaArticulos tbody tr');
             filas.forEach(fila => {
-                const ocText = fila.children[4]?.textContent?.toLowerCase() || '';
+                const ocText = fila.children[5]?.textContent?.toLowerCase() || '';
                 const visible = ocText.includes(filtro);
                 fila.style.display = visible ? '' : 'none';
             });
@@ -1848,7 +1861,7 @@
                 const um = s.inp?.dataset.um || '';
 
                 const codeDescText = tr.children[1]?.textContent?.trim() || '';
-                const ocCol = tr.children[4]?.textContent?.trim() || (s.inp?.dataset.oc || '');
+                const ocCol = tr.children[5]?.textContent?.trim() || (s.inp?.dataset.oc || '');
 
                 rowsHtml += `
                 <tr>

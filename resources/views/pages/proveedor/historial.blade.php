@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="{{ asset('assets/css/rol/proveedor/historial.css') }}">
 
     <x-sidebar />
+
     <div class="container-fluid con-sidebar">
         <div class="row justify-content-center">
 
             <div class="container">
+                {{-- Filtros de eventos --}}
                 <div class="card shadow p-3 mb-4" style="border: 2px solid #ee7826; border-radius: 17px;">
                     <div class="row row-cols-2 row-cols-md-5 g-2 text-center">
                         <div class="col">
@@ -21,16 +23,56 @@
                                 <i class="fas fa-calendar-alt fa-lg text-warning mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Total Citas
                                 </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $totalCitas }}</h5>
+                                <h5 id="count-todos" class="fw-bold text-dark mb-0">{{ $totalCitas }}</h5>
                             </div>
                         </div>
+                        <div class="col">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-evento="programada" role="button"
+                                tabindex="0" style="border-left: 4px solid #28a745; border-radius: 12px;">
+                                <i class="fas fa-calendar-check fa-lg text-warning mb-1"></i>
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Programada
+                                </h6>
+                                <h5 class="fw-bold text-dark mb-0">{{ $eventoProgramada }}</h5>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-evento="no-programada" role="button"
+                                tabindex="0" style="border-left: 4px solid #e74c3c; border-radius: 12px;">
+                                <i class="fas fa-calendar-plus fa-lg text-success mb-1"></i>
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">No Programada
+                                </h6>
+                                <h5 class="fw-bold text-dark mb-0">{{ $eventoNoProgramada }}</h5>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-evento="expres" role="button"
+                                tabindex="0" style="border-left: 4px solid #f3d321; border-radius: 12px;">
+                                <i class="fas fa-shipping-fast fa-lg text-danger mb-1"></i>
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Exprés
+                                </h6>
+                                <h5 class="fw-bold text-dark mb-0">{{ $eventoExpres }}</h5>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="card shadow-sm border-0 p-2 filter-card" data-evento="apartado" role="button"
+                                tabindex="0" style="border-left: 4px solid #0d6efd; border-radius: 12px;">
+                                <i class="fas fa-bookmark fa-lg text-primary mb-1"></i>
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Apartado</h6>
+                                <h5 class="fw-bold text-dark mb-0">{{ $eventoApartado ?? 0 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{-- Filtros de estado --}}
+                <div class="card shadow p-3 mb-4" style="border: 2px solid #ee7826; border-radius: 17px;">
+                    <div class="row row-cols-2 row-cols-md-5 g-2 text-center">
                         <div class="col">
                             <div class="card shadow-sm border-0 p-2 filter-card" data-status="pendientes" role="button"
                                 tabindex="0" style="border-left: 4px solid #f19a0f; border-radius: 12px;">
                                 <i class="fas fa-clock fa-lg text-warning mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Pendientes
                                 </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasPendientes }}</h5>
+                                <h5 id="count-pendientes" class="fw-bold text-dark mb-0">{{ $citasPendientes }}</h5>
                             </div>
                         </div>
                         <div class="col">
@@ -39,7 +81,7 @@
                                 <i class="fas fa-check-circle fa-lg text-success mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Confirmadas
                                 </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasConfirmadas }}</h5>
+                                <h5 id="count-confirmadas" class="fw-bold text-dark mb-0">{{ $citasConfirmadas }}</h5>
                             </div>
                         </div>
                         <div class="col">
@@ -48,7 +90,7 @@
                                 <i class="fas fa-times-circle fa-lg text-danger mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Canceladas
                                 </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasCanceladas }}</h5>
+                                <h5 id="count-canceladas" class="fw-bold text-dark mb-0">{{ $citasCanceladas }}</h5>
                             </div>
                         </div>
                         <div class="col">
@@ -56,7 +98,7 @@
                                 tabindex="0" style="border-left: 4px solid #0d6efd; border-radius: 12px;">
                                 <i class="fas fa-user-check fa-lg text-primary mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Asistió</h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasAsistio ?? 0 }}</h5>
+                                <h5 id="count-asistio" class="fw-bold text-dark mb-0">{{ $citasAsistio ?? 0 }}</h5>
                             </div>
                         </div>
                         <div class="col">
@@ -65,49 +107,32 @@
                                 <i class="fas fa-user-times fa-lg text-dark mb-1"></i>
                                 <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">No Asistió
                                 </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasNoAsistio ?? 0 }}</h5>
-                            </div>
-                        </div>
-
-                        <div class="col">
-                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="en-proceso" role="button"
-                                tabindex="0" style="border-left: 4px solid #ffc107; border-radius: 12px;">
-                                <i class="fas fa-spinner fa-lg text-dark mb-1"></i>
-                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">En Proceso
-                                </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasEnProceso ?? 0 }}</h5>
+                                <h5 id="count-no-asistio" class="fw-bold text-dark mb-0">{{ $citasNoAsistio ?? 0 }}</h5>
                             </div>
                         </div>
 
                         <div class="col">
                             <div class="card shadow-sm border-0 p-2 filter-card" data-status="recepcion-tardia"
-                                role="button" tabindex="0" style="border-left: 4px solid #6c757d; border-radius: 12px;">
+                                role="button" tabindex="0"
+                                style="border-left: 4px solid #6c757d; border-radius: 12px;">
                                 <i class="fas fa-hourglass-start fa-lg text-orange mb-1"></i>
-                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Recepción
-                                    tardía</h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasRecepcionTardia ?? 0 }}</h5>
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Asistió
+                                    Fuera de Horario</h6>
+                                <h5 id="count-recepcion-tardia" class="fw-bold text-dark mb-0">
+                                    {{ $citasRecepcionTardia ?? 0 }}</h5>
                             </div>
                         </div>
 
                         <div class="col">
                             <div class="card shadow-sm border-0 p-2 filter-card" data-status="cancelada-por-proveedor"
-                                role="button" tabindex="0" style="border-left: 4px solid #dc3545; border-radius: 12px;">
-                                <i class="fas fa-user-times fa-lg text-danger mb-1"></i>
-                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Cancelada por
-                                    proveedor</h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasCanceladasPorProveedor ?? 0 }}</h5>
-                            </div>
-                        </div>
-
-                        <div class="col">
-                            <div class="card shadow-sm border-0 p-2 filter-card" data-status="no-programado"
                                 role="button" tabindex="0"
-                                style="border-left: 4px solid #17a2b8; border-radius: 12px;">
-                                <i class="fas fa-info-circle fa-lg text-info mb-1"></i>
-                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">No
-                                    Programado
-                                </h6>
-                                <h5 class="fw-bold text-dark mb-0">{{ $citasNoProgramado ?? 0 }}</h5>
+                                style="border-left: 4px solid #dc3545; border-radius: 12px;">
+                                <i class="fas fa-user-times fa-lg text-danger mb-1"></i>
+                                <h6 class="text-uppercase fw-bold text-muted mb-0" style="font-size: 0.8rem;">Cancelada
+                                    por
+                                    proveedor</h6>
+                                <h5 id="count-cancelada-por-proveedor" class="fw-bold text-dark mb-0">
+                                    {{ $citasCanceladasPorProveedor ?? 0 }}</h5>
                             </div>
                         </div>
                     </div>
@@ -128,6 +153,7 @@
                                     <th>Nombre</th>
                                     <th>Orden de Compra</th>
                                     <th>Sucursal</th>
+                                    <th>Tipo Evento</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -146,12 +172,11 @@
                                             $displayDate = $reserva->fecha
                                                 ? \Carbon\Carbon::parse($reserva->fecha)->format('d/m/Y')
                                                 : '-';
-
                                             $displayTime = $reserva->hora
                                                 ? \Carbon\Carbon::parse($reserva->hora)->format('h:i A')
                                                 : '-';
-
                                         @endphp
+
                                         <td data-order="{{ $orderDt }}">{{ $displayDate }}
                                             <br>
                                             {{ $displayTime }}
@@ -159,6 +184,20 @@
                                         <td>{{ $reserva->proveedor_nombre }}</td>
                                         <td>{!! nl2br(e($reserva->ordenes_detalle ?? '-')) !!}</td>
                                         <td>{{ $reserva->sucursal_nombre ?? 'N/A' }}</td>
+                                        <td>
+                                            @php
+                                                $evento = strtolower(trim($reserva->tipo_evento ?? ''));
+                                                $eventoBadgeClass = match ($evento) {
+                                                    'programada' => 'bg-success',
+                                                    'no programada', 'no-programada', 'noprogramada' => 'bg-danger',
+                                                    'expres', 'paquetería express' => 'bg-warning',
+                                                    'apartado' => 'bg-primary',
+                                                    default => 'bg-light text-dark',
+                                                };
+                                            @endphp
+                                            <span
+                                                class="badge {{ $eventoBadgeClass }}">{{ ucfirst($reserva->tipo_evento ?? '-') }}</span>
+
                                         <td>
                                             @php
                                                 $estado = strtolower(trim($reserva->estado));
@@ -170,6 +209,7 @@
                                                     'cancelado', 'cancelada' => 'bg-danger',
                                                     'en proceso' => 'bg-warning',
                                                     'recepción tardía' => 'bg-dark',
+                                                    'asistio fuera del horario' => 'bg-dark',
                                                     'cancelada por proveedor' => 'bg-danger',
                                                     'no programado' => 'bg-info',
                                                     default => 'bg-light text-dark',
@@ -294,9 +334,6 @@
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
             </div>
         </div>
@@ -539,7 +576,7 @@
                 estado === 'no asistió' ? 'bg-dark' :
                 estado === 'cancelada' || estado === 'cancelado' ? 'bg-danger' :
                 estado === 'en proceso' ? 'bg-warning' :
-                estado === 'recepción tardía' ? 'bg-dark' :
+                estado === 'asistio fuera del horario' ? 'bg-dark' :
                 estado === 'cancelada por proveedor' ? 'bg-danger' :
                 estado === 'no programado' ? 'bg-info' :
                 'bg-light text-dark'
@@ -580,7 +617,6 @@
                 }
             }
 
-            // Cargar relaciones OC -> Entradas (gráfico)
             if (reserva && reserva.id) {
                 cargarOCRelacionadas(reserva.id);
             }
@@ -588,49 +624,51 @@
             $('#modalDetalles').modal('show');
         }
 
-
-
         $(document).ready(function() {
-            var table = $('#tablaReservas').DataTable({
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-                },
-                pageLength: 10,
-                lengthMenu: [25, 50, 100],
-                searching: true,
-                paging: true,
-                ordering: true,
-                order: [
-                    [0, 'desc']
-                ],
-                columnDefs: [{
-                    targets: [2, 3, 4],
-                    className: 'text-center'
-                }],
-                responsive: true,
-                autoWidth: false,
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                    '<"row"<"col-sm-12"tr>>' +
-                    '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                initComplete: function() {
-                    this.api().columns().every(function() {
-                        var column = this;
-                        if (column.index() === 0) {
-                            var input = $(
-                                    '<input type="text" class="form-control" placeholder="Buscar fecha">'
-                                )
-                                .appendTo($(column.footer()).empty())
-                                .on('keyup change', function() {
-                                    if (column.search() !== this.value) {
-                                        column.search(this.value).draw();
-                                    }
-                                });
-                        }
-                    });
-                }
-            });
+            var table;
+            if ($.fn.DataTable && $.fn.DataTable.isDataTable('#tablaReservas')) {
+                table = $('#tablaReservas').DataTable();
+            } else {
+                table = $('#tablaReservas').DataTable({
+                    language: {
+                        url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+                    },
+                    pageLength: 10,
+                    lengthMenu: [25, 50, 100],
+                    searching: true,
+                    paging: true,
+                    ordering: true,
+                    order: [
+                        [0, 'desc']
+                    ],
+                    columnDefs: [{
+                        targets: [2, 3, 4, 5, 6],
+                        className: 'text-center'
+                    }],
+                    responsive: true,
+                    autoWidth: false,
+                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+                        '<"row"<"col-sm-12"tr>>' +
+                        '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                    initComplete: function() {
+                        this.api().columns().every(function() {
+                            var column = this;
+                            if (column.index() === 0) {
+                                var input = $(
+                                        '<input type="text" class="form-control" placeholder="Buscar fecha">'
+                                    )
+                                    .appendTo($(column.footer()).empty())
+                                    .on('keyup change', function() {
+                                        if (column.search() !== this.value) {
+                                            column.search(this.value).draw();
+                                        }
+                                    });
+                            }
+                        });
+                    }
+                });
+            }
 
-            // Mapa de status: key = data-status en el card, value = patrón regex a buscar en la columna Estado
             var statusMap = {
                 'pendientes': 'pendiente',
                 'confirmadas': 'confirmada',
@@ -638,32 +676,55 @@
                 'asistio': 'asistió|asistio',
                 'no-asistio': 'no asistió|no asistio',
                 'en-proceso': 'en proceso',
-                'recepcion-tardia': 'recepción tardía|recepcion tardia',
+                'recepcion-tardia': 'recepción tardía|recepcion tardia|asistió fuera de horario|asistio fuera de horario|asistio fuera del horario|asistio fuera horario',
                 'cancelada-por-proveedor': 'cancelada por proveedor',
                 'no-programado': 'no programado'
             };
 
-            // Handler para los cards que filtran
+            var eventoMap = {
+                'programada': 'programada',
+                'no-programada': 'no programada|no-programada|noprogramada',
+                'expres': 'expres|exprés|paquetería express|express',
+                'apartado': 'apartado'
+            };
+
             $('.filter-card').on('click keypress', function(e) {
                 if (e.type === 'keypress' && e.key !== 'Enter' && e.key !== ' ') return;
                 var key = $(this).data('status');
 
-                // 'todos' limpia el filtro
-                if (!key || key === 'todos') {
+                var statusKey = $(this).data('status');
+                var eventoKey = $(this).data('evento');
+
+                if ((!statusKey && !eventoKey) || statusKey === 'todos') {
                     $('.filter-card').removeClass('active');
+                    table.column(5).search('').draw();
                     table.column(4).search('').draw();
                     return;
                 }
 
-                var pattern = statusMap[key] || key;
+                if (eventoKey) {
+                    var pattern = eventoMap[eventoKey] || eventoKey;
+                    if ($(this).hasClass('active')) {
+                        $(this).removeClass('active');
+                        table.column(4).search('').draw();
+                    } else {
+                        $('.filter-card').removeClass('active');
+                        $(this).addClass('active');
+                        table.column(4).search('(' + pattern + ')', true, false, true).draw();
+                        table.column(4).search('(' + pattern + ')', true, false, true).draw();
+                    }
+                    return;
+                }
 
+                var pattern = statusMap[statusKey] || statusKey;
                 if ($(this).hasClass('active')) {
                     $(this).removeClass('active');
-                    table.column(4).search('').draw();
+                    table.column(5).search('').draw();
                 } else {
                     $('.filter-card').removeClass('active');
                     $(this).addClass('active');
-                    table.column(4).search('^(' + pattern + ')$', true, false, true).draw();
+                    table.column(5).search('(' + pattern + ')', true, false, true).draw();
+                    table.column(5).search('(' + pattern + ')', true, false, true).draw();
                 }
             });
         });
@@ -717,6 +778,71 @@
                 .catch(err => {
                     console.error('Error cargando OCs relativas:', err);
                 });
+
+            function updateCounters() {
+                if (!table) return;
+                var nodes = table.rows({
+                    search: 'applied'
+                }).nodes();
+                var total = nodes.length;
+                var pendientes = 0,
+                    confirmadas = 0,
+                    canceladas = 0,
+                    asistio = 0,
+                    noAsistio = 0,
+                    recepcionTardia = 0,
+                    canceladaProveedor = 0;
+
+                $(nodes).each(function() {
+                    var estado = $(this).find('td').eq(5).text().toLowerCase().trim();
+                    if (!estado) return;
+
+                    if (estado.indexOf('no') !== -1 && estado.indexOf('asist') !== -1) {
+                        noAsistio++;
+                        return;
+                    }
+
+                    if (estado.indexOf('recepcion') !== -1 || estado.indexOf('tardi') !== -1 || estado.indexOf(
+                            'fuera') !== -1) {
+                        recepcionTardia++;
+                        return;
+                    }
+
+                    if (estado.indexOf('asist') !== -1) {
+                        asistio++;
+                    }
+
+                    if (estado.indexOf('proveedor') !== -1) {
+                        canceladaProveedor++;
+                    }
+
+                    if (estado.indexOf('cancel') !== -1) {
+                        canceladas++;
+                    }
+
+                    if (estado.indexOf('confirm') !== -1) {
+                        confirmadas++;
+                    }
+
+                    if (estado.indexOf('pendient') !== -1) {
+                        pendientes++;
+                    }
+                });
+
+                $('#count-todos').text(total);
+                $('#count-pendientes').text(pendientes);
+                $('#count-confirmadas').text(confirmadas);
+                $('#count-canceladas').text(canceladas);
+                $('#count-asistio').text(asistio);
+                $('#count-no-asistio').text(noAsistio);
+                $('#count-recepcion-tardia').text(recepcionTardia);
+                $('#count-cancelada-por-proveedor').text(canceladaProveedor);
+            }
+            table.on('draw', function() {
+                updateCounters();
+            });
+
+            updateCounters();
         }
 
         function renderGraph(ocs) {
