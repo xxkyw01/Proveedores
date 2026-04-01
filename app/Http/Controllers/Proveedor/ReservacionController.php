@@ -137,7 +137,6 @@ class ReservacionController extends Controller
                 ->select('EXEC [dbo].[sp_consultar_reservaciones_todas] @fechaInicio = ?', [$fecha]);
         }
 
-        // Extraer ids robustamente (el SP puede devolver 'id', 'Id' o 'ID')
         $ids = collect($reservaciones)->map(function ($r) {
             if (is_array($r)) $r = (object)$r;
             return $r->id ?? $r->Id ?? $r->ID ?? null;
@@ -146,7 +145,6 @@ class ReservacionController extends Controller
         $colsActivas    = $this->columnasDisponibles('reservaciones', $colsCandidatas);
         $colsCancel     = $this->columnasDisponibles('reservacion_cancelada', array_merge(['reservacion_id'], $colsCandidatas));
 
-        // Columnas relacionadas a estados/fechas que pueden existir en la tabla reservaciones
         $colsEstadoCandidatas = [
             'created_at', 'updated_at',
             'estado_completado','estado_cancelado','estado_asistio','estado_no_asistio',
@@ -193,7 +191,6 @@ class ReservacionController extends Controller
                 ->toArray();
         }
 
-        // Merge metaEstados into metaActivas so adjuntarMetaAReserva los incluya
         if (!empty($metaEstados)) {
             foreach ($metaEstados as $id => $vals) {
                 if (isset($metaActivas[$id])) {
@@ -240,8 +237,6 @@ class ReservacionController extends Controller
         $citasRecepcionTardia = $reservaciones->whereIn('estado', ['Asistio Fuera de Horario'])->count();
         $citasCanceladasPorProveedor = $reservaciones->where('estado', 'Cancelada por proveedor')->count();
         $citasNoProgramado = $reservaciones->filter(fn($i) => strtolower(trim($i->estado)) === 'no programado')->count();
-
-        // Contadores por tipo_evento (normalizando texto)
         $normalize = fn($v) => strtolower(trim((string)($v ?? '')));
         $eventoProgramada = $reservaciones->filter(fn($r) => $normalize($r->tipo_evento) === 'programada')->count();
         $eventoNoProgramada = $reservaciones->filter(fn($r) => in_array($normalize($r->tipo_evento), ['no programada', 'no-programada', 'noprogramada'], true))->count();
@@ -292,16 +287,11 @@ class ReservacionController extends Controller
         );
     }
 
-    /**
-     * Devuelve las Órdenes de Compra relacionadas a una reservación y sus entradas (si se encuentran).
-     * Respuesta JSON: { ocs: [ { id, docnum, fecha, almacen, total, entradas: [ { docnum, fecha, ref_proveedor, total } ] } ] }
-     */
+
     public function ocRelacionadas(Request $request, $id)
     {
         try {
             $id = (int) $id;
-
-            // Intentar obtener la reservación desde el SP (igual que en GestionSupplierController::getDetails)
             $data = DB::connection('sqlsrv_proveedores')->select("EXEC sp_consultar_reservaciones_todas");
             $evento = collect($data)->firstWhere('id', $id);
 
@@ -322,8 +312,6 @@ class ReservacionController extends Controller
                     }
                 }
             }
-
-            // Si no hay ordenes en el SP, buscar en la tabla reservacion_orden_compra
             if ($ordenes->isEmpty()) {
                 $fromTable = DB::connection('sqlsrv_proveedores')
                     ->table('reservacion_orden_compra')
@@ -338,14 +326,11 @@ class ReservacionController extends Controller
 
             $ocs = $ordenes->map(function ($o) {
                 $num = trim((string)$o);
-
-                // Intentar enriquecer con datos desde SAP (encabezado PO)
                 $fecha = null;
                 $almacen = null;
                 $total = null;
                 try {
-                    // Primero intentamos usando el helper existente (sapGetPO)
-                    $resp = app()->call([GestionSupplierController::class, 'sapGetPO'], [
+                    $resp = app()->call([app(GestionSupplierController::class), 'sapGetPO'], [
                         'docNum' => $num,
                         'sl'     => app(SAPServiceLayer::class)
                     ]);
@@ -371,7 +356,6 @@ class ReservacionController extends Controller
                     Log::warning('ocRelacionadas sapGetPO error: ' . $e->getMessage());
                 }
 
-                // Si no obtuvimos datos con sapGetPO, intentar consulta directa al Service Layer
                 if (empty($fecha) && empty($total)) {
                     try {
                         $sl = app(SAPServiceLayer::class);
@@ -398,22 +382,33 @@ class ReservacionController extends Controller
                     }
                 }
 
-                // Obtener Entradas (GRPO) relacionadas por DocEntry
                 $entradasOut = [];
                 if (!empty($docEntry)) {
                     try {
                         $sl = app(SAPServiceLayer::class);
-                        $q = "PurchaseDeliveryNotes?\$filter=DocumentLines/any(d: d/BaseEntry eq $docEntry and d/BaseType eq 22)";
-                        $res = $sl->request('GET', $q);
-                        $json = json_decode(is_string($res) ? $res : (string)$res->getBody(), true) ?? [];
-                        $vals = $json['value'] ?? [];
-
-                        // Si no encontró con BaseType, intentar sin esa condición
-                        if (empty($vals)) {
-                            $q2 = "PurchaseDeliveryNotes?\$filter=DocumentLines/any(d: d/BaseEntry eq $docEntry)";
-                            $res2 = $sl->request('GET', $q2);
-                            $json2 = json_decode(is_string($res2) ? $res2 : (string)$res2->getBody(), true) ?? [];
-                            $vals = $json2['value'] ?? [];
+                        // Construir filtro OData para buscar PDNs que referencien esta OC (BaseEntry)
+                        $filterRaw = "DocumentLines/any(d:d/BaseEntry eq $docEntry and d/BaseType eq 22)";
+                        // Codificar espacios y ':' para compatibilidad con Service Layer
+                        $filterEnc = str_replace([' ', ':'], ['%20', '%3A'], $filterRaw);
+                        $q = "PurchaseDeliveryNotes?\$filter=" . $filterEnc;
+                        try {
+                            $res = $sl->request('GET', $q);
+                            $json = json_decode(is_string($res) ? $res : (string)$res->getBody(), true) ?? [];
+                            $vals = $json['value'] ?? [];
+                        } catch (\Throwable $innerEx) {
+                            Log::warning('ocRelacionadas GRPO query attempt encoded failed: ' . $innerEx->getMessage(), ['query' => $q]);
+                            // Intento alternativo sin BaseType (algunas SL no aceptan la comparación compuesta)
+                            $filterNoBaseType = "DocumentLines/any(d:d/BaseEntry eq $docEntry)";
+                            $filterNoBaseTypeEnc = str_replace(' ', '%20', $filterNoBaseType);
+                            $q2 = "PurchaseDeliveryNotes?\$filter=" . $filterNoBaseTypeEnc;
+                            try {
+                                $res2 = $sl->request('GET', $q2);
+                                $json2 = json_decode(is_string($res2) ? $res2 : (string)$res2->getBody(), true) ?? [];
+                                $vals = $json2['value'] ?? [];
+                            } catch (\Throwable $innerEx2) {
+                                Log::warning('ocRelacionadas GRPO query attempt fallback failed: ' . $innerEx2->getMessage(), ['query' => $q2]);
+                                $vals = [];
+                            }
                         }
 
                         $entradasOut = collect($vals)->map(function($pdn) {
@@ -429,45 +424,25 @@ class ReservacionController extends Controller
 
                         if (empty($entradasOut)) {
                             try {
-                                Log::info("ocRelacionadas GRPO fallback: no vals for docEntry={$docEntry}, trying bulk fetch expand lines");
-                                $resAll = $sl->request('GET', "PurchaseDeliveryNotes?") ;
-                                try {
-                                    $resAll = $sl->request('GET', "PurchaseDeliveryNotes?");
-                                } catch (\Throwable $inner) {
-                                    Log::warning('ocRelacionadas GRPO fallback request error: ' . $inner->getMessage());
-                                }
-                                try {
-                                    $resAll = $sl->request('GET', 'PurchaseDeliveryNotes?$top=500&$expand=DocumentLines');
-                                } catch (\Throwable $inner) {
-                                    Log::warning('ocRelacionadas GRPO fallback expand error: ' . $inner->getMessage());
-                                }
-                                $allArr = json_decode(is_string($resAll) ? $resAll : (string)$resAll->getBody(), true) ?? [];
-                                $allVals = $allArr['value'] ?? [];
-                                $matches = [];
-                                foreach ($allVals as $pdn) {
-                                    $lines = $pdn['DocumentLines'] ?? [];
-                                    foreach ($lines as $ln) {
-                                        $base = $ln['BaseEntry'] ?? ($ln['BaseEntry'] ?? null);
-                                        if ($base !== null && ((string)$base) === ((string)$docEntry)) {
-                                            $matches[] = $pdn;
-                                            break;
-                                        }
-                                    }
-                                }
-                                Log::info('ocRelacionadas GRPO fallback scanned', ['total_pdn' => count($allVals), 'matches' => count($matches)]);
-                                if (!empty($matches)) {
-                                    $entradasOut = collect($matches)->map(function($pdn) {
+                                $internalReq = \Illuminate\Http\Request::create("/api/sap/po/{$num}/flow", 'GET', [], [], [], ['HTTP_ACCEPT' => 'application/json']);
+                                $resp = app()->handle($internalReq);
+                                $body = method_exists($resp, 'getContent') ? $resp->getContent() : (string)$resp;
+                                $arr = json_decode($body, true) ?? [];
+                                $grpos = $arr['grpos'] ?? [];
+                                if (!empty($grpos)) {
+                                    $entradasOut = collect($grpos)->map(function($g) {
                                         return [
-                                            'docnum' => $pdn['DocNum'] ?? null,
-                                            'docentry' => $pdn['DocEntry'] ?? null,
-                                            'fecha' => $pdn['DocDate'] ?? null,
-                                            'ref_proveedor' => $pdn['NumAtCard'] ?? null,
-                                            'total' => $pdn['DocTotal'] ?? null,
+                                            'docnum' => $g['DocNum'] ?? $g['DocNum'] ?? null,
+                                            'docentry' => $g['DocEntry'] ?? null,
+                                            'fecha' => $g['DocDate'] ?? null,
+                                            'ref_proveedor' => $g['CardCode'] ?? $g['NumAtCard'] ?? null,
+                                            'total' => $g['DocTotal'] ?? null,
                                         ];
                                     })->values()->all();
+                                    Log::info('ocRelacionadas: populated entradas from internal /sap/po/{docNum}/flow', ['docnum' => $num, 'found' => count($entradasOut)]);
                                 }
                             } catch (\Throwable $e) {
-                                Log::warning('ocRelacionadas GRPO fallback error: ' . $e->getMessage());
+                                Log::warning('ocRelacionadas internal flow call error: ' . $e->getMessage());
                             }
                         }
                     } catch (\Throwable $e) {
@@ -475,20 +450,242 @@ class ReservacionController extends Controller
                     }
                 }
 
+                // Añadimos campos derivados para que el frontend pueda mostrarlos
+                // sin necesidad de enviar el objeto PO completo. 
+                $fecha_inicio = $fecha;
+                $fecha_fin = null;
+                $estado_documento = null;
+                $lineas_count = null;
+
+                if (!empty($po) && is_array($po)) {
+                    $fecha_fin = $po['TaxDate'] ?? $po['TaxDateString'] ?? null;
+                    $estado_documento = $po['DocumentStatus'] ?? null;
+                }
+
+                if (!empty($lines) && is_array($lines)) {
+                    $lineas_count = count($lines);
+                }
+
                 return [
                     'docnum' => $num,
                     'docentry' => $docEntry ?? null,
                     'fecha' => $fecha,
+                    'fecha_inicio' => $fecha_inicio,
+                    'fecha_fin' => $fecha_fin,
                     'almacen' => $almacen,
                     'total' => $total,
-                    'entradas' => $entradasOut
+                    'lineas_count' => $lineas_count,
+                    'estado_documento' => $estado_documento,
+                    'entradas' => $entradasOut,
                 ];
             })->values()->all();
+
+            try {
+                foreach ($ocs as $i => $ocItem) {
+                    if (!empty($ocItem['entradas'])) continue;
+                    $num = $ocItem['docnum'] ?? null;
+                    if (!$num) continue;
+                    try {
+                        $internalReq = \Illuminate\Http\Request::create("/api/sap/po/{$num}/flow", 'GET', [], [], [], ['HTTP_ACCEPT' => 'application/json']);
+                        $resp = app()->handle($internalReq);
+                        $body = method_exists($resp, 'getContent') ? $resp->getContent() : (string)$resp;
+                        $arr = json_decode($body, true) ?? [];
+                        $grpos = $arr['grpos'] ?? [];
+                        if (!empty($grpos)) {
+                            $entradasFromFlow = collect($grpos)->map(function($g) {
+                                return [
+                                    'docnum' => $g['DocNum'] ?? null,
+                                    'docentry' => $g['DocEntry'] ?? null,
+                                    'fecha' => $g['DocDate'] ?? null,
+                                    'ref_proveedor' => $g['NumAtCard'] ?? ($g['CardCode'] ?? null),
+                                    'total' => $g['DocTotal'] ?? null,
+                                ];
+                            })->values()->all();
+                            $ocs[$i]['entradas'] = $entradasFromFlow;
+                        }
+                    } catch (\Throwable $e) {
+                        Log::warning('ocRelacionadas final fallback error: ' . $e->getMessage());
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning('ocRelacionadas flow final loop error: ' . $e->getMessage());
+            }
 
             return response()->json(['ocs' => $ocs]);
         } catch (\Throwable $e) {
             Log::warning('ocRelacionadas error: ' . $e->getMessage());
             return response()->json(['ocs' => []], 500);
+        }
+    }
+
+    public function printOC($docEntry)
+    {
+        try {
+            $resp = app()->call([app(GestionSupplierController::class), 'sapGetPO'], [
+                'docNum' => $docEntry,
+                'sl' => app(SAPServiceLayer::class)
+            ]);
+
+            $arr = [];
+            if ($resp instanceof \Illuminate\Http\JsonResponse) {
+                $arr = $resp->getData(true);
+            } else {
+                $body = is_string($resp) ? $resp : (method_exists($resp, 'getContent') ? $resp->getContent() : json_encode($resp));
+                $arr = json_decode($body, true) ?? [];
+            }
+
+            $po = $arr['po'] ?? [];
+            $lines = $arr['lines'] ?? ($po['DocumentLines'] ?? []);
+            if (empty($po)) {
+                $sl = app(SAPServiceLayer::class);
+                $q = "PurchaseOrders?
+                    \$filter=DocEntry eq {$docEntry}";
+                try {
+                    $raw = $sl->request('GET', $q);
+                    $head = json_decode(is_string($raw) ? $raw : (string)$raw->getBody(), true) ?? [];
+                    $po = $head['value'][0] ?? [];
+                    if (!empty($po) && isset($po['DocEntry'])) {
+                        $full = $sl->request('GET', "PurchaseOrders({$po['DocEntry']})");
+                        $fullArr = json_decode(is_string($full) ? $full : (string)$full->getBody(), true) ?? [];
+                        $lines = $fullArr['DocumentLines'] ?? [];
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning('printOC SL lookup error: ' . $e->getMessage());
+                }
+            }
+
+            $summary = [
+                'lines' => is_countable($lines) ? count($lines) : 0,
+                'totalQty' => array_sum(array_map(fn($l) => floatval($l['Quantity'] ?? $l['QuantityOrdered'] ?? 0), is_array($lines) ? $lines : [])),
+            ];
+
+                if (class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+                    try {
+                        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.oc_pdf', compact('po', 'lines', 'summary'));
+                        $pdf->setPaper('a4', 'portrait');
+                        $filename = 'OC-' . ($po['DocNum'] ?? $docEntry) . '.pdf';
+                        return $pdf->stream($filename);
+                    } catch (\Throwable $e) {
+                        Log::error('printOC PDF render error: ' . $e->getMessage(), ['exception' => $e]);
+                        if (config('app.debug')) {
+                            $html = '<h3>Error al generar PDF</h3><pre>' . e($e->getMessage()) . '\n\n' . e($e->getTraceAsString()) . '</pre>';
+                            return response($html, 500)->header('Content-Type', 'text/html');
+                        }
+                        return response('Error al generar PDF. Consulte al administrador.', 500)->header('Content-Type', 'text/plain');
+                    }
+                }
+
+                return view('pdf.oc_pdf', compact('po', 'lines', 'summary'));
+        } catch (\Throwable $e) {
+            Log::warning('printOC error: ' . $e->getMessage());
+            if (config('app.debug')) {
+                $msg = '<h3>Exception: ' . e($e->getMessage()) . '</h3><pre>' . e($e->getTraceAsString()) . '</pre>';
+                return response($msg, 500)->header('Content-Type', 'text/html');
+            }
+            abort(500, 'Error al generar impresión de OC');
+        }
+    }
+
+    public function printPDN($docEntry)
+    {
+        try {
+            $sl = app(SAPServiceLayer::class);
+            $pdn = [];
+            $lines = [];
+
+            try {
+                $q = "PurchaseDeliveryNotes?\$filter=DocEntry eq {$docEntry}";
+                $raw = $sl->request('GET', $q);
+                $arr = json_decode(is_string($raw) ? $raw : (string)$raw->getBody(), true) ?? [];
+                $pdn = $arr['value'][0] ?? [];
+                if (!empty($pdn) && isset($pdn['DocumentLines'])) {
+                    $lines = $pdn['DocumentLines'];
+                } elseif (!empty($pdn) && isset($pdn['DocEntry'])) {
+                    $full = $sl->request('GET', "PurchaseDeliveryNotes({$pdn['DocEntry']})");
+                    $fullArr = json_decode(is_string($full) ? $full : (string)$full->getBody(), true) ?? [];
+                    $lines = $fullArr['DocumentLines'] ?? $fullArr['Lines'] ?? [];
+                }
+                if (empty($pdn)) {
+                    $q2 = "PurchaseDeliveryNotes?\$filter=DocNum eq {$docEntry}";
+                    $raw2 = $sl->request('GET', $q2);
+                    $arr2 = json_decode(is_string($raw2) ? $raw2 : (string)$raw2->getBody(), true) ?? [];
+                    $pdn = $arr2['value'][0] ?? [];
+                    if (!empty($pdn)) {
+                        $lines = $pdn['DocumentLines'] ?? $pdn['Lines'] ?? [];
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning('printPDN SL lookup error: ' . $e->getMessage());
+            }
+
+            $summary = [
+                'lines' => is_countable($lines) ? count($lines) : 0,
+                'totalQty' => array_sum(array_map(fn($l) => floatval($l['Quantity'] ?? 0), is_array($lines) ? $lines : [])),
+            ];
+
+            try {
+                $pdf = Pdf::loadView('pdf.grpo_pdf', compact('pdn', 'lines', 'summary'));
+                $filename = 'PDN-' . ($pdn['DocNum'] ?? $docEntry) . '.pdf';
+                return $pdf->stream($filename);
+            } catch (\Throwable $e) {
+                Log::warning('printPDN PDF render error: ' . $e->getMessage());
+                return view('pdf.grpo_pdf', compact('pdn', 'lines', 'summary'));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('printPDN error: ' . $e->getMessage());
+            if (config('app.debug')) {
+                $msg = '<h3>Exception: ' . e($e->getMessage()) . '</h3><pre>' . e($e->getTraceAsString()) . '</pre>';
+                return response($msg, 500)->header('Content-Type', 'text/html');
+            }
+            abort(500, 'Error al generar impresión de Entrada');
+        }
+    }
+
+    public function pdnDetalles($docEntry)
+    {
+        try {
+            $sl = app(SAPServiceLayer::class);
+            $pdn = [];
+            $lines = [];
+
+            try {
+                $q = "PurchaseDeliveryNotes?\$filter=DocEntry eq {$docEntry}";
+                $raw = $sl->request('GET', $q);
+                $arr = json_decode(is_string($raw) ? $raw : (string)$raw->getBody(), true) ?? [];
+                $pdn = $arr['value'][0] ?? [];
+                if (!empty($pdn) && isset($pdn['DocumentLines'])) {
+                    $lines = $pdn['DocumentLines'];
+                } elseif (!empty($pdn) && isset($pdn['DocEntry'])) {
+                    $full = $sl->request('GET', "PurchaseDeliveryNotes({$pdn['DocEntry']})");
+                    $fullArr = json_decode(is_string($full) ? $full : (string)$full->getBody(), true) ?? [];
+                    $lines = $fullArr['DocumentLines'] ?? $fullArr['Lines'] ?? [];
+                }
+                if (empty($pdn)) {
+                    $q2 = "PurchaseDeliveryNotes?\$filter=DocNum eq {$docEntry}";
+                    $raw2 = $sl->request('GET', $q2);
+                    $arr2 = json_decode(is_string($raw2) ? $raw2 : (string)$raw2->getBody(), true) ?? [];
+                    $pdn = $arr2['value'][0] ?? [];
+                    if (!empty($pdn)) {
+                        $lines = $pdn['DocumentLines'] ?? $pdn['Lines'] ?? [];
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::warning('pdnDetalles SL lookup error: ' . $e->getMessage());
+            }
+
+            $summary = [
+                'lines' => is_countable($lines) ? count($lines) : 0,
+                'totalQty' => array_sum(array_map(fn($l) => floatval($l['Quantity'] ?? 0), is_array($lines) ? $lines : [])),
+            ];
+
+            return response()->json([
+                'pdn' => $pdn,
+                'lines' => $lines,
+                'summary' => $summary,
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('pdnDetalles error: ' . $e->getMessage());
+            return response()->json(['error' => 'No se pudo obtener detalles de la entrada'], 500);
         }
     }
 }

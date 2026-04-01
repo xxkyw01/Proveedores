@@ -92,16 +92,25 @@ Route::get('/sap/po/{docEntry}/lines', function ($docEntry, SAPServiceLayer $sl)
         $res  = $sl->request('GET', $q);
         $json = json_decode($res->getBody()->getContents(), true);
 
-        // SL devuelve { value: [...] }. Proyectamos en PHP lo que necesitamos:
-        $lines = collect($json['value'] ?? [])
-            ->map(fn($l) => [
-                'LineNum'         => $l['LineNum']         ?? null,
-                'ItemCode'        => $l['ItemCode']        ?? null,
-                'ItemDescription' => $l['ItemDescription'] ?? null,
-                'Quantity'        => $l['Quantity']        ?? null,
-                'OpenQuantity'    => $l['OpenQuantity']    ?? null,
-                'WarehouseCode'   => $l['WarehouseCode']   ?? null,
-            ])->values();
+        // SL devuelve { value: [...] } o un array directo. Proyectamos campos útiles.
+        $linesRaw = $json['value'] ?? $json ?? [];
+        $lines = collect($linesRaw)
+            ->map(function($l) {
+                return [
+                    'LineNum'         => $l['LineNum']         ?? null,
+                    'ItemCode'        => $l['ItemCode']        ?? null,
+                    'ItemDescription' => $l['ItemDescription'] ?? ($l['ItemName'] ?? null),
+                    'Quantity'        => $l['Quantity']        ?? null,
+                    'OpenQuantity'    => $l['OpenQuantity']    ?? null,
+                    'WarehouseCode'   => $l['WarehouseCode']   ?? ($l['Warehouse'] ?? null),
+                    'Price'           => $l['Price']           ?? ($l['UnitPrice'] ?? null),
+                    'LineTotal'       => $l['LineTotal']       ?? null,
+                    'BaseEntry'       => $l['BaseEntry']       ?? null,
+                    'BaseLine'        => $l['BaseLine']        ?? null,
+                    'TaxCode'         => $l['TaxCode']         ?? null,
+                    'UomCode'         => $l['UnitMsr']         ?? ($l['UomCode'] ?? null),
+                ];
+            })->values();
 
         return response()->json($lines, 200);
     } catch (RequestException $e) {
@@ -119,6 +128,22 @@ Route::get('/sap/po/{docEntry}/lines/raw', function ($docEntry, \App\Services\SA
     $q = "PurchaseOrders($docEntry)/DocumentLines";
     $res  = $sl->request('GET', $q);
     return response()->json(json_decode($res->getBody()->getContents(), true), 200);
+});
+
+Route::get('/sap/pdn/{docEntry}/raw', function ($docEntry, SAPServiceLayer $sl) {
+    try {
+        $res = $sl->request('GET', "PurchaseDeliveryNotes({$docEntry})");
+        $json = json_decode($res->getBody()->getContents(), true);
+        return response()->json($json, 200);
+    } catch (RequestException $e) {
+        $status = optional($e->getResponse())->getStatusCode() ?? 500;
+        $body   = optional($e->getResponse())->getBody()?->getContents();
+        return response()->json([
+            'ok' => false,
+            'error' => $e->getMessage(),
+            'body' => json_decode($body, true) ?? $body,
+        ], $status);
+    }
 });
 
 Route::get('/sap/items/{itemCode}', function ($itemCode, SAPServiceLayer $sl) {
@@ -227,3 +252,117 @@ Route::get(
     Route::post('/recepcion/grpo', [GestionSupplierController::class, 'sapCrearGRPO']);
     Route::post('/almacen/recepcion/grpo/validar', [GestionSupplierController::class, 'sapValidarGRPO'])->name('almacen.grpo.validar');
     Route::post('/almacen/recepcion/grpo', [GestionSupplierController::class, 'crearGRPO'])->name('almacen.grpo.crear');
+
+    Route::get('/sap/po/{docNum}/flow', function ($docNum, SAPServiceLayer $sl) {
+    $q1 = "PurchaseOrders?\$select=DocEntry,DocNum,CardCode,CardName,DocDate"
+        . "&\$filter=DocNum eq $docNum&\$top=1";
+
+    $r1 = $sl->request('GET', $q1);
+    $po = json_decode($r1->getBody(), true)['value'][0] ?? null;
+
+    if (!$po) {
+        return response()->json(['ok' => false, 'msg' => 'OC no encontrada'], 404);
+    }
+
+    $docEntryPO = $po['DocEntry'];
+
+    $rPOlines = $sl->request('GET', "PurchaseOrders($docEntryPO)/DocumentLines");
+    $poLines = json_decode($rPOlines->getBody(), true)['value'] ?? [];
+
+    $poItems = collect($poLines)
+        ->pluck('ItemCode')
+        ->filter()
+        ->unique();
+
+    $fecha = substr($po['DocDate'], 0, 10); 
+
+    $q2 = "PurchaseDeliveryNotes?\$select=DocEntry,DocNum,DocDate,CardCode"
+    . "&\$filter=CardCode eq '{$po['CardCode']}'"
+    . "&\$orderby=DocEntry desc&\$top=200";
+
+    $r2 = $sl->request('GET', $q2);
+    $grposRaw = json_decode($r2->getBody(), true)['value'] ?? [];
+
+    $grpos = [];
+
+    foreach ($grposRaw as $g) {
+
+        $linesRes = $sl->request('GET', "PurchaseDeliveryNotes({$g['DocEntry']})/DocumentLines");
+        $linesJson = json_decode($linesRes->getBody(), true) ?? [];
+        $lines = $linesJson['value'] ?? $linesJson['DocumentLines'] ?? [];
+
+        $matchedLines = [];
+        $matchReasons = [];
+
+        foreach ($lines as $l) {
+            $baseEntry = $l['BaseEntry'] ?? null;
+            $itemCode = $l['ItemCode'] ?? null;
+
+            if ($baseEntry !== null && $baseEntry == $docEntryPO) {
+                $matchReasons[] = 'baseentry';
+                $matchedLines[] = [
+                    'LineNum' => $l['LineNum'] ?? null,
+                    'ItemCode' => $itemCode,
+                    'BaseEntry' => $baseEntry,
+                ];
+                continue; // ya hizo match por baseentry, no necesitamos doble contar
+            }
+
+            if ($itemCode && $poItems->contains($itemCode)) {
+                $matchReasons[] = 'itemcode';
+                $matchedLines[] = [
+                    'LineNum' => $l['LineNum'] ?? null,
+                    'ItemCode' => $itemCode,
+                    'BaseEntry' => $baseEntry,
+                ];
+            }
+        }
+
+        $matchReasons = array_values(array_unique($matchReasons));
+
+        if (!empty($matchReasons)) {
+            $g['lines'] = $lines;
+            $g['match_by'] = $matchReasons;
+            $g['matched_lines'] = $matchedLines;
+            $grpos[] = $g;
+        }
+    }
+
+    $q3 = "PurchaseInvoices?\$select=DocEntry,DocNum,DocDate,CardCode"
+        . "&\$filter=CardCode eq '{$po['CardCode']}'"
+        . "&\$orderby=DocEntry desc&\$top=100";
+
+    $r3 = $sl->request('GET', $q3);
+    $invoicesRaw = json_decode($r3->getBody(), true)['value'] ?? [];
+
+    $resultGRPO = [];
+
+    foreach ($grpos as $g) {
+
+        $invoices = [];
+
+            foreach ($invoicesRaw as $inv) {
+
+                $linesRes = $sl->request('GET', "PurchaseInvoices({$inv['DocEntry']})/DocumentLines");
+                $invLinesJson = json_decode($linesRes->getBody(), true) ?? [];
+                $lines = $invLinesJson['value'] ?? $invLinesJson['DocumentLines'] ?? [];
+
+                $match = collect($lines)->contains(fn($l) =>
+                    ($l['BaseEntry'] ?? null) == $docEntryPO
+                );
+
+                if ($match) {
+                    $invoices[] = $inv;
+                }
+            }
+
+        $g['invoices'] = $invoices;
+        $resultGRPO[] = $g;
+    }
+
+    return response()->json([
+        'ok' => true,
+        'po' => $po,
+        'grpos' => $resultGRPO
+    ]);
+});

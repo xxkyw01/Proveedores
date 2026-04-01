@@ -1059,7 +1059,7 @@
                 const itemCode = String(inp.dataset.itemcode || '');
                 const whs = String(inp.dataset.whs || '');
                 const ocL = String(inp.dataset.oc || docNumL || '');
-                const serie = Number(SERIES_BY_SUC[String(sucursalId)] || 157); // default ZC
+                const serie = Number(SERIES_BY_SUC[String(sucursalId)] || 157); 
                 if (!serie) throw new Error(`Sucursal sin serie GRPO configurada: ${sucursalId}`);
 
                 if (!docEntryL || !docNumL || !cardCodeL) {
@@ -1076,7 +1076,6 @@
                         cardCode: cardCodeL,
                         numAtCard: numeroReferencia,
                         sucursal_id: sucursalId,
-                        //Series: serieGRPO,
                         Series: serie,
                         user_comment: `${comment} [OC ${docNumL}]`,
                         oc_num: String(ocL),
@@ -1114,53 +1113,133 @@
 
         async function previsualizarGRPO() {
             try {
-                const payloads = buildGrpoPayloadFromUI();
-                const jsonPretty = JSON.stringify(payloads, null, 2);
-                const html = `
-                <div style="text-align:left;">
-                    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                    <div><b>Recepciones a generar:</b> ${payloads.length}</div>
-                    <button type="button" id="btnCopyPayload" class="swal2-confirm swal2-styled"
-                        style="margin:0;padding:6px 10px;font-size:12px;">
-                        Copiar JSON
-                    </button>
-                    </div>
-                    <pre style="max-height:55vh;overflow:auto;background:#0b0f14;color:#e6edf3;padding:12px;border-radius:10px;border:1px solid #1f2937;">
-                        ${escapeHTML(jsonPretty)}
-                            </pre>
+                let payloads = null;
+                try {
+                    payloads = buildGrpoPayloadFromUI();
+                } catch (err) {
+                    // build failed (likely no selection). We'll still prepare a minimal preview below.
+                    payloads = null;
+                }
+
+                const numeroReferencia = (document.getElementById('numeroReferencia')?.value || '').trim();
+                const comment = (document.getElementById('comentarios')?.value || '').trim();
+                const ocDisplay = currentOrder ? (currentOrder.orden_compra || currentOrder.id || 'N/A') : 'N/A';
+                // Try to determine DocEntry to show even if no lines selected
+                let docEntryDisplay = 'N/A';
+                if (payloads && Array.isArray(payloads) && payloads.length) {
+                    docEntryDisplay = String(payloads[0].docEntry || payloads[0].DocEntry || 'N/A');
+                } else if (window.PO_HEADER && window.PO_HEADER.DocEntry) {
+                    docEntryDisplay = String(window.PO_HEADER.DocEntry || 'N/A');
+                } else {
+                    const firstInp = document.querySelector('#articulosList input.inp-recibir');
+                    if (firstInp) docEntryDisplay = String(firstInp.dataset.docentry || firstInp.dataset.docEntry || firstInp.dataset.docnum || 'N/A');
+                    else {
+                        const firstTr = document.querySelector('#articulosList table tbody tr');
+                        if (firstTr) docEntryDisplay = String(firstTr.dataset.docentry || firstTr.dataset.docEntry || 'N/A');
+                    }
+                }
+
+                if (payloads && Array.isArray(payloads) && payloads.length) {
+                    const jsonPretty = JSON.stringify(payloads, null, 2);
+                    const html = `
+                    <div style="text-align:left;">
+                        <div style="margin-bottom:8px;">
+                            <strong>OC:</strong> ${escapeHTML(String(ocDisplay))} &nbsp; <strong>DocEntry:</strong> ${escapeHTML(docEntryDisplay)}
                         </div>
-                    `;
+                        <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <div><b>Recepciones a generar:</b> ${payloads.length}</div>
+                        <button type="button" id="btnCopyPayload" class="swal2-confirm swal2-styled"
+                            style="margin:0;padding:6px 10px;font-size:12px;">Copiar JSON</button>
+                        </div>
+                        <pre style="max-height:55vh;overflow:auto;background:#0b0f14;color:#e6edf3;padding:12px;border-radius:10px;border:1px solid #1f2937;">${escapeHTML(jsonPretty)}</pre>
+                    </div>`;
+
+                    await Swal.fire({
+                        title: 'Payload(s) GRPO',
+                        theme: 'auto',
+                        html,
+                        width: 900,
+                        confirmButtonText: 'OK',
+                        didOpen: () => {
+                            const btn = document.getElementById('btnCopyPayload');
+                            if (btn) {
+                                btn.addEventListener('click', async () => {
+                                    try {
+                                        await navigator.clipboard.writeText(jsonPretty);
+                                        Swal.showValidationMessage('Copiado al portapapeles');
+                                        setTimeout(() => Swal.resetValidationMessage(), 800);
+                                    } catch {
+                                        Swal.showValidationMessage('No pude copiar (bloqueo del navegador).');
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                    console.groupCollapsed('[PREVIEW PAYLOADS GRPO] Multi-OC');
+                    console.log(payloads);
+                    payloads.forEach(p => {
+                        console.log('OC:', p.docNum, 'DocEntry:', p.docEntry);
+                        console.table(p.lines);
+                    });
+                    console.groupEnd();
+
+                    return;
+                }
+
+                // No payloads (no selection) — build a lightweight preview using available form and table data
+                const tableRows = Array.from(document.querySelectorAll('#articulosList table tbody tr'));
+                const rows = tableRows.map(tr => {
+                    const code = tr.querySelector('td:nth-child(2) div:first-child')?.textContent?.trim() || tr.dataset.codigo || '';
+                    const name = tr.querySelector('td:nth-child(2) div:nth-child(2)')?.textContent?.trim() || '';
+                    const inp = tr.querySelector('input.inp-recibir');
+                    const pendiente = inp ? Number(inp.dataset.pendiente || 0) : 0;
+                    const seleccionado = tr.querySelector('input.chk-art')?.checked || false;
+                    const valorCapturado = inp ? (inp.value === '' ? 0 : Number(inp.value)) : 0;
+                    return { code, name, pendiente, seleccionado, valorCapturado };
+                });
+
+                let rowsHtml = '';
+                if (!rows.length) {
+                    rowsHtml = `<div class="text-muted">No hay líneas cargadas para esta OC.</div>`;
+                } else {
+                    rowsHtml = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead><tr><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Código</th>
+                        <th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Descripción</th>
+                        <th style="text-align:right;padding:6px;border-bottom:1px solid #eee">Pendiente</th>
+                        <th style="text-align:right;padding:6px;border-bottom:1px solid #eee">Capturado</th></tr></thead><tbody>`;
+                    rows.forEach(r => {
+                        rowsHtml += `<tr>
+                            <td style="padding:6px;border-bottom:1px solid #fafafa">${escapeHTML(r.code)}</td>
+                            <td style="padding:6px;border-bottom:1px solid #fafafa">${escapeHTML(r.name)}</td>
+                            <td style="padding:6px;text-align:right;border-bottom:1px solid #fafafa">${r.pendiente}</td>
+                            <td style="padding:6px;text-align:right;border-bottom:1px solid #fafafa">${r.seleccionado ? r.valorCapturado : '-'}</td>
+                        </tr>`;
+                    });
+                    rowsHtml += `</tbody></table>`;
+                }
+
+                const numeroRefHtml = numeroReferencia ? `<strong>${escapeHTML(numeroReferencia)}</strong>` : `<span style="color:#b71c1c;font-weight:700">(Falta número de referencia)</span>`;
+
+                const html = `
+                    <div style="text-align:left;">
+                        <div style="margin-bottom:8px;">
+                            <strong>OC:</strong> ${escapeHTML(String(ocDisplay))} &nbsp; <strong>DocEntry:</strong> ${escapeHTML(docEntryDisplay)}<br>
+                            <strong>Folio proveedor:</strong> ${numeroRefHtml}<br>
+                            <strong>Comentarios:</strong> ${escapeHTML(comment || '')}
+                        </div>
+                        <div style="margin-top:6px;padding:8px;border:1px solid #f1f1f1;border-radius:6px;background:#fff;">
+                            <div style="font-weight:700;margin-bottom:6px">Líneas (pendientes / capturado)</div>
+                            ${rowsHtml}
+                        </div>
+                        <div style="margin-top:8px;color:#666;font-size:13px">Nota: No se seleccionaron líneas o no hay cantidades capturadas. Selecciona líneas y captura cantidades para generar la(s) recepción(es).</div>
+                    </div>`;
 
                 await Swal.fire({
-                    title: 'Payload(s) GRPO',
-                    theme: 'auto',
+                    title: `Previsualizar GRPO - OC ${escapeHTML(String(ocDisplay))}`,
                     html,
-                    width: 900,
-                    confirmButtonText: 'OK',
-                    didOpen: () => {
-                        const btn = document.getElementById('btnCopyPayload');
-                        if (btn) {
-                            btn.addEventListener('click', async () => {
-                                try {
-                                    await navigator.clipboard.writeText(jsonPretty);
-                                    Swal.showValidationMessage('Copiado al portapapeles');
-                                    setTimeout(() => Swal.resetValidationMessage(), 800);
-                                } catch {
-                                    Swal.showValidationMessage(
-                                        'No pude copiar (bloqueo del navegador).');
-                                }
-                            });
-                        }
-                    }
+                    width: 900
                 });
-
-                console.groupCollapsed('[PREVIEW PAYLOADS GRPO] Multi-OC');
-                console.log(payloads);
-                payloads.forEach(p => {
-                    console.log('OC:', p.docNum, 'DocEntry:', p.docEntry);
-                    console.table(p.lines);
-                });
-                console.groupEnd();
 
             } catch (e) {
                 Swal.fire('No se puede previsualizar', String(e.message || e), 'warning');

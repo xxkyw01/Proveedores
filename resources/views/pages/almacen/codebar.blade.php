@@ -40,7 +40,16 @@
                                     <div class="small text-muted">Código</div>
                                     <div id="barcodeValue" class="barcode-value">-</div>
                                     <div class="small text-muted mt-2">Vista previa</div>
-                                    <div id="barcodeGraphic" class="barcode-graphic">||||||||||||</div>
+                                    <div id="barcodeGraphic" class="barcode-graphic">
+                                        <div id="barcodeSvgWrap" style="min-height:60px;display:flex;align-items:center;">
+                                            <svg id="barcodeSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+                                        </div>
+                                        <div id="barcodeLibError" style="display:none;margin-top:8px;color:#b71c1c;font-size:13px;
+                                            background:#fff2f2;padding:8px;border-radius:4px;border:1px solid #f5c6cb;">
+                                            No se pudo cargar la librería de generación de códigos. Revisa la consola o coloca
+                                            <strong>/assets/js/JsBarcode.all.min.js</strong> en tu servidor.
+                                        </div>
+                                    </div>
                                     <div id="barcodeProductPreview" class="mt-2" style="display:none;">
                                         <div id="barcodeProductRow" style="display:flex;gap:10px;align-items:flex-start;">
                                             <img id="barcodeImage" src="" alt=""
@@ -55,9 +64,7 @@
                                         </div>
                                     </div>
                                 </div>
-
-                            </div>
-
+                            </div> 
 
                             <div class="col-12 col-md-7">
                                 <label class="form-label">Buscar artículo (por nombre o código)</label>
@@ -71,7 +78,19 @@
                                     style="min-height:120px;border:1px dashed #e9ecef;border-radius:6px;background:#fbfbfb;">
                                     <div class="text-muted">No hay artículo seleccionado.</div>
                                 </div>
-
+                                
+                                <div class="mt-2">
+                                    <label class="form-label">Unidad de medida</label>
+                                    <select id="uomSelect" class="form-select" disabled>
+                                        <option value="">-- Selecciona --</option>
+                                        <option value="BULTO">BULTO</option>
+                                        <option value="PAQUETE">PAQUETE</option>
+                                        <option value="KILO">KILO</option>
+                                        <option value="CAJA">CAJA</option>
+                                        <option value="PIEZA">PIEZA</option>
+                                        <option value="CUBETA">CUBETA</option>
+                                    </select>
+                                </div>
                                 <div class="mt-3 d-flex gap-2 justify-content-end">
                                     <button id="btnGuardarAltaCodigo" class="btn btn-primary">Capturar y guardar</button>
                                     <button id="btnLimpiar" class="btn btn-outline-secondary">Limpiar</button>
@@ -95,6 +114,7 @@
             const searchInput = document.getElementById('searchItemInput');
             const resultsEl = document.getElementById('searchResults');
             const selectedInfo = document.getElementById('selectedItemInfo');
+            const uomSelect = document.getElementById('uomSelect');
             const btnGuardar = document.getElementById('btnGuardarAltaCodigo');
             const btnLimpiar = document.getElementById('btnLimpiar');
 
@@ -110,6 +130,77 @@
             const searchCache = new Map();
             const RESULTS_LIMIT = 50;
 
+            const barcodeSvg = document.getElementById('barcodeSvg');
+            let jsBarcodeReady = false;
+
+            function ensureJsBarcode() {
+                return new Promise((resolve) => {
+                    if (window.JsBarcode) {
+                        jsBarcodeReady = true;
+                        return resolve(true);
+                    }
+                    const urls = [
+                        'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
+                        'https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js',
+                        'https://unpkg.com/jsbarcode@3.11.5/dist/JsBarcode.all.min.js',
+                        '/assets/js/JsBarcode.all.min.js'
+                    ];
+                    let idx = 0;
+                    function tryLoad() {
+                        if (idx >= urls.length) return resolve(false);
+                        const s = document.createElement('script');
+                        s.src = urls[idx++];
+                        s.onload = () => {
+                            jsBarcodeReady = true;
+                            resolve(true);
+                        };
+                        s.onerror = () => {
+                            tryLoad();
+                        };
+                        document.head.appendChild(s); 
+                    }
+                    tryLoad();
+                });
+            }
+
+            async function renderSvgBarcode(val) {
+                if (!barcodeSvg) return;
+                const v = String(val || '');
+                if (!v) {
+                    barcodeSvg.innerHTML = '';
+                    return;
+                }
+                const type = 'CODE128';
+                const ok = await ensureJsBarcode();
+                if (!ok || !window.JsBarcode) {
+                    barcodeSvg.innerHTML = '';
+                    const wrap = document.getElementById('barcodeSvgWrap');
+                    if (wrap) wrap.textContent = v;
+                    const err = document.getElementById('barcodeLibError');
+                    if (err) err.style.display = 'block';
+                    console.warn('JsBarcode no disponible. Intenta colocar JsBarcode.all.min.js en /assets/js o permitir carga desde CDN.');
+                    return;
+                }
+                try {
+                    const wrap = document.getElementById('barcodeSvgWrap');
+                    if (wrap) wrap.textContent = '';
+                    const err = document.getElementById('barcodeLibError');
+                    if (err) err.style.display = 'none';
+                    JsBarcode(barcodeSvg, v, {
+                        format: type,
+                        displayValue: true,
+                        fontSize: 12,
+                        height: 60,
+                        margin: 10
+                    });
+                } catch (e) {
+                    console.warn('JsBarcode render failed', e);
+                    barcodeSvg.innerHTML = '';
+                    const wrap2 = document.getElementById('barcodeSvgWrap');
+                    if (wrap2) wrap2.textContent = v;
+                }
+            }
+
             function esc(t) {
                 return String(t || '');
             }
@@ -117,7 +208,11 @@
             function renderBarcode(val) {
                 const v = esc(val) || '-';
                 barcodeValue.textContent = v;
-                barcodeGraphic.textContent = v ? ('*' + v + '*') : '||||||||||||';
+                try {
+                    const wrap = document.getElementById('barcodeSvgWrap');
+                    if (wrap) {  }
+                } catch (_) {}
+                renderSvgBarcode(val);
             }
 
             function showProductPreview(data) {
@@ -235,6 +330,10 @@
 
                 if (!selectedItem) {
                     selectedInfo.innerHTML = '<div class="text-muted">No hay artículo seleccionado.</div>';
+                    if (uomSelect) {
+                        uomSelect.value = '';
+                        uomSelect.disabled = true;
+                    }
                     return;
                 }
 
@@ -266,6 +365,16 @@
                     }
                 } catch (e) {
                     console.warn('init DataTable selectedItemTable', e);
+                }
+                try {
+                    if (uomSelect) {
+                        const uomVal = selectedItem.UoM || selectedItem.Unidad || '';
+                        const opt = Array.from(uomSelect.options).some(o => o.value === uomVal && uomVal !== '');
+                        uomSelect.value = opt ? uomVal : '';
+                        uomSelect.disabled = false;
+                    }
+                } catch (e) {
+                    console.warn('set uomSelect', e);
                 }
             }
 
@@ -447,6 +556,14 @@
                 searchTmr = setTimeout(() => doSearch(q), 300);
             });
 
+            if (uomSelect) {
+                uomSelect.addEventListener('change', () => {
+                    try {
+                        if (selectedItem) selectedItem.UoM = uomSelect.value;
+                    } catch (e) {}
+                });
+            }
+
             searchInput.addEventListener('change', (e) => {
                 const v = (e.target.value || '').trim();
                 if (!v) return;
@@ -503,6 +620,8 @@
                 }
             });
 
+            
+
             btnLimpiar.addEventListener('click', () => {
                 barcodeInput.value = '';
                 renderBarcode('');
@@ -510,6 +629,10 @@
                 resultsEl.innerHTML = '';
                 selectedItem = null;
                 renderSelected();
+                if (uomSelect) {
+                    uomSelect.value = '';
+                    uomSelect.disabled = true;
+                }
             });
 
             btnGuardar.addEventListener('click', async () => {
@@ -586,7 +709,7 @@
                     barcode: barcode,
                     item_code: selectedItem.ItemCode || selectedItem.Codigo || '',
                     item_name: selectedItem.ItemName || selectedItem.Nombre || '',
-                    uom: selectedItem.UoM || selectedItem.Unidad || '',
+                    uom: (uomSelect && uomSelect.value) ? uomSelect.value : (selectedItem.UoM || selectedItem.Unidad || ''),
                     item_group: selectedItem.ItemGroup || selectedItem.Grupo || '',
                     num_at_card: ''
                 };

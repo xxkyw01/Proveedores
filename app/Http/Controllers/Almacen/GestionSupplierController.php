@@ -782,23 +782,45 @@ class GestionSupplierController extends Controller
                 ], 500);
             }
 
-            $docLines = [];
+            // Agrupar líneas por BaseLine: si el usuario seleccionó la misma BaseLine
+            // varias veces (p. ej. aparece duplicada en la UI), sumamos cantidades
+            // y verificamos que el WarehouseCode sea consistente. Esto evita el
+            // error SAP "Invalid value [DocumentLines.BaseLine]" por entradas
+            // duplicadas/conflictivas.
+            $docLinesByLine = [];
             foreach ($lines as $ln) {
                 $baseLine = isset($ln['BaseLine']) ? (int) $ln['BaseLine'] : null;
                 $qty      = (float) ($ln['Quantity'] ?? 0);
+                $whs      = $ln['WarehouseCode'] ?? null;
 
                 if ($baseLine === null || !($qty > 0)) {
                     continue;
                 }
 
-                $docLines[] = [
-                    'BaseEntry'     => $docEntry,
-                    'BaseType'      => 22,
-                    'BaseLine'      => $baseLine,
-                    'Quantity'      => $qty,
-                    'WarehouseCode' => $ln['WarehouseCode'] ?? null,
-                ];
+                if (isset($docLinesByLine[$baseLine])) {
+                    // Si el almacén difiere entre entradas de la misma BaseLine,
+                    // devolvemos un error para evitar mezclas inconsistentes.
+                    if ($whs !== $docLinesByLine[$baseLine]['WarehouseCode']) {
+                        return response()->json([
+                            'ok'  => false,
+                            'msg' => "Líneas con BaseLine {$baseLine} tienen almacenes distintos.",
+                        ], 200);
+                    }
+
+                    $docLinesByLine[$baseLine]['Quantity'] += $qty;
+                } else {
+                    $docLinesByLine[$baseLine] = [
+                        'BaseEntry'     => $docEntry,
+                        'BaseType'      => 22,
+                        'BaseLine'      => $baseLine,
+                        'Quantity'      => $qty,
+                        'WarehouseCode' => $whs,
+                    ];
+                }
             }
+
+            // Convertir a array indexado para enviar a SAP
+            $docLines = array_values($docLinesByLine);
 
             if (!count($docLines)) {
                 return response()->json([

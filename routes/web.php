@@ -48,6 +48,12 @@ Route::middleware(['proveedor', 'prevent-back-history'])->prefix('proveedor')->g
     Route::post('/enviar-solicitud', [CitaController::class, 'enviarSolicitudCorreo']);
     Route::get('/historial', [ReservacionController::class, 'historial'])->name('proveedor.historial');
     Route::get('/reporte/pdf', [ReservacionController::class, 'generarPDF']);
+    // Ruta para imprimir una Orden de Compra (PDF)
+    Route::get('/oc/{docEntry}/print', [ReservacionController::class, 'printOC'])->name('proveedor.oc.print');
+    // Ruta para imprimir una Entrada (PDN)
+    Route::get('/pdn/{docEntry}/print', [ReservacionController::class, 'printPDN'])->name('proveedor.pdn.print');
+    // Ruta para obtener detalles JSON de una Entrada (PDN)
+    Route::get('/pdn/{docEntry}/json', [ReservacionController::class, 'pdnDetalles'])->name('proveedor.pdn.json');
     Route::post('/cancelacion/solicitar', [ReservacionController::class, 'solicitarCancelacion']);
     Route::post('/cancelacion/confirmar', [ReservacionController::class, 'confirmarCancelacion']);
     Route::get('/evidencia/{id}', [ReservacionController::class, 'verEvidencia'])->name('proveedor.evidencia');

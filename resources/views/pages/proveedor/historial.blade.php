@@ -7,14 +7,13 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('assets/css/rol/proveedor/historial.css') }}">
-
     <x-sidebar />
 
     <div class="container-fluid con-sidebar">
         <div class="row justify-content-center">
 
             <div class="container">
-                {{-- Filtros de eventos --}}
+                {{-- Filtros de eventos  --}}
                 <div class="card shadow p-3 mb-4" style="border: 2px solid #ee7826; border-radius: 17px;">
                     <div class="row row-cols-2 row-cols-md-5 g-2 text-center">
                         <div class="col">
@@ -668,6 +667,12 @@
                     }
                 });
             }
+            
+            try {
+                window.table = table;
+            } catch (e) {
+                
+            }
 
             var statusMap = {
                 'pendientes': 'pendiente',
@@ -763,7 +768,6 @@
                 .catch(err => Swal.fire('Error', 'Error de servidor.', 'error'));
         });
 
-        /* --- Gráfico OC -> Entradas: funciones auxiliares --- */
         function cargarOCRelacionadas(reservaId) {
             const svg = document.getElementById('graphSvg');
             if (svg) svg.innerHTML = '';
@@ -848,6 +852,39 @@
         function renderGraph(ocs) {
             const svg = document.getElementById('graphSvg');
             if (!svg) return;
+            if (!svg.querySelector('defs')) {
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.setAttribute('id', 'arrow');
+                marker.setAttribute('markerWidth', '8');
+                marker.setAttribute('markerHeight', '8');
+                marker.setAttribute('refX', '6');
+                marker.setAttribute('refY', '3');
+                marker.setAttribute('orient', 'auto');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M0,0 L6,3 L0,6 Z');
+                path.setAttribute('fill', '#6c757d');
+                marker.appendChild(path);
+                defs.appendChild(marker);
+
+                const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+                filter.setAttribute('id', 'shadow');
+                filter.setAttribute('x', '-20%');
+                filter.setAttribute('y', '-20%');
+                filter.setAttribute('width', '140%');
+                filter.setAttribute('height', '140%');
+                const fe = document.createElementNS('http://www.w3.org/2000/svg', 'feDropShadow');
+                fe.setAttribute('dx', '0');
+                fe.setAttribute('dy', '3');
+                fe.setAttribute('stdDeviation', '4');
+                fe.setAttribute('flood-color', '#000');
+                fe.setAttribute('flood-opacity', '0.18');
+                filter.appendChild(fe);
+                defs.appendChild(filter);
+
+                svg.insertBefore(defs, svg.firstChild);
+            }
 
             const padding = 20;
             const leftX = 120;
@@ -866,125 +903,467 @@
 
             svg.setAttribute('height', Math.max(220, ocs.length * rowH + padding));
 
-            ocs.forEach(function(oc, idx) {
-                const y = padding + idx * rowH;
+            var currentY = padding;
+            for (var idx = 0; idx < ocs.length; idx++) {
+                var oc = ocs[idx];
 
-                // Nodo OC (izquierda)
-                const gOc = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                var lines = [];
+                lines.push(oc.docnum || '-');
+
+                var po = oc.po || null;
+                var fechaRaw = (po && (po.DocDate || po.DocDateString)) || oc.fecha_inicio || oc.fecha || oc.start_date || oc.fechaInicio || '';
+                if (fechaRaw) {
+                    var fechaTxt = fechaRaw;
+                    try {
+                        var d = new Date(fechaRaw);
+                        if (!isNaN(d.getTime())) {
+                            var dd = String(d.getDate()).padStart(2, '0');
+                            var mm = String(d.getMonth() + 1).padStart(2, '0');
+                            var yyyy = d.getFullYear();
+                            fechaTxt = dd + '/' + mm + '/' + yyyy;
+                        }
+                    } catch (e) {}
+                    lines.push('Fecha de inicio : ' + fechaTxt);
+                }
+
+                var fechaFin = (po && (po.TaxDate || po.TaxDateString)) || oc.fecha_final || oc.fecha_fin || oc.end_date || oc.fechaFin || '';
+                var fechaFinTxt = '-';
+                if (fechaFin) {
+                    try {
+                        var d2 = new Date(fechaFin);
+                        if (!isNaN(d2.getTime())) {
+                            var dd2 = String(d2.getDate()).padStart(2, '0');
+                            var mm2 = String(d2.getMonth() + 1).padStart(2, '0');
+                            var yyyy2 = d2.getFullYear();
+                            fechaFinTxt = dd2 + '/' + mm2 + '/' + yyyy2;
+                        } else {
+                            fechaFinTxt = fechaFin;
+                        }
+                    } catch (e) { fechaFinTxt = fechaFin; }
+                }
+                lines.push('Fecha de Final : ' + fechaFinTxt);
+
+                if (oc.almacen) lines.push('Almacén : ' + oc.almacen);
+                if (oc.docentry) lines.push('DocEntry : ' + oc.docentry);
+                if (oc.total !== undefined && oc.total !== null) {
+                    try {
+                        var totalNum = Number(oc.total);
+                        lines.push('Total : ' + (isNaN(totalNum) ? oc.total : totalNum.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })));
+                    } catch (e) {
+                        lines.push('Total : ' + oc.total);
+                    }
+                }
+                
+                var articleCount = '';
+                if (oc.lines && Array.isArray(oc.lines)) {
+                    articleCount = oc.lines.length;
+                } else {
+                    var lc = oc.lineas_articulos || oc.lineas || oc.articulos || oc.lineas_count || oc.total_lineas || '';
+                    if (typeof lc === 'number') articleCount = lc;
+                    else if (typeof lc === 'string' && lc.trim() !== '') {
+                        var parsed = parseInt(lc, 10);
+                        if (!isNaN(parsed)) articleCount = parsed;
+                    }
+                }
+                if (articleCount) lines.push(String(articleCount) + ' Articulos');
+
+                var estadoTxt = oc.estado || oc.estado_oc || oc.status || oc.estadoOC || '';
+                
+                var rawEstado = oc.estado_documento || '';
+                if (!estadoTxt && rawEstado) {
+                    var dsLower = String(rawEstado).toLowerCase();
+                    
+                    if (dsLower.indexOf('bost_open') !== -1 || dsLower.indexOf('open') !== -1 || dsLower === 'o') {
+                        estadoTxt = 'Abierto';
+                    } else if (dsLower.indexOf('bost_closed') !== -1 || dsLower.indexOf('closed') !== -1 || dsLower === 'c') {
+                        estadoTxt = 'Cerrado';
+                    } else if (dsLower.indexOf('printed') !== -1 || dsLower.indexOf('imprim') !== -1) { 
+
+                        estadoTxt = 'Abierto (Impreso)';
+                    } else {
+
+                        estadoTxt = String(rawEstado);
+                    }
+                }
+                if (!estadoTxt && oc.state) estadoTxt = oc.state;
+                if (!estadoTxt && oc.state) estadoTxt = oc.state;
+                lines.push('Estado : ' + (estadoTxt || '-'));
+
+                try {
+                    console.log('renderGraph - OC raw object:', oc);
+                } catch (e) {}
+
+                (function addExtraFields() {
+                    var shownKeys = {
+                        'docnum': true, 'fecha_inicio': true, 'fecha': true, 'start_date': true, 'fechaInicio': true,
+                        'fecha_final': true, 'fecha_fin': true, 'end_date': true, 'fechaFin': true,
+                        'almacen': true, 'docentry': true, 'total': true, 'entradas': true,
+                        'lineas_articulos': true, 'lineas': true, 'lines': true, 'articulos': true,
+                        'lineas_count': true, 'total_lineas': true, 'estado': true, 'estado_oc': true,
+                        'status': true, 'estadoOC': true, 'estado_documento': true, 'state': true
+                    };
+
+                    var extraAdded = 0;
+                    var maxExtra = 6;
+
+                    function pushField(key, val) {
+                        if (extraAdded >= maxExtra) return false;
+                        var label = key.replace(/[_\-]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+                        lines.push(label.charAt(0).toUpperCase() + label.slice(1) + ' : ' + String(val));
+                        extraAdded++;
+                        return extraAdded < maxExtra;
+                    }
+
+                    for (var k in oc) {
+                        if (!oc.hasOwnProperty(k)) continue;
+                        if (shownKeys[k]) continue;
+                        var v = oc[k];
+                        if (v === null || v === undefined) continue;
+
+                        if (typeof v === 'object') {
+                            try {
+
+                                var keys = Object.keys(v || {});
+                                var primCount = 0;
+                                for (var ki = 0; ki < keys.length; ki++) {
+                                    var kk = keys[ki];
+                                    var vv = v[kk];
+                                    if (vv === null || vv === undefined) continue;
+                                    if (typeof vv === 'object') continue;
+                                    primCount++;
+                                }
+
+                                if (primCount > 0 && primCount <= 4) {
+                                    for (var ki2 = 0; ki2 < keys.length; ki2++) {
+                                        var kk2 = keys[ki2];
+                                        var vv2 = v[kk2];
+                                        if (vv2 === null || vv2 === undefined) continue;
+                                        if (typeof vv2 === 'object') continue;
+                                        var compoundKey = k + '.' + kk2;
+                                        if (!pushField(compoundKey, vv2)) break;
+                                    }
+                                    if (extraAdded >= maxExtra) break;
+                                    continue;
+                                }
+                            } catch (e) {
+
+                            }
+                            try {
+                                var small = JSON.stringify(v);
+                                if (small && small.length > 0) {
+                                    if (!pushField(k, small.length > 120 ? small.slice(0, 120) + '...' : small)) break;
+                                }
+                            } catch (e) {}
+                            if (extraAdded >= maxExtra) break;
+                            continue;
+                        }
+
+                        if (!pushField(k, v)) break;
+                    }
+                })();
+
+                var lineHeight = 20;
+                var paddingRect = 14; 
+                var rectHeight = Math.max(48, lines.length * lineHeight + paddingRect);
+
+                var gOc = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 gOc.setAttribute('class', 'node oc');
                 gOc.setAttribute('data-docnum', oc.docnum || '');
                 gOc.setAttribute('cursor', 'pointer');
 
-                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 rect.setAttribute('x', leftX - 100);
-                rect.setAttribute('y', y);
+                rect.setAttribute('y', currentY);
                 rect.setAttribute('rx', 8);
                 rect.setAttribute('ry', 8);
                 rect.setAttribute('width', 200);
-                rect.setAttribute('height', 48);
-                rect.setAttribute('fill', '#f8f9fa');
-                rect.setAttribute('stroke', '#007bff');
-                rect.setAttribute('stroke-width', 1);
+                rect.setAttribute('height', rectHeight);
+                rect.setAttribute('stroke-width', 2);
 
-                const t1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                t1.setAttribute('x', leftX - 90);
-                t1.setAttribute('y', y + 18);
-                t1.setAttribute('fill', '#000');
-                t1.setAttribute('style', 'font-weight:700; font-size:12px');
-                t1.textContent = oc.docnum || '-';
+                var entradasArr = oc.entradas || [];
+                var hasEntradas = (
+                    (Array.isArray(entradasArr) && entradasArr.length > 0) ||
+                    (oc.entradas_count && Number(oc.entradas_count) > 0) ||
+                    (oc.has_entradas === true) ||
+                    (oc.cantidad_entradas && Number(oc.cantidad_entradas) > 0) ||
+                    (typeof oc.entradas === 'number' && oc.entradas > 0)
+                );
 
-                const t2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                t2.setAttribute('x', leftX - 90);
-                t2.setAttribute('y', y + 36);
-                t2.setAttribute('fill', '#555');
-                t2.setAttribute('style', 'font-size:11px');
-                t2.textContent = oc.fecha ? (oc.fecha + ' • ' + (oc.total || '')) : (oc.total || '');
+                try { console.log('renderGraph - OC', oc.docnum, 'hasEntradas=', hasEntradas, 'entradas=', entradasArr); } catch (e) {}
+                if (hasEntradas) {
+                    rect.setAttribute('fill', '#fff3cd');
+                    rect.setAttribute('stroke', '#ff9800');
+                    rect.setAttribute('filter', 'url(#shadow)');
+                } else {
+                    rect.setAttribute('fill', '#f8f9fa');
+                    rect.setAttribute('stroke', '#007bff');
+                }
 
                 gOc.appendChild(rect);
-                gOc.appendChild(t1);
-                gOc.appendChild(t2);
+                for (var li = 0; li < lines.length; li++) {
+                    var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', leftX - 90);
+                    text.setAttribute('y', currentY + 18 + li * lineHeight);
+                    if (li === 0) {
+                        text.setAttribute('fill', '#000');
+                        text.setAttribute('style', 'font-weight:700; font-size:12px');
+                    } else {
+                        text.setAttribute('fill', '#555');
+                        text.setAttribute('style', 'font-size:11px');
+                    }
+                    text.textContent = lines[li];
+                    gOc.appendChild(text);
+                }
 
-                gOc.addEventListener('click', function() {
-                    openOcModal(oc, 'oc');
-                });
+                if (hasEntradas) {
+                    var badge = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    var bRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    bRect.setAttribute('x', leftX + 40);
+                    bRect.setAttribute('y', currentY + 6);
+                    bRect.setAttribute('rx', 6);
+                    bRect.setAttribute('ry', 6);
+                    bRect.setAttribute('width', 40);
+                    bRect.setAttribute('height', 20);
+                    bRect.setAttribute('fill', '#ffc107');
+                    bRect.setAttribute('stroke', 'none');
+                    var bText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    bText.setAttribute('x', leftX + 60);
+                    bText.setAttribute('y', currentY + 20);
+                    bText.setAttribute('fill', '#fff');
+                    bText.setAttribute('style', 'font-weight:700; font-size:10px');
+                    bText.setAttribute('text-anchor', 'middle');
+                    bText.textContent = 'OC';
+                    badge.appendChild(bRect);
+                    badge.appendChild(bText);
+                    gOc.appendChild(badge);
+                }
 
+                gOc.addEventListener('click', (function(o) { return function() {
+                    try {
+                        if (o && (o.docentry || o.docEntry)) {
+                            var entry = o.docentry || o.docEntry;
+                            var url = '/proveedor/oc/' + encodeURIComponent(entry) + '/print';
+                            window.open(url, '_blank');
+                            return;
+                        }
+                    } catch (e) {}
+                    openOcModal(o, 'oc');
+                }; })(oc));
                 svg.appendChild(gOc);
 
-                // Entradas (si hay) a la derecha
-                const entradas = oc.entradas || [];
-                if (entradas.length) {
-                    entradas.forEach(function(en, j) {
-                        const ey = y + j * 40;
-                        const gEn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                var entradas = entradasArr || [];
+                if (entradas && entradas.length) {
+                    for (var j = 0; j < entradas.length; j++) {
+                        var en = entradas[j];
+                        var ey = currentY + j * 40;
+                        var gEn = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                         gEn.setAttribute('class', 'node entrada');
                         gEn.setAttribute('cursor', 'pointer');
+                        gEn.setAttribute('data-docentry', enDocEntry || '');
 
-                        const rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        var rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                         rect2.setAttribute('x', rightX - 40);
                         rect2.setAttribute('y', ey);
-                        rect2.setAttribute('rx', 6);
-                        rect2.setAttribute('ry', 6);
-                        rect2.setAttribute('width', 220);
-                        rect2.setAttribute('height', 40);
-                        rect2.setAttribute('fill', '#fff8e1');
-                        rect2.setAttribute('stroke', '#ffc107');
-                        rect2.setAttribute('stroke-width', 1);
+                        rect2.setAttribute('rx', 8);
+                        rect2.setAttribute('ry', 8);
+                        rect2.setAttribute('width', 240);
+                        rect2.setAttribute('fill', '#ffffff');
+                        rect2.setAttribute('stroke', '#198754');
+                        rect2.setAttribute('stroke-width', 1.2);
 
-                        const et1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                        et1.setAttribute('x', rightX - 30);
-                        et1.setAttribute('y', ey + 18);
-                        et1.setAttribute('fill', '#000');
-                        et1.setAttribute('style', 'font-weight:600; font-size:12px');
-                        et1.textContent = en.docnum || '-';
+                        // Preferencias SAP OPDN: DocDate = fecha inicial, TaxDate = fecha final
+                        var startRaw = en.DocDate || en.DocDateString || en.docDate || en.docdate || en.Date || en.fecha || en.Fecha || '';
+                        var endRaw = en.TaxDate || en.TaxDateString || en.taxDate || en.taxdate || en.DocDueDate || en.fecha || en.Fecha || '';
 
-                        const et2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                        et2.setAttribute('x', rightX - 30);
-                        et2.setAttribute('y', ey + 34);
-                        et2.setAttribute('fill', '#444');
-                        et2.setAttribute('style', 'font-size:11px');
-                        et2.textContent = en.ref_proveedor ? (en.ref_proveedor + ' • ' + (en.total || '')) :
-                            (en.total || '');
+                        function _fmtDate(raw) {
+                            if (!raw && raw !== 0) return '-';
+                            try {
+                                var ddObj = new Date(raw);
+                                if (!isNaN(ddObj.getTime())) {
+                                    var ddd = String(ddObj.getDate()).padStart(2, '0');
+                                    var mmm = String(ddObj.getMonth() + 1).padStart(2, '0');
+                                    var yyyy2 = ddObj.getFullYear();
+                                    return ddd + '/' + mmm + '/' + yyyy2;
+                                }
+                            } catch (e) {}
+                            return String(raw || '-');
+                        }
+
+                        var enFechaInicioTxt = _fmtDate(startRaw);
+                        var enFechaFinalTxt = _fmtDate(endRaw);
+
+                        var enDocNum = en.DocNum || en.docnum || en.Numero || en.num || '-';
+                        var enDocEntry = en.DocEntry || en.docentry || en.DocEntry || null;
+                        var enRef = en.NumAtCard || en.ref_proveedor || en.CarCode || en.CardCode || '';
+                        // Heurística: buscar campo numérico de total en todo el objeto (varios nombres posibles)
+                        function findNumericTotal(obj) {
+                            var candidates = ['DocTotal', 'DocTotalFC', 'DocTotalSys', 'Total', 'total', 'DocumentTotal', 'docTotal', 'DocSum', 'DocTotalFc'];
+                            for (var i = 0; i < candidates.length; i++) {
+                                var k = candidates[i];
+                                if (typeof obj[k] !== 'undefined' && obj[k] !== null) return obj[k];
+                            }
+                            // buscar cualquier clave que contenga 'total' (case-insensitive)
+                            for (var kk in obj) {
+                                if (!obj.hasOwnProperty(kk)) continue;
+                                try {
+                                    if (/total/i.test(kk) && obj[kk] !== null && obj[kk] !== undefined) return obj[kk];
+                                } catch (e) {}
+                            }
+                            return '';
+                        }
+
+                        var enTotalRaw = findNumericTotal(en);
+                        var enTotalTxt = '';
+                        try {
+                            var tN = Number(enTotalRaw);
+                            enTotalTxt = isNaN(tN) ? (enTotalRaw || '') : tN.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+                        } catch (e) { enTotalTxt = enTotalRaw || ''; }
+
+                        var enAlmacen = en.WarehouseCode || en.Warehouse || en.WhsCode || en.Destination || en.ShipTo || '';
+                        // Heurística: buscar arrays de líneas en todo el objeto
+                        function findLinesCount(obj) {
+                            var arrNames = ['PDN1','Pdn1','pdn1','DocumentLines','lines','LineItems','LineArray','lines_'];
+                            for (var i2 = 0; i2 < arrNames.length; i2++) {
+                                var key = arrNames[i2];
+                                if (Array.isArray(obj[key])) return obj[key].length;
+                            }
+                            // buscar cualquier propiedad que parezca un array de líneas
+                            for (var k2 in obj) {
+                                if (!obj.hasOwnProperty(k2)) continue;
+                                try {
+                                    if (/pdn1|documentlines|lines|lineas|lineitems/i.test(k2) && Array.isArray(obj[k2])) return obj[k2].length;
+                                } catch (e) {}
+                            }
+                            if (typeof obj.LineCount !== 'undefined') return Number(obj.LineCount) || 0;
+                            if (typeof obj.LineNum !== 'undefined') return Number(obj.LineNum) || 0;
+                            return 0;
+                        }
+
+                        var enLinesCount = findLinesCount(en);
+
+                        var enEstadoRaw = en.DocumentStatus || en.status || en.estado || '';
+                        var enEstadoTxt = '';
+                        if (enEstadoRaw) {
+                            var rs = String(enEstadoRaw).toLowerCase();
+                            if (rs.indexOf('bost_open') !== -1 || rs.indexOf('open') !== -1 || rs === 'o') enEstadoTxt = 'Abierto';
+                            else if (rs.indexOf('bost_closed') !== -1 || rs.indexOf('closed') !== -1 || rs === 'c') enEstadoTxt = 'Cerrado';
+                            else enEstadoTxt = String(enEstadoRaw);
+                        }
+
+                        // Construir líneas separadas para cada campo
+                        var fieldLines = [];
+                        fieldLines.push({text: enDocNum || '-', bold: true});
+                        fieldLines.push({text: 'Doc: ' + enFechaInicioTxt, bold: false});
+                        fieldLines.push({text: 'Tax: ' + enFechaFinalTxt, bold: false});
+                        fieldLines.push({text: 'Ref: ' + (enRef || '-'), bold: false});
+                        if (enLinesCount) fieldLines.push({text: String(enLinesCount) + ' líneas', bold: false});
+                        if (enEstadoTxt) fieldLines.push({text: 'Estado: ' + enEstadoTxt, bold: false});
+
+                        var lineHeightEn = 16;
+                        var paddingEn = 12;
+                        var rect2Height = Math.max(40, fieldLines.length * lineHeightEn + paddingEn);
+                        rect2.setAttribute('height', rect2Height);
 
                         gEn.appendChild(rect2);
-                        gEn.appendChild(et1);
-                        gEn.appendChild(et2);
 
-                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                        line.setAttribute('x1', leftX + 10);
-                        line.setAttribute('y1', y + 24);
-                        line.setAttribute('x2', rightX - 50);
-                        line.setAttribute('y2', ey + 20);
+                        for (var lf = 0; lf < fieldLines.length; lf++) {
+                            var tx = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            tx.setAttribute('x', rightX - 30);
+                            tx.setAttribute('y', ey + 12 + lf * lineHeightEn);
+                            tx.setAttribute('fill', lf === 0 ? '#000' : '#444');
+                            tx.setAttribute('style', (fieldLines[lf].bold ? 'font-weight:700; ' : '') + 'font-size:11px');
+                            tx.textContent = fieldLines[lf].text;
+                            gEn.appendChild(tx);
+                        }
+
+                        var et3 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        et3.setAttribute('x', rightX + 160);
+                        et3.setAttribute('y', ey + 12 + Math.floor(rect2Height / lineHeightEn) * lineHeightEn - 2);
+                        et3.setAttribute('fill', '#000');
+                        et3.setAttribute('style', 'font-weight:700; font-size:11px');
+                        et3.setAttribute('text-anchor', 'end');
+                        et3.textContent = enTotalTxt || '';
+                        gEn.appendChild(et3);
+
+                        // Si faltan total o líneas, intentar cargar detalles vía AJAX y actualizar el nodo
+                        if ((!enLinesCount || enLinesCount === 0) || !enTotalTxt) {
+                            (function(gEl, docEntry, etTotal, baseEy, baseFieldCount, lHeight) {
+                                if (!docEntry) return;
+                                fetch('/proveedor/pdn/' + encodeURIComponent(docEntry) + '/json')
+                                    .then(function(res) { return res.json(); })
+                                    .then(function(json) {
+                                        if (!json) return;
+                                        var newLines = (json.summary && json.summary.lines) ? json.summary.lines : (Array.isArray(json.lines) ? json.lines.length : 0);
+                                        var pdn = json.pdn || {};
+                                        var newTotal = pdn.DocTotal ?? pdn.DocTotalFC ?? pdn.Total ?? pdn.total ?? '';
+
+                                        // actualizar / agregar texto de líneas
+                                        try {
+                                            var texts = gEl.querySelectorAll('text');
+                                            var found = false;
+                                            texts.forEach(function(t) {
+                                                if (t && t.textContent && /líneas|lineas/i.test(t.textContent)) {
+                                                    t.textContent = String(newLines) + ' líneas';
+                                                    found = true;
+                                                }
+                                            });
+                                            if (!found && newLines) {
+                                                var tnew = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                                tnew.setAttribute('x', rightX - 30);
+                                                tnew.setAttribute('y', baseEy + 12 + baseFieldCount * lHeight);
+                                                tnew.setAttribute('fill', '#444');
+                                                tnew.setAttribute('style', 'font-size:11px');
+                                                tnew.textContent = String(newLines) + ' líneas';
+                                                gEl.insertBefore(tnew, etTotal);
+                                            }
+                                        } catch (e) {}
+
+                                        // actualizar total
+                                        try {
+                                            if (newTotal !== '' && newTotal !== null && typeof newTotal !== 'undefined') {
+                                                var tnum = Number(newTotal);
+                                                etTotal.textContent = isNaN(tnum) ? String(newTotal) : tnum.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+                                            }
+                                        } catch (e) {}
+                                    })
+                                    .catch(function() {});
+                            })(gEn, enDocEntry, et3, ey, fieldLines.length, lineHeightEn);
+                        }
+
+                        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        var rectRightX = (leftX - 100) + 200; 
+                        line.setAttribute('x1', rectRightX + 6);
+                        line.setAttribute('y1', currentY + rectHeight / 2);
+                        line.setAttribute('x2', rightX + 20);
+                        line.setAttribute('y2', ey + 28);
                         line.setAttribute('stroke', '#6c757d');
                         line.setAttribute('stroke-width', 1.2);
                         line.setAttribute('marker-end', 'url(#arrow)');
 
                         svg.appendChild(line);
 
-                        gEn.addEventListener('click', function() {
-                            openOcModal(en, 'entrada');
-                        });
+                        gEn.addEventListener('click', (function(item) { return function() {
+                            try {
+                                if (item && (item.DocEntry || item.docentry || item.DocEntry)) {
+                                    var entry = item.DocEntry || item.docentry || item.DocEntry;
+                                    var url = '/proveedor/pdn/' + encodeURIComponent(entry) + '/print';
+                                    window.open(url, '_blank');
+                                    return;
+                                }
+                            } catch (e) {}
+                            openOcModal(item, 'entrada');
+                        }; })(en));
 
                         svg.appendChild(gEn);
-                    });
+                    }
                 }
-            });
 
-            if (!svg.querySelector('defs')) {
-                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
-                marker.setAttribute('id', 'arrow');
-                marker.setAttribute('markerWidth', '8');
-                marker.setAttribute('markerHeight', '8');
-                marker.setAttribute('refX', '6');
-                marker.setAttribute('refY', '3');
-                marker.setAttribute('orient', 'auto');
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', 'M0,0 L6,3 L0,6 Z');
-                path.setAttribute('fill', '#6c757d');
-                marker.appendChild(path);
-                defs.appendChild(marker);
-                svg.insertBefore(defs, svg.firstChild);
+                var entradasHeight = (entradas && entradas.length) ? entradas.length * 40 : 0;
+                var usedHeight = Math.max(rectHeight, entradasHeight);
+                var ocRowH = usedHeight + 20;
+                currentY += ocRowH;
             }
+
         }
 
         function openOcModal(item, tipo) {
@@ -1004,11 +1383,15 @@
             if (modalBody) {
                 const container = document.createElement('div');
                 container.className = 'mt-3 p-3 border rounded bg-white';
-                container.innerHTML = '<h6 class="fw-bold">' + title + '</h6>' + cuerpo;
+                var printBtn = '';
+                if (item.docentry) {
+                    printBtn = '<a class="btn btn-sm btn-danger ms-2" target="_blank" href="/proveedor/oc/' + item.docentry + '/print">\u00A0\u00A0<i class="fas fa-print"></i> Imprimir OC\u00A0\u00A0</a>';
+                }
+                container.innerHTML = '<div class="d-flex justify-content-between align-items-center"><h6 class="fw-bold">' + title + '</h6>' + printBtn + '</div>' + cuerpo;
                 Swal.fire({
                     title: title,
                     html: container.innerHTML,
-                    width: 600,
+                    width: 700,
                     icon: 'info'
                 });
             }
